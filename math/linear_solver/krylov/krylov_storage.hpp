@@ -1,0 +1,60 @@
+#ifndef KRYLOV_STORAGE_HPP
+#define KRYLOV_STORAGE_HPP
+
+/** \internal
+ *
+ */
+template<typename T, size_t krylov_space>
+struct krylov_arrays
+{
+    T H[krylov_space* ( krylov_space+1 ) /2];
+    T C[krylov_space+1];
+    T S[krylov_space+1];
+    T G[krylov_space+1];
+    T *V;
+    T *R;
+};
+
+/** \internal
+ *
+ * \class sdc_storage
+ *
+ * \brief Stores the data of the sdc method
+ *
+ * This class stores the data of fixed-size sdc vectors
+ *
+ */
+template<typename T, size_t size, size_t krylov_space>
+class krylov_storage;
+
+// purely fixed-size arrays
+template<typename T, size_t size, size_t krylov_space>
+class krylov_storage
+{
+        krylov_arrays<T,krylov_space> m_data;
+    public:
+        inline explicit krylov_storage ( )
+        {
+            m_data.V = new T[size* ( krylov_space+1 ) ];
+            m_data.R = new T[size];
+        }
+        ~krylov_storage()
+        {
+            delete [] m_data.V;
+            delete [] m_data.R;
+        }
+        inline void swap ( krylov_storage& other ) { std::swap ( m_data,other.m_data ); }
+        inline T &H ( size_t i, size_t j ) { return * ( m_data.H + i*krylov_space+j-i*(i+1)/2 ); }
+        inline T *H ( ) { return m_data.H; }
+        inline T *residual () { return m_data.R; }
+        inline T &residual ( size_t i ) { return * ( m_data.R + i ); }
+        inline T *v ( size_t i ) { return m_data.V + i*size; }
+        inline T &c ( size_t i ) { return * ( m_data.C + i ); }
+        inline T &s ( size_t i ) { return * ( m_data.S + i ); }
+        inline T &g ( size_t i ) { return * ( m_data.G + i ); }
+        inline T *g (  ) { return m_data.G; }
+
+};
+
+
+#endif

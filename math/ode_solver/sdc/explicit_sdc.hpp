@@ -1,0 +1,113 @@
+#ifndef EXPLICIT_SDC_RAW_HPP
+#define EXPLICIT_SDC_RAW_HPP
+/**
+ * \brief C++ Class.
+ * Author: Ricardo Ortiz <ortiz@unc.edu>
+ * Carolina Center for Interdisciplinary Applied Mathematics
+ * NSF Focused Research Group - Advanced Algorithms and Software for Problems in Computational Bio-Fluid Dynamics
+ * $Id:
+**/
+
+#include "sdc_base.hpp"
+#include "integrator/clenshaw_curtis.hpp"
+
+/**
+ * \brief This class implements a fully explicit SDC method.
+ *
+ * \param function_type The right hand function of the differential equation.
+ * \param integrator_type The integrator method used in the correction step.
+ * \param sdc_nodes The umber of subnodes.
+ * \param sdc_corrections Number of corrections to do.
+ *
+ **/
+template<typename value_type, typename integrator_type, int sdc_nodes, int sdc_corrections>
+class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, integrator_type, sdc_nodes, sdc_corrections> >
+{
+    protected:
+
+        sdc_storage<value_type,sdc_nodes,0,SDC::EXPLICIT> m_storage;
+        integrator_type m_integrator;
+        /**< This is the integrator used to compute the spectral integrals of the right hand sides F. **/
+        enum
+        {
+            ode_size = integrator_type::ode_size
+        };
+    public:
+
+        ExplicitSDC() : m_storage(ode_size) {}
+        
+        inline void update()                        { m_storage.update(); }
+        inline const value_type *F ( int i ) const  { return m_storage.F() [i]; }
+        inline const value_type *X ( int i ) const  { return m_storage.X() [i]; }
+        inline value_type *F ( int i )              { return m_storage.F() [i]; }
+        inline value_type *X ( int i )              { return m_storage.X() [i]; }
+        inline const value_type **F() const         { return m_storage.F(); }
+        inline const value_type **X() const         { return m_storage.X(); }
+        inline value_type **F()                     { return m_storage.F(); }
+        inline value_type **X()                     { return m_storage.X(); }
+        inline value_type dt ( int i )              { return m_integrator.dt[i]; }
+        inline value_type &Immk ( int i, int j )    { return m_integrator.Immk[i][j]; }
+        inline void integrate()                     { m_integrator.integrate ( F() ); }
+        inline void init(const value_type *x, const value_type *Fx) { m_storage.init(x,Fx); }
+        
+        /**
+        * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method
+        *
+        * \param xold Current iterate x_k
+        * \param Fold This is F(x_k)
+        * \param xnew The value of x_{k+1}
+        * \param Fnew The value of F(x_{k+1})
+        * \param t Local substep time
+        * \param dt Local substep timestep
+        * \return void
+        *
+        * \sa predictor(), corrector()
+        **/
+        template<typename function_type>
+        inline void predictor_step ( function_type &V, const int k, value_type &t, const value_type &dt )
+        {
+            t += dt;
+            forward_euler ( X ( k+1 ), X ( k ), F ( k ), dt );
+            V ( t, X ( k+1 ), F ( k+1 ) );
+        }
+        /**
+         * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method
+         *
+         * \param xold This is x_k
+         * \param xnew The value of x_{k+1}
+         * \param Fnew The value of F(x_{k+1})
+         * \param fdiff This is the difference between F(x_{k+1}) and F(x_{k})
+         * \param t Local time
+         * \param dt Local timestep
+         * \return void
+         *
+         * \sa predictor(), corrector()
+         **/
+        template<typename function_type>
+        inline void corrector_predictor_step ( function_type &V, const int k, value_type *fdiff, value_type &t, const value_type &dt )
+        {
+            value_type Fold[ode_size];
+            std::copy( F(k+1),F(k+1)+ode_size,Fold);
+            t += dt;
+            forward_euler ( X ( k+1 ), X ( k ), fdiff, dt );
+            V ( t, X ( k+1 ), F ( k+1 ) );
+            std::transform(F( k+1 ),F( k+1 )+ode_size,Fold,fdiff,std::minus<value_type>());
+        }
+
+};
+
+template<typename _value_type, typename _integrator_type, int _sdc_nodes, int _sdc_corrections>
+struct sdc_traits<ExplicitSDC<_value_type, _integrator_type, _sdc_nodes, _sdc_corrections> >
+{
+    typedef _value_type value_type;
+    typedef _integrator_type integrator_type;
+    enum
+    {
+        sdc_nodes = _sdc_nodes,
+        ode_size = integrator_type::ode_size,
+        sdc_corrections = _sdc_corrections
+    };
+};
+
+#endif
+
