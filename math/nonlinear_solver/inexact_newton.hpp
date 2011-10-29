@@ -3,7 +3,6 @@
 
 #include<cmath>
 #include<limits>
-#include<vector>
 
 #include "math/nonlinear_solver/newton_storage.hpp"
 #include "math/nonlinear_solver/newton_base.hpp"
@@ -15,16 +14,21 @@
  * Inexact-Newton-Armijo iteration.
  * Eisenstat-Walker forcing term.
  * Parabolic line search via three point interpolation.
- * Computes Jacobian using finite differences
+ * Computes Jacobian using finite differences.
  **/
-template < typename value_type, size_t system_size, int k_max = 40, int k_restart = 10, typename krylov_method_type = GeneralizedMinimalResidualMethod<value_type,system_size,k_max> >
+template< typename value_type, 
+	  size_t system_size, 
+	  int k_max = 40, 
+	  int k_restart = 10, 
+	  typename krylov_method_type = GeneralizedMinimalResidualMethod<value_type,system_size,k_max> >
 class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,system_size,k_max,k_restart,krylov_method_type> >
 {
     private:
-        newton_storage<value_type,system_size> m_storage;
-        value_type m_gamma;
-        value_type m_etamax;
-        krylov_method_type                       m_gmres;
+        newton_storage<value_type,system_size> 	m_storage;
+        krylov_method_type			m_gmres;
+        value_type 				m_gamma;
+        value_type 				m_etamax;
+	
     public:
 
         InexactNewtonMethod() :
@@ -135,3 +139,4 @@ struct newton_traits<InexactNewtonMethod<_value_type,_system_size,_k_max,_k_rest
 
 
 #endif
+

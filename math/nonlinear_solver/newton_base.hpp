@@ -144,8 +144,9 @@ struct directional_derivative
         value_type wnorm = norm ( w );
         if ( wnorm == 0 )
         {
-            for ( size_t i = 0; i < system_size; ++i )
-                DF[i] = value_type ( 0 );
+	  std::fill(DF,DF+system_size,value_type(0));
+//             for ( size_t i = 0; i < system_size; ++i )
+//                 DF[i] = value_type ( 0 );
             return;
         }
         

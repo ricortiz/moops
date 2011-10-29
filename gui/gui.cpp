@@ -62,7 +62,9 @@ GuiBase::GuiBase()
     vtkSmartPointer<vtkRenderWindow> renwin = vtkSmartPointer<vtkRenderWindow>::New();
 
     // Activate 3DConnexion device
+#ifdef VTK_USE_TDX
     m_vtk_widget->SetUseTDx(true);
+#endif
     m_vtk_widget->SetRenderWindow(renwin);
 
     const double angleSensitivity=0.01;

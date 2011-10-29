@@ -9,10 +9,10 @@
 #include <vtkFloatArray.h>
 #include <vtkXMLPolyDataWriter.h>
 
-#include "particle_system/time_stepping/sdc_integrator.hpp"
-#include "particle_system/time_stepping/euler_integrator.hpp"
-#include "particle_system/spring_system/immersed_boundary.hpp"
-#include "particle_system/spring_system/spring_system.hpp"
+#include "particle_system/time_integrator/sdc_integrator.hpp"
+#include "particle_system/time_integrator/euler_integrator.hpp"
+#include "particle_system/elastic_system/elastic_boundary.hpp"
+#include "particle_system/elastic_system/spring_system.hpp"
 #include "particle_system/particle_system.hpp"
 #include "particle_system/fluid_solver/fmm_stokes_solver.hpp"
 #ifdef CUDA_FLUID_SOLVER
@@ -25,8 +25,8 @@
 #include "geometry/oval_geometry.hpp"
 #include "heart_pump.hpp"
 #include "io/write_vtu.hpp"
-#include "particle_system/spring_system/immersed_volume.hpp"
-#include "io/gui.hpp"
+#include "particle_system/particle_markers.hpp"
+#include "gui/gui.hpp"
 
 class ValvelessPump
 {
@@ -68,8 +68,8 @@ class ValvelessPump
 #else
         typedef DirectStokesSolver<particle_system_type> fluid_solver_type;
 #endif
-        typedef ImmersedBoundary<spring_system_type,fluid_solver_type,SDCIntegrator> boundary_type;
-        typedef ImmersedVolume<particle_system_tracers_type,boundary_type,fluid_solver_type,EulerIntegrator> volume_type;
+        typedef ElasticBoundary<spring_system_type,fluid_solver_type,SDCIntegrator> boundary_type;
+        typedef ParticleMarkers<particle_system_tracers_type,boundary_type,fluid_solver_type,EulerIntegrator> volume_type;
         
         typedef IO::VTKWriter<vtkXMLPolyDataWriter> vtk_writer;
 
@@ -144,8 +144,8 @@ class ValvelessPump
 
 int main(int ac, char **av)
 {
-//     QVTKApplication app(ac,av);
-//     GuiBase gui;
+    QVTKApplication app(ac,av);
+    GuiBase gui;
     
 // 
     std::string data_dir;
@@ -154,10 +154,10 @@ int main(int ac, char **av)
     else
         return 0;
     ValvelessPump pump(data_dir);
-//     pump.boundary()->storage()->grid()->PrintSelf(std::cout, vtkIndent());
-//     gui.SetActor(pump.boundary()->storage()->grid());
-//     gui.show();
-    while (1)
-        pump.run();
-//     return app.exec();
+    pump.boundary()->storage()->grid()->PrintSelf(std::cout, vtkIndent());
+    gui.SetActor(pump.boundary()->storage()->grid());
+    gui.show();
+//     while (1)
+//         pump.run();
+    return app.exec();
 }
