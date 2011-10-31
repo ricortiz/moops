@@ -1,5 +1,17 @@
 #ifndef VTK_PARTICLE_SYSTEM_STORAGE_HPP
 #define VTK_PARTICLE_SYSTEM_STORAGE_HPP
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    vtkParticleSystemStorage
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
 
 #include<vtkDataArray.h>
 #include<vtkDoubleArray.h>
@@ -9,6 +21,14 @@
 #include<vtkPoints.h>
 #include<vtkCellArray.h>
 #include "particle_system_storage.hpp"
+
+/// @name ParticleSystemStorage - Provides the storage for the particle system.
+///
+/// @section Description This particle system provides allocation and handling of 
+/// 			the simulation data.  The purpose of this class is to provide 
+/// 			storage model that is easy to swap when needing.
+/// 			
+
 
 template<typename vtk_data_array_type>
 struct vtk_arrays
@@ -28,11 +48,11 @@ struct vtk_arrays
  * This class stores the data
  *
  */
-template<typename T, typename particle_type, int immerse_structure_type, typename vtk_data_array_type= vtkDoubleArray>
-class vtk_particle_system_storage;
+template<typename T, typename particle_type, int immerse_structure_type, typename vtk_data_array_type = vtkDoubleArray>
+class vtkParticleSystemStorage;
 
 template<typename T, typename particle_type, typename vtk_data_array_type >
-class vtk_particle_system_storage<T,particle_type,PSYS::SURFACE,vtk_data_array_type>
+class vtkParticleSystemStorage<T,particle_type,PSYS::SURFACE,vtk_data_array_type>
 {
     private:
         particle_system_arrays<T,particle_type> m_data;
@@ -40,7 +60,7 @@ class vtk_particle_system_storage<T,particle_type,PSYS::SURFACE,vtk_data_array_t
         vtkSmartPointer<vtkPolyData>            m_poly_data; 
 
     public:
-        inline explicit vtk_particle_system_storage(size_t num_particles) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
+        inline explicit vtkParticleSystemStorage(size_t num_particles) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
         {
             size_t size = 3*num_particles;
             m_data.positions = new T[size];
@@ -78,14 +98,14 @@ class vtk_particle_system_storage<T,particle_type,PSYS::SURFACE,vtk_data_array_t
             
         }
 
-        ~vtk_particle_system_storage()
+        ~vtkParticleSystemStorage()
         {
             delete [] m_data.positions;
             delete [] m_data.velocities;
             delete [] m_data.forces;
             delete [] m_data.particles;
         }
-        inline void swap(vtk_particle_system_storage& other) { std::swap(m_data,other.m_data); }
+        inline void swap(vtkParticleSystemStorage& other) { std::swap(m_data,other.m_data); }
 
         inline const T *position(size_t i) const { return m_data.particle[i].position; }
         inline T *position(size_t i)             { return m_data.particle[i].position; }
@@ -117,7 +137,7 @@ class vtk_particle_system_storage<T,particle_type,PSYS::SURFACE,vtk_data_array_t
 };
 
 template<typename T, typename particle_type, typename vtk_data_array_type>
-class vtk_particle_system_storage<T,particle_type,PSYS::VOLUME,vtk_data_array_type>
+class vtkParticleSystemStorage<T,particle_type,PSYS::VOLUME,vtk_data_array_type>
 {
     private:
         particle_system_arrays<T,particle_type> m_data;
@@ -125,7 +145,7 @@ class vtk_particle_system_storage<T,particle_type,PSYS::VOLUME,vtk_data_array_ty
         vtkSmartPointer<vtkPolyData>            m_poly_data; 
 
     public:
-        inline explicit vtk_particle_system_storage(size_t num_particles) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
+        inline explicit vtkParticleSystemStorage(size_t num_particles) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
         {
             size_t size = 3*num_particles;
             m_data.positions = new T[size];
@@ -164,13 +184,13 @@ class vtk_particle_system_storage<T,particle_type,PSYS::VOLUME,vtk_data_array_ty
             m_poly_data->SetVerts(cells);
         }
 
-        ~vtk_particle_system_storage()
+        ~vtkParticleSystemStorage()
         {
             delete [] m_data.positions;
             delete [] m_data.velocities;
             delete [] m_data.particles;
         }
-        inline void swap(vtk_particle_system_storage& other) { std::swap(m_data,other.m_data); }
+        inline void swap(vtkParticleSystemStorage& other) { std::swap(m_data,other.m_data); }
 
         inline const T *position(size_t i) const { return m_data.particle[i].position; }
         inline T *position(size_t i)             { return m_data.particle[i].position; }

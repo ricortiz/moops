@@ -20,12 +20,12 @@ class QMenu;
 class QStatusBar;
 
 
-class GuiBase : public QMainWindow
+class GUI : public QMainWindow
 {
     Q_OBJECT
 public:
-    GuiBase();
-    ~GuiBase();
+    GUI();
+    ~GUI();
 
     void SetActor(vtkPolyData *);
     

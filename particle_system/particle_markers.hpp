@@ -1,14 +1,24 @@
 #ifndef PARTICLE_MARKERS_HPP
 #define PARTICLE_MARKERS_HPP
+/*=========================================================================
 
-/// Author: Ricardo Ortiz <ricardo.ortiz@tulane.edu>, (C) 2008
-/// $Id: stokes_flow.h 19 2008-12-17 23:41:26Z rortiz $
+Program:   Modular Object Oriented Particle Simulator
+Module:    ParticleMarkers
 
-/**
- * Immersed volume that interact with immersed boundary
- *
- * Takes a geometry and builds a particle system from it.
- */
+Copyright (c) Ricardo Ortiz
+All rights reserved.
+This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.
+
+=========================================================================*/
+
+/// @name ParticleMarkers - Stores data for freely moving points in the fluid.
+/// @section Description The ParticleMarkers class is used in the case you want
+/// 			 to move points in the fluid that have no constraints
+/// 			 (ie, there is no springs connecticn any of the points)
+
+
 template<typename particle_system_type,
          typename immersed_surface_type,
          typename fluid_solver_type,

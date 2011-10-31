@@ -54,7 +54,7 @@
 #include <QVTKInteractor.h>
 #include <QVTKWidget.h>
 
-GuiBase::GuiBase()
+GUI::GUI()
 {
     this->setup();
 
@@ -102,7 +102,7 @@ GuiBase::GuiBase()
 
 }
 
-void GuiBase::SetActor(vtkPolyData *poly_data)
+void GUI::setActor(vtkPolyData *poly_data)
 {
     vtkSmartPointer<vtkSmoothPolyDataFilter> smoother = vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
     smoother->SetInput(poly_data);
@@ -118,14 +118,14 @@ void GuiBase::SetActor(vtkPolyData *poly_data)
     m_vtk_renderer->AddViewProp(actor);
 }
 
-GuiBase::~GuiBase()
+GUI::~GUI()
 {
     m_vtk_renderer->Delete();
     Connections->Delete();
 }
 
 
-void GuiBase::updateCoords(vtkObject* obj)
+void GUI::updateCoords(vtkObject* obj)
 {
     // get interactor
     vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(obj);
@@ -138,7 +138,7 @@ void GuiBase::updateCoords(vtkObject* obj)
     coord->setText(str);
 }
 
-void GuiBase::popup(vtkObject * obj, unsigned long,void * client_data, void *,vtkCommand * command)
+void GUI::popup(vtkObject * obj, unsigned long,void * client_data, void *,vtkCommand * command)
 {
     // A note about context menus in Qt and the QVTKWidget
     // You may find it easy to just do context menus on right button up,
@@ -169,28 +169,28 @@ void GuiBase::popup(vtkObject * obj, unsigned long,void * client_data, void *,vt
     popupMenu->popup(global_pt);
 }
 
-void GuiBase::reset(QAction* color)
+void GUI::reset(QAction* color)
 {
 //     m_vtk_renderer->ResetCamera();
 //     m_vtk_widget->update();
 }
 
 
-void GuiBase::retranslateUi()
+void GUI::retranslateUi()
 {
-    this->setWindowTitle(QApplication::translate("GuiBase", "MainWindow", 0, QApplication::UnicodeUTF8));
-    actionExit->setText(QApplication::translate("GuiBase", "Exit", 0, QApplication::UnicodeUTF8));
-    actionE_xit->setText(QApplication::translate("GuiBase", "E&xit", 0, QApplication::UnicodeUTF8));
-    coord->setText(QApplication::translate("GuiBase", "TextLabel", 0, QApplication::UnicodeUTF8));
-    menuFile->setTitle(QApplication::translate("GuiBase", "File", 0, QApplication::UnicodeUTF8));
-    menuFile_2->setTitle(QApplication::translate("GuiBase", "File", 0, QApplication::UnicodeUTF8));
-    menu_File->setTitle(QApplication::translate("GuiBase", "&File", 0, QApplication::UnicodeUTF8));
+    this->setWindowTitle(QApplication::translate("GUI", "MainWindow", 0, QApplication::UnicodeUTF8));
+    actionExit->setText(QApplication::translate("GUI", "Exit", 0, QApplication::UnicodeUTF8));
+    actionE_xit->setText(QApplication::translate("GUI", "E&xit", 0, QApplication::UnicodeUTF8));
+    coord->setText(QApplication::translate("GUI", "TextLabel", 0, QApplication::UnicodeUTF8));
+    menuFile->setTitle(QApplication::translate("GUI", "File", 0, QApplication::UnicodeUTF8));
+    menuFile_2->setTitle(QApplication::translate("GUI", "File", 0, QApplication::UnicodeUTF8));
+    menu_File->setTitle(QApplication::translate("GUI", "&File", 0, QApplication::UnicodeUTF8));
 }
 
-void GuiBase::setup()
+void GUI::setup()
 {
     if (this->objectName().isEmpty())
-        this->setObjectName(QString::fromUtf8("GuiBase"));
+        this->setObjectName(QString::fromUtf8("GUI"));
     this->resize(442, 361);
     actionExit = new QAction(this);
     actionExit->setObjectName(QString::fromUtf8("actionExit"));

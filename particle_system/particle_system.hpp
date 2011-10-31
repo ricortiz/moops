@@ -1,5 +1,20 @@
 #ifndef PARTICLE_SYSTEM_HPP
 #define PARTICLE_SYSTEM_HPP
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    ParticleSystem
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @NAME ParticleSystem - Main kernel for the particle system
+/// @SECTION Description The ParticleSystem class is the main class for the simulator.  
+///			 It owns the storage and provides methods for accessing the data.
 
 #include<limits>
 #include<algorithm>
@@ -11,7 +26,7 @@ template<typename _value_type,
          typename _sdc_type,
          size_t _num_particles,
          int immersed_structure_type = PSYS::SURFACE,
-         typename storage_type = vtk_particle_system_storage<_value_type,Particle<_value_type>,immersed_structure_type>
+         typename storage_type = vtkParticleSystemStorage<_value_type,Particle<_value_type>,immersed_structure_type>
          >
 class ParticleSystem
 {
@@ -98,18 +113,5 @@ class ParticleSystem
 
         storage_type *storage() { return &m_storage; }
 };
-
-// template<typename _value_type, typename _particle_integrator_type, size_t _num_particles>
-// struct particle_system_traits<ParticleSystem<_value_type,_particle_integrator_type,_num_particles> >
-// {
-//     enum
-//     {
-//         num_particles = _num_particles
-//     };
-//     typedef _value_type value_type;
-//     typedef Particle<value_type> particle_type;
-//     typedef _particle_integrator_type particle_integrator_type;
-// };
-
 
 #endif
