@@ -1,6 +1,21 @@
 #ifndef DIRECT_STOKES_SOLVER_HPP
 #define DIRECT_STOKES_SOLVER_HPP
-
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    DirectStokesSolver
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @name DirectStokesSolver - Solves the Stokes problem using a direct solver.
+/// @section Description DirectStokesSolver solves an n-body problem and updates the
+///                      velocities of the particle system.
+/// @section See also 
 #include "math/fluid_solver/stokes/nbody_cpu/cpu_compute_velocity.hpp"
 
 template<typename particle_system_type>

@@ -1,17 +1,24 @@
 #ifndef ELASTIC_BOUNDARY_HPP
 #define ELASTIC_BOUNDARY_HPP
-
-/// Author: Ricardo Ortiz <ricardo.ortiz@tulane.edu>, (C) 2008
-/// $Id: stokes_flow.h 19 2008-12-17 23:41:26Z rortiz $
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    ElasticBoundary
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @name ElasticBoundary
+/// @section Description 
+/// @section See also
 
 #include <vector>
 #include "geometry/surface.hpp"
 
-/**
- * Immersed boundary that interact with fluid
- *
- * Takes a geometry and builds a particle system from it.
- */
 template<typename spring_system_type, 
 	 typename fluid_solver_type, 
 	 template<typename> class integration_policy>

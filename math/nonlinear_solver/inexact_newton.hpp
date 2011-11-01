@@ -3,6 +3,7 @@
 
 #include<cmath>
 #include<limits>
+#include<vector>
 
 #include "math/nonlinear_solver/newton_storage.hpp"
 #include "math/nonlinear_solver/newton_base.hpp"

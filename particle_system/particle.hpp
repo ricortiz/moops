@@ -1,18 +1,17 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
-/*=========================================================================
-
-  Program:   Modular Object Oriented Particle Simulator
-  Module:    Particle
-
-  Copyright (c) Ricardo Ortiz
-  All rights reserved.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.
-
-=========================================================================*/
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    Particle
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
 
 /// @name Particle - Stores particle state.
 /// @section Description Particle is the wrapper for the data arrays.  
@@ -28,7 +27,6 @@ struct Particle
     value_type *velocity;
     value_type *force;
 };
-
 
 
 #endif

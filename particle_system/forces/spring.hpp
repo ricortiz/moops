@@ -1,10 +1,23 @@
 #ifndef SPRING_HPP
 #define SPRING_HPP
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    Spring
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @name Spring - Enforces spring constraint between two particles
+/// @section Description The Spring class is an abstraction of the spring force
+///                      between any two points.
+/// @section See also also SpringSystem
 
 #include<cmath>
-
-/// Author: Ricardo Ortiz <ricardo.ortiz@tulane.edu>, (C) 2008
-/// $Id: particle_system_spring.h 148 2010-02-18 20:53:38Z rortiz $
 
 template<typename value_type, typename particle_type>
 class Spring 

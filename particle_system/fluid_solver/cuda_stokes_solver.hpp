@@ -1,5 +1,21 @@
 #ifndef CUDA_STOKES_SOLVER
 #define CUDA_STOKES_SOLVER
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    CudaStokesSolver
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @name CudaStokesSolver - Wrapper for the direct cuda-based stokes solver.
+/// @section Description Wraps the cuda kernels that solve Stokes equations so 
+///                      it can be used by the simulator.
+/// @section See also cuda
 
 #include "math/fluid_solver/stokes/nbody_gpu/gpu_compute_velocity.hpp"
 

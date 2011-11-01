@@ -15,11 +15,18 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 SET(USE_CUDA_FLUID_SOLVER OFF CACHE BOOL "Use the cuda-based Stokes solver.")
 
-include_directories(${PROJECT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
-add_subdirectory(app)
 IF(USE_CUDA_FLUID_SOLVER)
-  add_subdirectory(math/fluid_solver/stokes/nbody_gpu)
+  ADD_SUBDIRECTORY(math/fluid_solver/stokes/nbody_gpu)
 ENDIF(USE_CUDA_FLUID_SOLVER)
 
-add_subdirectory(gui)
+INCLUDE(CTest)
+ENABLE_TESTING()
+IF(BUILD_TESTING)
+    ADD_SUBDIRECTORY(testing)
+ENDIF(BUILD_TESTING)
+
+
+ADD_SUBDIRECTORY(app)
+ADD_SUBDIRECTORY(gui)

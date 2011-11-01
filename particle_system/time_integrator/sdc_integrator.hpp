@@ -1,5 +1,21 @@
 #ifndef EXPLICIT_SDC_INTEGRATOR_HPP
 #define EXPLICIT_SDC_INTEGRATOR_HPP
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    SDCIntegrator
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @name SDCIntegrator -- Wrapper for the Spectral Deffered Correction time integrator
+/// @section Description SDCIntegrator wraps the integrator so it can be used by the simulator
+///                      It contains the main method that drives the simulation: void integrate()
+/// @section See also ExplicitSDC SemiImplicitSDC
 
 #include "math/ode_solver/sdc/sdc_base.hpp"
 

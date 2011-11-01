@@ -1,5 +1,17 @@
 #ifndef FORWARD_EULER_HPP
 #define FORWARD_EULER_HPP
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    ForwardEuler
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
 
 template<typename value_type>
 class ForwardEuler

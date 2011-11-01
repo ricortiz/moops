@@ -28,7 +28,7 @@
 #include "particle_system/particle_markers.hpp"
 #include "gui/gui.hpp"
 
-class ValvelessPump
+class ValvelessPump : public Gui<ValvelessPump>
 {
         enum
         {
@@ -145,18 +145,17 @@ class ValvelessPump
 int main(int ac, char **av)
 {
     QVTKApplication app(ac,av);
-    GuiBase gui;
     
-// 
     std::string data_dir;
     if (ac == 2)
         data_dir = av[1];
     else
         return 0;
+    
     ValvelessPump pump(data_dir);
     pump.boundary()->storage()->grid()->PrintSelf(std::cout, vtkIndent());
-    gui.SetActor(pump.boundary()->storage()->grid());
-    gui.show();
+    pump.setActor(pump.boundary()->storage()->grid());
+    pump.show();
 //     while (1)
 //         pump.run();
     return app.exec();

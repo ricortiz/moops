@@ -20,6 +20,7 @@
 #include<vtkPointData.h>
 #include<vtkPoints.h>
 #include<vtkCellArray.h>
+
 #include "particle_system_storage.hpp"
 
 /// @name ParticleSystemStorage - Provides the storage for the particle system.

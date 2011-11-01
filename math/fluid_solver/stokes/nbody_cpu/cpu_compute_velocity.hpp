@@ -1,6 +1,17 @@
 #ifndef CPU_COMPUTE_VELOCITY_HPP
 #define CPU_COMPUTE_VELOCITY_HPP
-
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    compute_velocity
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
 #include <cmath>
 
 /**

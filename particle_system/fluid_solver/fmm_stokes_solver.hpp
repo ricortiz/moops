@@ -1,5 +1,20 @@
 #ifndef FMM_STOKES_SOLVER
 #define FMM_STOKES_SOLVER
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    FMMStokesSolver
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @name FMMStokesSolver - Wrapper for the Fast Multipole Method based Stokes solver
+/// @section Description FMMStokesSolver wraps the FMM method so the simulator can use it.
+/// @section See also MultipoleTaylor
 
 #include "math/fluid_solver/stokes/fmm/octree/octree.hpp"
 #include "math/fluid_solver/stokes/fmm/multipole_taylor.hpp"

@@ -1,18 +1,17 @@
 #ifndef PARTICLE_MARKERS_HPP
 #define PARTICLE_MARKERS_HPP
-/*=========================================================================
-
-Program:   Modular Object Oriented Particle Simulator
-Module:    ParticleMarkers
-
-Copyright (c) Ricardo Ortiz
-All rights reserved.
-This software is distributed WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE.
-
-=========================================================================*/
-
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    ParticleMarkers
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
 /// @name ParticleMarkers - Stores data for freely moving points in the fluid.
 /// @section Description The ParticleMarkers class is used in the case you want
 /// 			 to move points in the fluid that have no constraints

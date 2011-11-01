@@ -1,8 +1,20 @@
 #ifndef SPRING_SYSTEM_HPP
 #define SPRING_SYSTEM_HPP
-
-/// Author: Ricardo Ortiz <ricardo.ortiz@tulane.edu>, (C) 2008
-/// $Id: spring_system.h 19 2008-12-17 23:41:26Z rortiz $
+//=========================================================================
+//
+//  Program:   Modular Object Oriented Particle Simulator
+//  Module:    SpringSystem
+//
+//  Copyright (c) Ricardo Ortiz
+//  All rights reserved.
+//     This software is distributed WITHOUT ANY WARRANTY; without even
+//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+//     PURPOSE.
+//
+//=========================================================================
+/// @name SpringSystem
+/// @section Description 
+/// @section See also 
 #include<list>
 #include<map>
 #include "particle_system/forces/spring.hpp"

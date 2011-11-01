@@ -1,2 +1,2 @@
-
-add_library(gui gui.cpp ${QT_LIBRARIES})
+QT4_WRAP_CPP(HEADERS_MOC gui_base.hpp)
+ADD_LIBRARY(gui gui_base.cpp ${QT_LIBRARIES} ${HEADERS_MOC})
