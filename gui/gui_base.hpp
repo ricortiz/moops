@@ -10,7 +10,8 @@ class QLabel;
 class QMenuBar;
 class QMenu;
 class QStatusBar;
-
+class vtkObject;
+class vtkCommand;
 
 class GuiBase : public QMainWindow
 {
@@ -21,6 +22,8 @@ class GuiBase : public QMainWindow
 
 
     public slots:
+    void popup(vtkObject * obj, unsigned long,void * client_data, void *,vtkCommand * command);
+    void updateCoords(vtkObject* obj);
         void reset(QAction*);
 
 
@@ -28,14 +31,11 @@ class GuiBase : public QMainWindow
 
         QWidget *centralwidget;
         QAction *actionExit;
-        QAction *actionE_xit;
         QVBoxLayout *vboxLayout;
         QHBoxLayout *hboxLayout;
         QLabel *coord;
         QMenuBar *menubar;
         QMenu *menuFile;
-        QMenu *menuFile_2;
-        QMenu *menu_File;
         QStatusBar *statusbar;
 
 };

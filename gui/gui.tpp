@@ -33,7 +33,6 @@
 
 #include <QMenu>
 #include <QLabel>
-#include <QApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMenuBar>
@@ -58,6 +57,7 @@
 template<typename app>
 Gui<app>::Gui() : GuiBase()
 {
+  
     m_vtk_widget = new QVTKWidget(centralwidget);
     m_vtk_widget->setObjectName(QString::fromUtf8("m_vtk_widget"));
     hboxLayout->addWidget(m_vtk_widget);
@@ -108,25 +108,6 @@ Gui<app>::~Gui()
     m_connections->Delete();
 }
 
-template<typename app>
-void Gui<app>::popup(vtkObject * obj, unsigned long,void * client_data, void *,vtkCommand * command)
-{
-    // get interactor
-    vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(obj);
-    // consume event so the interactor style doesn't get it
-    command->AbortFlagOn();
-    // get popup menu
-    QMenu* popupMenu = static_cast<QMenu*>(client_data);
-    // get event location
-    int* sz = interactor->GetSize();
-    int* position = interactor->GetEventPosition();
-    // remember to flip y
-    QPoint pt = QPoint(position[0], sz[1]-position[1]);
-    // map to global
-    QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);
-    // show popup menu at global point
-    popupMenu->popup(global_pt);
-}
 
 template<typename app>
 void Gui<app>::setActor(vtkPolyData *poly_data)
@@ -143,18 +124,4 @@ void Gui<app>::setActor(vtkPolyData *poly_data)
     mapper->SetInputConnection(normals->GetOutputPort());
     actor->SetMapper(mapper);
     m_vtk_renderer->AddViewProp(actor);
-}
-
-template<typename app>
-void Gui<app>::updateCoords(vtkObject* obj)
-{
-    // get interactor
-    vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(obj);
-    // get event position
-    int event_pos[2];
-    interactor->GetEventPosition(event_pos);
-    // update label
-    QString str;
-    str.sprintf("x=%d : y=%d", event_pos[0], event_pos[1]);
-    coord->setText(str);
 }

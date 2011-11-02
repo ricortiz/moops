@@ -14,22 +14,24 @@ class GuiBase;
 template<typename app>
 class Gui : public GuiBase
 {
-    public:
-        Gui();
-        ~Gui();
-        void setActor(vtkPolyData *);
-        void updateCoords(vtkObject* obj);
+public:
+    Gui();
+    ~Gui();
+    void setActor(vtkPolyData *);
 public slots:
     void popup(vtkObject * obj, unsigned long,void * client_data, void *,vtkCommand * command);
+    void updateCoords(vtkObject* obj);
     
-    protected:
-        app *derived() { return static_cast<app*>(this); }
-        
-    private:
+protected:
+    app *derived() {
+        return static_cast<app*>(this);
+    }
 
-        vtkRenderer* m_vtk_renderer;
-        vtkEventQtSlotConnect* m_connections;
-        QVTKWidget *m_vtk_widget;
+private:
+
+    vtkRenderer* m_vtk_renderer;
+    vtkEventQtSlotConnect* m_connections;
+    QVTKWidget *m_vtk_widget;
 };
 
 #include "gui.tpp"
