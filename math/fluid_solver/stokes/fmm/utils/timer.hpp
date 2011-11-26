@@ -45,48 +45,53 @@ template<typename real_type>
 class Timer
 {
 #ifdef WIN32
-    private:
-        LARGE_INTEGER m_start;   ///<
-        LARGE_INTEGER m_end;     ///<
-        LARGE_INTEGER m_freq;    ///<
-        bool m_first;            ///<
-    public:
-        Timer():m_first(true) {}
-    public:
-        void start()
+private:
+    LARGE_INTEGER m_start;   ///<
+    LARGE_INTEGER m_end;     ///<
+    LARGE_INTEGER m_freq;    ///<
+    bool m_first;            ///<
+public:
+    Timer():m_first(true) {}
+public:
+    void start()
+    {
+        if (m_first)
         {
-            if (m_first)
-            {
-                QueryPerformanceFrequency(&m_freq);
-                m_first = false;
-            }
-            QueryPerformanceCounter(&m_start);
+            QueryPerformanceFrequency(&m_freq);
+            m_first = false;
         }
-        void stop()
-        {
-            QueryPerformanceCounter(&m_end);
-        }
-        real_type operator()()const
-        {
-            real_type end = static_cast<real_type>(m_end.QuadPart);
-            real_type start = static_cast<real_type>(m_start.QuadPart);
-            real_type freq = static_cast<real_type>(m_freq.QuadPart);
-            return (end - start)/ freq;
-        }
+        QueryPerformanceCounter(&m_start);
+    }
+    void stop()
+    {
+        QueryPerformanceCounter(&m_end);
+    }
+    real_type operator()()const
+    {
+        real_type end = static_cast<real_type>(m_end.QuadPart);
+        real_type start = static_cast<real_type>(m_start.QuadPart);
+        real_type freq = static_cast<real_type>(m_freq.QuadPart);
+        return (end - start)/ freq;
+    }
 #else
-    private:
-        struct timeval m_start;   ///<
-        struct timeval m_end;     ///<
-        struct timezone m_tz;     ///<
-    public:
-        void start() { gettimeofday(&m_start, &m_tz); }
-        real_type stop()  { gettimeofday(&m_end,&m_tz); return operator()(); }
-        real_type operator()()const
-        {
-            real_type t1 =  static_cast<real_type>(m_start.tv_sec) + static_cast<real_type>(m_start.tv_usec)/(1000*1000);
-            real_type t2 =  static_cast<real_type>(m_end.tv_sec) + static_cast<real_type>(m_end.tv_usec)/(1000*1000);
-            return t2-t1;
-        }
+private:
+    struct timeval m_start;   ///<
+    struct timeval m_end;     ///<
+    struct timezone m_tz;     ///<
+public:
+    void start() {
+        gettimeofday(&m_start, &m_tz);
+    }
+    real_type stop()  {
+        gettimeofday(&m_end,&m_tz);
+        return operator()();
+    }
+    real_type operator()()const
+    {
+        real_type t1 =  static_cast<real_type>(m_start.tv_sec) + static_cast<real_type>(m_start.tv_usec)/(1000*1000);
+        real_type t2 =  static_cast<real_type>(m_end.tv_sec) + static_cast<real_type>(m_end.tv_usec)/(1000*1000);
+        return t2-t1;
+    }
 #endif
 };
 

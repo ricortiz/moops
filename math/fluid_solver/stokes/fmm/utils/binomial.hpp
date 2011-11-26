@@ -14,7 +14,6 @@ T binomial_coefficient(unsigned n, unsigned k)
     static const char* function = "binomial<%1%>(unsigned, unsigned)";
     if (k > n)
         return 0;
-//         throw std::domain_error(std::string(function) + std::string(": The binomial coefficient is undefined for k > n."));
     T result;
     if ((k == 0) || (k == n))
         return 1;
@@ -25,8 +24,7 @@ T binomial_coefficient(unsigned n, unsigned k)
     {
         // Use fast table lookup:
         result = factorial<T>(n);
-        result /= factorial<T>(n-k);
-        result /= factorial<T>(k);
+        result /= (factorial<T>(n-k)*factorial<T>(k));
     }
     else 
     {
@@ -34,9 +32,9 @@ T binomial_coefficient(unsigned n, unsigned k)
         s << function << ": The binomial coefficient is undefined for n > " << max_factorial<T>::value;
         throw std::domain_error(s.str());
     }
-
+    return result;
     // convert to nearest integer:
-    return std::ceil(result - 0.5f);
+//     return std::ceil(result - 0.5f);
 }
 
 

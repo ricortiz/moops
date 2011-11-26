@@ -65,16 +65,7 @@ class HeartPump : public Surface<HeartPump<value_type> >
                         }
                     }
             }
-//             std::cout << "];" << std::endl;
-// //
-//             std::cout << "p = [";
-//             for(size_t i = 0; i < spring_system.particles_size(); ++i)
-//             {
-//                 std::cout << "[";
-//                 std::cout << particles[i].position[0] << "," << particles[i].position[1] << "," << particles[i].position[2];
-//                 std::cout << "];";
-//             }
-//             std::cout << "];" << std::endl;
+
 
 
             std::cout << "Created " << spring_system.springs_size() << " springs." << std::endl;
