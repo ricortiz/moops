@@ -233,14 +233,14 @@ protected:
             }
         }
         
-        inline value_type get_distance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type t)
+        inline value_type get_distance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type scale)
         {
             value_type point1[3] = {0}, point2[3] = {0};
             size_t *dims = derived()->get_dimensions();
             value_type dtheta = 2*M_PI/dims[0];
             value_type dalpha = 2*M_PI/dims[1];
-            derived()->surface_point(Ai,Aj,t,point1,dtheta,dalpha);
-            derived()->surface_point(Bi,Bj,t,point2,dtheta,dalpha);
+            derived()->surface_point(Ai,Aj,scale,point1,dtheta,dalpha);
+            derived()->surface_point(Bi,Bj,scale,point2,dtheta,dalpha);
             value_type dx[3] = {point1[0]-point2[0],point1[1]-point2[1],point1[2]-point2[2]};
             return std::sqrt(dx[0]*dx[0]+dx[1]*dx[1]+dx[2]*dx[2]);
         }
@@ -261,7 +261,7 @@ protected:
             for (size_t i = 0, idx = 0; i < dims[1]; ++i)
                 for (size_t j = 0; j < dims[0]; ++j, idx+=3)
                 {
-                    derived()->surface_point(i,j,&positions[idx],1.0,dtheta,dalpha);
+                    derived()->surface_point(i,j,1.0,&positions[idx],dtheta,dalpha);
                     grid[&positions[idx]] = std::make_pair(i,j);
                 }
         }
@@ -276,8 +276,8 @@ protected:
                 for (size_t i = 0; i < dims[1]; ++i)
                     for (size_t j = 0; j < dims[0]; ++j, idx+=3)
                     {
-                        value_type depth = .1*l+.1;
-                        derived()->surface_point(i,j,&positions[idx],depth,dtheta,dalpha);
+                        value_type scale = .1*l+.1;
+                        derived()->surface_point(i,j,scale,&positions[idx],dtheta,dalpha);
                     }
         }
 

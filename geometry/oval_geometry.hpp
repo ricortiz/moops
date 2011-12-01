@@ -35,6 +35,10 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
         size_t const *get_dimensions() const { return m_dims; }
         size_t size() { return m_size; }
         value_type *get_x0() { return m_x0; }
+        value_type &inner_radius() { return m_inner_radius; }
+        size_t const &inner_radius() const { return m_inner_radius; }
+        value_type &outer_radius() { return m_outer_radius; }
+        size_t const &outer_radius() const { return m_outer_radius; }
 
         void set_x0(value_type x, value_type y, value_type z)
         {
@@ -48,12 +52,13 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             value_type Dx[3] = {0};
             value_type b = m_outer_radius;
             value_type a = b/2;
-            value_type a4 = a*a*a*a;
+            value_type a2 = a*a;
+            value_type a4 = a2*a2;
             value_type b4 = b*b*b*b;
-            value_type c = a*a*std::cos(2*s);
+            value_type c =a2*std::cos(2*s);
             value_type d = std::sqrt((-a4+b4)+a4*(std::cos(2*s))*(std::cos(2*s)));
             value_type M = c+d;
-            value_type DM = -2*a*a*std::sin(2*s)*(1+c/d);
+            value_type DM = -2*a2*std::sin(2*s)*(1+c/d);
             value_type sqrtM = std::sqrt(M);
 
             x[0] = sqrtM * std::cos(s);
@@ -73,12 +78,7 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             normal[1] =-Dx[0];
         }
 
-        inline void surface_point(size_t i, size_t j, value_type t, value_type *point, value_type dtheta, value_type dalpha)
-        {
-            surface_point(i,j,point,.5* std::cos(m_speed*t) * std::cos(m_speed*t)+.5,dtheta,dalpha);
-        }
-
-        inline void surface_point(size_t i, size_t j, value_type *point, value_type depth, value_type dtheta, value_type dalpha)
+        inline void surface_point(size_t i, size_t j, value_type scale, value_type *point, value_type dtheta, value_type dalpha)
         {
 
             value_type s = i*dalpha;
@@ -88,7 +88,7 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             get_local_frame(s,x,normal);
 
             value_type theta = j * dtheta;
-            value_type R = depth*m_inner_radius;
+            value_type R = scale*m_inner_radius;
             point[0] = R * normal[0] * std::cos(theta) + x[0] + m_x0[0];
             point[1] = R * normal[1] * std::cos(theta) + x[1] + m_x0[1];
             point[2] = R * std::sin(theta)                    + m_x0[2];

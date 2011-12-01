@@ -37,6 +37,7 @@ class ElasticBoundary : public spring_system_type, public integration_policy<Ela
         ~ElasticBoundary() {}
         inline fluid_solver_type &fluid_solver() { return m_fluid_solver; }
         inline fluid_solver_type const &fluid_solver() const { return m_fluid_solver; }
+        
         void run(value_type timestep)
         {
             this->integrate(timestep);
