@@ -50,8 +50,8 @@ protected:
     typedef ExplicitSDC<value_type,integrator_type,sdc_nodes,sdc_nodes> sdc_type;
     typedef ForwardEuler<value_type> euler_type;
 #ifdef CUDA_FLUID_SOLVER
-    typedef vtk_particle_system_storage<value_type,Particle<value_type>,PSYS::SURFACE,vtkFloatArray> surface_storage_type;
-    typedef vtk_particle_system_storage<value_type,Particle<value_type>,PSYS::VOLUME,vtkFloatArray> volume_storage_type;
+    typedef vtkParticleSystemStorage<value_type,Particle<value_type>,PSYS::SURFACE,vtkFloatArray> surface_storage_type;
+    typedef vtkParticleSystemStorage<value_type,Particle<value_type>,PSYS::VOLUME,vtkFloatArray> volume_storage_type;
     typedef ParticleSystem<value_type,sdc_type,num_particles,PSYS::SURFACE,surface_storage_type> particle_system_type;
     typedef ParticleSystem<value_type,euler_type,num_particles,PSYS::VOLUME,volume_storage_type> particle_system_tracers_type;
 #else
