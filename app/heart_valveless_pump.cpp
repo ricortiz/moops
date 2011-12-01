@@ -2,7 +2,10 @@
 #include <iterator>
 #include <memory>
 
+#ifdef USE_QT_GUI
 #include <QVTKApplication.h>
+#include "gui/gui.hpp"
+#endif
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataWriter.h>
@@ -15,7 +18,7 @@
 #include "particle_system/elastic_system/spring_system.hpp"
 #include "particle_system/particle_system.hpp"
 #include "particle_system/fluid_solver/fmm_stokes_solver.hpp"
-#ifdef CUDA_FLUID_SOLVER
+#ifdef USE_CUDA_FLUID_SOLVER
 #include "particle_system/fluid_solver/cuda_stokes_solver.hpp"
 #endif
 #include "particle_system/fluid_solver/direct_stokes_solver.hpp"
@@ -26,9 +29,11 @@
 #include "heart_pump.hpp"
 #include "io/write_vtu.hpp"
 #include "particle_system/particle_markers.hpp"
-#include "gui/gui.hpp"
 
-class ValvelessPump /*: public Gui<ValvelessPump>*/
+class ValvelessPump
+#ifdef USE_QT_GUI
+    : public Gui<ValvelessPump>
+#endif
 {
     enum
     {
@@ -41,7 +46,7 @@ class ValvelessPump /*: public Gui<ValvelessPump>*/
         fmm_order = 3
     };
 protected:
-#ifdef CUDA_FLUID_SOLVER
+#ifdef USE_CUDA_FLUID_SOLVER
     typedef float value_type;
 #else
     typedef double value_type;
@@ -49,7 +54,7 @@ protected:
     typedef ClenshawCurtis<value_type,data_size,sdc_nodes> integrator_type;
     typedef ExplicitSDC<value_type,integrator_type,sdc_nodes,sdc_nodes> sdc_type;
     typedef ForwardEuler<value_type> euler_type;
-#ifdef CUDA_FLUID_SOLVER
+#ifdef USE_CUDA_FLUID_SOLVER
     typedef vtkParticleSystemStorage<value_type,Particle<value_type>,PSYS::SURFACE,vtkFloatArray> surface_storage_type;
     typedef vtkParticleSystemStorage<value_type,Particle<value_type>,PSYS::VOLUME,vtkFloatArray> volume_storage_type;
     typedef ParticleSystem<value_type,sdc_type,num_particles,PSYS::SURFACE,surface_storage_type> particle_system_type;
@@ -63,7 +68,7 @@ protected:
     typedef OvalGeometry<value_type> oval_type;
     typedef SpringSystem<heart_pump_surface_type,particle_system_type> spring_system_type;
 //         typedef FMMStokesSolver<particle_system_type,fmm_max_particles,fmm_order> fluid_solver_type;
-#ifdef CUDA_FLUID_SOLVER
+#ifdef USE_CUDA_FLUID_SOLVER
     typedef CudaStokesSolver<particle_system_type> fluid_solver_type;
 #else
     typedef DirectStokesSolver<particle_system_type> fluid_solver_type;
@@ -128,64 +133,17 @@ public:
         size_t lo = 20, hi = 50;
         value_type dtheta = 2*M_PI/M;
         value_type dalpha = 2*M_PI/N;
+        
+        std::vector<value_type> rscale(hi-lo, 0.0);
+        m_heart_pump.radius_scale(m_boundary.time(),lo,hi,rscale);
         for(size_t i = lo, idx = lo*M; i < hi; ++i)
             for(size_t j = 0; j < M; ++j, ++idx)
-                m_oval_geometry.surface_point(i,j,radius(m_boundary.time(),i-lo),particles[idx].position,dtheta,dalpha);
+                m_oval_geometry.surface_point(i,j,rscale[i-lo],particles[idx].position,dtheta,dalpha);
         m_boundary.time() += m_time_step;
         if (m_record)
-        {
             m_surface_writer->write(m_boundary.time());
-        }
     }
 
-    value_type radius(value_type t, size_t i)
-    {
-        particle_system_type::particle_type *particles = m_boundary.particles();
-        size_t lo = 20, hi = 50;
-        value_type dtheta = 2*M_PI/M;
-        value_type dalpha = 2*M_PI/N;
-        
-        // Range of stretchy part
-        value_type x_1 = 0.0;
-        value_type x_2 = 1.0;
-        
-        // Range of part to be squeezed
-        value_type x_a = 0.2;
-        value_type x_b = 0.8;
-        
-        // size of squeeze
-        value_type Ls = 0.3;
-        value_type r = .035;
-        value_type deltar = m_oval_geometry.inner_radius() - r;
-        
-        value_type freq = 2.0;
-        value_type wt = std::fmod(t/freq,1.0);
-        value_type x_c = (1-wt)*x_a + wt*(x_b-Ls);
-        value_type x_d = x_c + Ls;
-
-        value_type dx = (x_2-x_1)/(hi-lo);
-
-        std::vector<value_type> x(hi-lo), q(hi-lo);
-        std::vector<value_type> filter(hi-lo);
-        for(size_t k = 0; k < hi-lo; ++k)
-        {
-            x[k] = dx*k;            
-            filter[k] = (x[k] > x_c) && (x[k] < x_d);
-            q[k] = (x[k]-x_c)*(x[k]-x_d);
-            q[k] *= q[k];
-        }
-        value_type scale = 0;
-        for(size_t k = 0; k < hi-lo; ++k)
-        {
-            if(filter[k])
-                if(q[k] > scale)
-                    scale = q[k];
-        }
-        for(size_t k = 0; k < hi-lo; ++k)
-            q[k] /= scale;
-
-        return 1 - std::sin(M_PI*wt)*deltar*q[i]*filter[i]/m_oval_geometry.inner_radius();
-    }
 
 public:
     boundary_type *boundary()
@@ -198,7 +156,9 @@ public:
 
 int main(int ac, char **av)
 {
-//     QVTKApplication app(ac,av);
+#ifdef USE_QT_GUI
+    QVTKApplication app(ac,av);
+#endif
 
     std::string data_dir;
     if (ac == 2)
@@ -207,10 +167,14 @@ int main(int ac, char **av)
         return 0;
 
     ValvelessPump pump(data_dir);
-//     pump.boundary()->storage()->grid()->PrintSelf(std::cout, vtkIndent());
-//     pump.setActor(pump.boundary()->storage()->grid());
-//     pump.show();
+#ifdef USE_QT_GUI
+    pump.boundary()->storage()->grid()->PrintSelf(std::cout, vtkIndent());
+    pump.setActor(pump.boundary()->storage()->grid());
+    pump.show();
+#endif    
     while (1)
         pump.run();
-//     return app.exec();
+#ifdef USE_QT_GUI
+    return app.exec();
+#endif
 }

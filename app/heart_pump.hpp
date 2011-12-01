@@ -82,7 +82,7 @@ public:
                     size_t Aj = grid[(*s)->A()->position].second;
                     size_t Bi = grid[(*s)->B()->position].first;
                     size_t Bj = grid[(*s)->B()->position].second;
-                    (*s)->resting_length() = m_geometry->get_distance(Ai,Aj,Bi,Bj,rscale[i]);
+                    (*s)->resting_length() = m_geometry->get_distance(Ai,Aj,Bi,Bj,rscale[i-lo]);
                 }
             }
     }
@@ -103,7 +103,7 @@ public:
         value_type deltar = m_geometry->inner_radius() - radius;
         
         value_type freq = 2.0;
-        value_type wt = std::fmod(t/freq,1.0);
+        value_type wt = std::fmod(t/freq,value_type(1));
         value_type x_c = (1-wt)*x_a + wt*(x_b-Ls);
         value_type x_d = x_c + Ls;
         

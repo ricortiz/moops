@@ -1,2 +1,4 @@
-QT4_WRAP_CPP(HEADERS_MOC gui_base.hpp)
-ADD_LIBRARY(gui gui_base.cpp ${QT_LIBRARIES} ${HEADERS_MOC})
+IF(USE_QT_GUI)
+    QT4_WRAP_CPP(HEADERS_MOC gui_base.hpp)
+    ADD_LIBRARY(gui gui_base.cpp ${QT_LIBRARIES} ${HEADERS_MOC})
+ENDIF(USE_QT_GUI)
