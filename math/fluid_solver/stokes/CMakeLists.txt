@@ -1,0 +1,2 @@
+
+ADD_SUBDIRECTORY(nbody_gpu)
