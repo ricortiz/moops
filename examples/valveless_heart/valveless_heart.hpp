@@ -4,6 +4,7 @@
 #include <cassert>
 #include <deque>
 #include <cmath>
+#include <iterator>
 #include "geometry/surface.hpp"
 #include "geometry/torus_geometry.hpp"
 #include "geometry/oval_geometry.hpp"
@@ -21,18 +22,26 @@ private:
     oval_type *m_geometry;
     std::vector<size_t>    m_col_ptr;
     std::vector<size_t>    m_col_idx;
+    size_t m_hi;
+    size_t m_lo;
+    std::vector<value_type> m_radius_scale;
 
 public:
 
     void init_surface(oval_type &oval_geometry, value_type *positions)
     {
+        m_lo = 10; m_hi = 60;
+        m_radius_scale.resize(m_hi-m_lo);
         m_col_ptr.push_back(0);
         grid_type &grid = this->grid();
         oval_geometry.init(positions,grid);
+//         std::cout << "p = [";
+//         std::copy(positions,positions+3*20*200,std::ostream_iterator<value_type>(std::cout,","));
+//         std::cout << "];\n";
         oval_geometry.get_connections(m_col_ptr,m_col_idx);
         m_geometry = &oval_geometry;
     }
-
+    
     void init_volume(BaseGeometry<oval_type> &oval_geometry, value_type *positions, size_t num_sub_surfaces = 1)
     {
         oval_geometry.init(positions,num_sub_surfaces);
@@ -45,16 +54,25 @@ public:
         particle_type *particles = spring_system.particles();
 
         // Use this to determine wich cross-sections of the geometry are going to be stiffer
-        size_t lo = 400, hi = 1000;
+        size_t lo = (m_lo+2)*20, hi = (m_hi-2)*20;
+//         std::cout << "springs = [";
         for (size_t p = 0; p < m_col_ptr.size()-1; ++p)
         {
             for (size_t i = m_col_ptr[p], end = m_col_ptr[p+1]; i < end; ++i)
                 if (!spring_system.exist_spring(&particles[p],&particles[m_col_idx[i]]))
-                    if (p > lo && p < hi)
-                        spring_system.add_spring(&particles[p],&particles[m_col_idx[i]],1.);
-                    else
-                        spring_system.add_spring(&particles[p],&particles[m_col_idx[i]],10.);
+                {
+                    if (p > lo && p < hi){
+                        /*if (*/spring_system.add_spring(&particles[p],&particles[m_col_idx[i]],2.)/*)
+                            std::cout << p+1 << "," << m_col_idx[i]+1 << ";"*/;
+                    }
+                    else{
+                        /*if (*/spring_system.add_spring(&particles[p],&particles[m_col_idx[i]],3.)/*)
+                            std::cout << p+1 << "," << m_col_idx[i]+1 << ";"*/;
+                    }
+                    
+                }
         }
+//         std::cout << "];\n";
         std::cout << "Created " << spring_system.springs_size() << " springs." << std::endl;
     }
 
@@ -67,12 +85,10 @@ public:
         grid_type &grid = this->grid();
         spring_map_type &springs_map = spring_system.springs_map();
         particle_type *particles = spring_system.particles();
-        const size_t lo = 20, hi = 50;
         size_t *dims = m_geometry->get_dimensions();
 
-        std::vector<value_type> rscale(hi-lo, 0.0);
-        radius_scale(time,lo,hi,rscale);
-        for(size_t i = lo, idx = lo*dims[0]; i < hi; ++i)
+        radius_scale(time);
+        for(size_t i = m_lo, idx = m_lo*dims[0]; i < m_hi; ++i)
             for(size_t j = 0; j < dims[0]; ++j, ++idx)
             {
                 particle_type *particle = &particles[idx];
@@ -82,59 +98,58 @@ public:
                     size_t Aj = grid[(*s)->A()->position].second;
                     size_t Bi = grid[(*s)->B()->position].first;
                     size_t Bj = grid[(*s)->B()->position].second;
-                    (*s)->resting_length() = m_geometry->get_distance(Ai,Aj,Bi,Bj,rscale[i-lo]);
+                    (*s)->resting_length() = m_geometry->get_distance(Ai,Aj,Bi,Bj,m_radius_scale[i-m_lo]);
                 }
             }
     }
 
-    void radius_scale(value_type t, size_t lo, size_t hi, std::vector<value_type> &r)
-    {        
+    std::vector<value_type> &radius_scale(value_type t)
+    {
+        size_t n = m_hi-m_lo;
         // Range of stretchy part
         value_type x_1 = 0.0;
         value_type x_2 = 1.0;
         
         // Range of part to be squeezed
-        value_type x_a = 0.2;
-        value_type x_b = 0.8;
+        value_type x_a = x_1;
+        value_type x_b = x_2;
         
         // size of squeeze
         value_type Ls = 0.3;
         value_type radius = .035;
-        value_type deltar = m_geometry->inner_radius() - radius;
         
-        value_type freq = 2.0;
+        value_type freq = 3.0;
         value_type wt = std::fmod(t/freq,value_type(1));
         value_type x_c = (1-wt)*x_a + wt*(x_b-Ls);
         value_type x_d = x_c + Ls;
         
-        value_type dx = (x_2-x_1)/(hi-lo);
+        value_type dx = (x_2-x_1)/n;
         
-        std::vector<value_type> x(hi-lo), q(hi-lo), filter(hi-lo);
-        for(size_t k = 0; k < hi-lo; ++k)
+        std::vector<value_type> x(n), filter(n);
+        value_type scale = 0;
+        for(size_t k = 0; k < n; ++k)
         {
             x[k] = dx*k;
             filter[k] = (x[k] > x_c) && (x[k] < x_d);
-            q[k] = (x[k]-x_c)*(x[k]-x_d);
-            q[k] *= q[k];
+            m_radius_scale[k] = (x[k]-x_c)*(x[k]-x_d);
+            m_radius_scale[k] *= m_radius_scale[k];
+            if(filter[k] && (m_radius_scale[k] > scale))
+                scale = m_radius_scale[k];
         }
-        value_type scale = 0;
-        for(size_t k = 0; k < hi-lo; ++k)
-        {
-            if(filter[k])
-                if(q[k] > scale)
-                    scale = q[k];
+        scale = std::sin(M_PI*wt)*radius/(scale*m_geometry->inner_radius());
+        for(size_t k = 0; k < n; ++k)
+        {            
+            m_radius_scale[k] *= filter[k]*scale;
+            m_radius_scale[k] = 1 - m_radius_scale[k];
         }
-        for(size_t k = 0; k < hi-lo; ++k)
-        {
-            q[k] /= scale;
-            r[k] = 1 - std::sin(M_PI*wt)*deltar*q[k]*filter[k]/m_geometry->inner_radius();
-        }
-        
+        return m_radius_scale;
     }
     
     inline BaseGeometry<oval_type> *geometry() {
         return m_geometry;
     }
+
+    void get_lohi(size_t &lo,size_t &hi) { lo = m_lo; hi = m_hi; }
 
 };
 

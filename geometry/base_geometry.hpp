@@ -1,8 +1,8 @@
 #ifndef BASE_GEOMETRY_HPP
 #define BASE_GEOMETRY_HPP
 
-#include <list>
 #include <map>
+#include<cmath>
 #include <vtkCellArray.h>
 #include <vtkSmartPointer.h>
 
@@ -35,200 +35,438 @@ protected:
         }
 
         template<typename array_type>
-        inline void add_cylinder_connections(size_t i, size_t j, array_type &col_idx)
+        inline void add_plane_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
         {
-            size_t *dims = derived()->get_dimensions();
-            if (i == 0 && j == 0)
-            {
-                col_idx.push_back(dims[0]-1);
-                col_idx.push_back((j+1)*dims[0]+dims[0]-1);
-            }
-            if (i == dims[0]-1 && j == 0)
-            {
-                col_idx.push_back(j*dims[0]);
-                col_idx.push_back((j+1)*dims[0]);
-            }
-            if (i == dims[0]-1 && j == dims[1]-1)
-            {
-                col_idx.push_back((j-1)*dims[0]);
-                col_idx.push_back(j*dims[0]);
-            }
 
-            if (i == 0 && j == dims[1]-1)
-            {
-                col_idx.push_back((j-1)*dims[0]+dims[0]-1);
-                col_idx.push_back(j*dims[0]+dims[0]-1);
-            }
-            if (i == 0 && (j > 0 && j < dims[1]-1))
-            {
-                col_idx.push_back((j-1)*dims[0]+dims[0]-1);
-                col_idx.push_back(j*dims[0]+dims[0]-1);
-                col_idx.push_back((j+1)*dims[0]+dims[0]-1);
-            }
-            if (i == dims[0]-1 && (j > 0 && j < dims[1]-1))
-            {
-                col_idx.push_back((j-1)*dims[0]);
-                col_idx.push_back(j*dims[0]);
-                col_idx.push_back(j*dims[0]+i+1);
-            }
+            int connections[10][2] = {{i-1,j-1},
+                                      {i,j-1},
+                                      {i+1,j-1},
+                                      {i+2,j},
+                                      {i+1,j},
+                                      {i-1,j},
+                                      {i-2,j},
+                                      {i+1,j+1},
+                                      {i,j+1},
+                                      {i-1,j+1}};
+            for(int k = 0; k < 10; ++k)
+                if((connections[k][0] >=0 && connections[k][1] >=0) && (connections[k][0] <= M-1 && connections[k][1] <= N-1))
+                    col_idx.push_back(connections[k][1]*M+connections[k][0]+offset);
+//             if (i == 0 && j == 0)
+//             {
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back((j+1)*M+i+1);
+//             }
+//             if (i == M-1 && j == 0)
+//             {
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//             }
+//             if (i == M-1 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M+M-1);
+//                 col_idx.push_back((j-1)*M+M-2);
+//                 col_idx.push_back(j*M+M-2);
+//             }
+//             
+//             if (i == 0 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j-1)*M+i);
+//             }
+//             if (i == 0 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i+1);
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j+1)*M+i);
+//             }
+//             if (i == M-1 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back((j-1)*M+i-1);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//             }
+//             if (j == 0 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i+1);
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//             }
+//             if (j == N-1 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j-1)*M+i-1);
+//                 col_idx.push_back(j*M+i-1);
+//             }
+//             if (i > 0 && j > 0 && (i < M-1 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i+1);
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back((j-1)*M+i-1);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//             }
         }
-
+        
         template<typename array_type>
-        inline void add_plane_connections(size_t i, size_t j, array_type &col_idx)
+        inline void add_cylinder_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
         {
-            size_t *dims = derived()->get_dimensions();
-            if (i == 0 && j == 0)
-            {
-                col_idx.push_back(j*dims[0]+i+1);
-                col_idx.push_back((j+1)*dims[0]+i+1);
-                col_idx.push_back((j+1)*dims[0]+i);
-            }
-            if (i == dims[0]-1 && j == 0)
-            {
-                col_idx.push_back((j+1)*dims[0]+i);
-                col_idx.push_back(j*dims[0]+i-1);
-                col_idx.push_back((j+1)*dims[0]+i-1);
-            }
-            if (i == dims[0]-1 && j == dims[1]-1)
-            {
-                col_idx.push_back((j-1)*dims[0]+dims[0]-1);
-                col_idx.push_back((j-1)*dims[0]+dims[0]-2);
-                col_idx.push_back(j*dims[0]+dims[0]-2);
-            }
-
-            if (i == 0 && j == dims[1]-1)
-            {
-                col_idx.push_back((j-1)*dims[0]+i+1);
-                col_idx.push_back(j*dims[0]+i+1);
-                col_idx.push_back((j-1)*dims[0]+i);
-            }
-            if (i == 0 && (j > 0 && j < dims[1]-1))
-            {
-                col_idx.push_back((j-1)*dims[0]+i+1);
-                col_idx.push_back(j*dims[0]+i+1);
-                col_idx.push_back((j+1)*dims[0]+i+1);
-                col_idx.push_back((j-1)*dims[0]+i);
-                col_idx.push_back((j+1)*dims[0]+i);
-            }
-            if (i == dims[0]-1 && (j > 0 && j < dims[1]-1))
-            {
-                col_idx.push_back((j-1)*dims[0]+i);
-                col_idx.push_back((j+1)*dims[0]+i);
-                col_idx.push_back((j-1)*dims[0]+i-1);
-                col_idx.push_back(j*dims[0]+i-1);
-                col_idx.push_back((j+1)*dims[0]+i-1);
-            }
-            if (j == 0 && (i > 0 && i < dims[0]-1))
-            {
-                col_idx.push_back(j*dims[0]+i+1);
-                col_idx.push_back((j+1)*dims[0]+i+1);
-                col_idx.push_back((j+1)*dims[0]+i);
-                col_idx.push_back(j*dims[0]+i-1);
-                col_idx.push_back((j+1)*dims[0]+i-1);
-            }
-            if (j == dims[1]-1 && (i > 0 && i < dims[0]-1))
-            {
-                col_idx.push_back((j-1)*dims[0]+i+1);
-                col_idx.push_back(j*dims[0]+i+1);
-                col_idx.push_back((j-1)*dims[0]+i);
-                col_idx.push_back((j-1)*dims[0]+i-1);
-                col_idx.push_back(j*dims[0]+i-1);
-            }
-            if (i > 0 && j > 0 && (i < dims[0]-1 && j < dims[1]-1))
-            {
-                col_idx.push_back((j-1)*dims[0]+i+1);
-                col_idx.push_back(j*dims[0]+i+1);
-                col_idx.push_back((j+1)*dims[0]+i+1);
-                col_idx.push_back((j-1)*dims[0]+i);
-                col_idx.push_back((j+1)*dims[0]+i);
-                col_idx.push_back((j-1)*dims[0]+i-1);
-                col_idx.push_back(j*dims[0]+i-1);
-                col_idx.push_back((j+1)*dims[0]+i-1);
-            }
-        }
-
+            int connections[4][2] = {{i+2,j},
+                                     {i+1,j},
+                                     {i-1,j},
+                                     {i-2,j}};
+            for(int k = 0; k < 4; ++k)
+                if((connections[k][0] < 0 && connections[k][1] >= 0) || (connections[k][0] > M-1 && connections[k][1] <= N-1))
+                    col_idx.push_back(connections[k][1]*M+connections[k][0]%M+offset);
+//                     col_idx.push_back(j*M+(i+2)%M);
+//             if (i == 0 && j == 0)
+//             {
+//                 col_idx.push_back(M-1);
+//                 col_idx.push_back((j+1)*M+M-1);
+//             }
+//             if (i == M-1 && j == 0)
+//             {
+//                 col_idx.push_back(j*M);
+//                 col_idx.push_back((j+1)*M);
+//             }
+//             if (i == M-1 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M);
+//                 col_idx.push_back(j*M);
+//             }
+//             
+//             if (i == 0 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M+M-1);
+//                 col_idx.push_back(j*M+M-1);
+//             }
+//             if (i == 0 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+M-1);
+//                 col_idx.push_back(j*M+M-1);
+//                 col_idx.push_back((j+1)*M+M-1);
+//             }
+//             if (i == M-1 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M);
+//                 col_idx.push_back(j*M);
+//                 col_idx.push_back(j*M+i+1);
+//             }
+        }            
+        
         template<typename array_type>
-        inline void add_closed_connections(size_t i, size_t j, array_type &col_idx)
+        inline void add_closed_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx)
         {
-            size_t *dims = derived()->get_dimensions();
-            size_t M = dims[0];
-            size_t N = dims[1];
-
-            if (i == 0 && j == 0)
-            {
-                col_idx.push_back((N-1)*M+M-1);
-                col_idx.push_back((N-1)*M+i);
-                col_idx.push_back((N-1)*M+i+1);
-            }
-            if (i == M-1 && j == 0)
-            {
-                col_idx.push_back((N-1)*M+M-2);
-                col_idx.push_back((N-1)*M+M-1);
-                col_idx.push_back((N-1)*M);
-            }
-
-            if (i == M-1 && j == N-1)
-            {
-                col_idx.push_back(M-2);
-                col_idx.push_back(M-1);
-                col_idx.push_back(0);
-            }
-//
-            if (i == 0 && j == N-1)
-            {
-                col_idx.push_back(M-1);
-                col_idx.push_back(0);
-                col_idx.push_back(1);
-            }
-
-            if (j == 0 && (i > 0 && i < M-1))
-            {
-                col_idx.push_back((N-1)*M+i-1);
-                col_idx.push_back((N-1)*M+i);
-                col_idx.push_back((N-1)*M+i+1);
-            }
-
-            if (j == N-1 && (i > 0 && i < M-1))
-            {
-                col_idx.push_back(i-1);
-                col_idx.push_back(i);
-                col_idx.push_back(i+1);
-            }
-
+            int connections[2][6] = {{i-1,i,i+1,i+1,i,i-1},{j-1,j-1,j-1,j+1,j+1,j+1}};
+            for(int k = 0; k < 6; ++k)
+                if((connections[0][k] >= 0 && connections[1][k] < 0) || (connections[0][k] <= M-1 && connections[1][k] > N-1))
+                    col_idx.push_back(connections[1][k]%M+connections[0][k]);
+//             col_idx.push_back(((j+2)%N)*M+i);
+//             col_idx.push_back(((j+3)%N)*M+i);
+//             if (i == 0 && j == 0)
+//             {
+//                 col_idx.push_back((N-1)*M+M-1);
+//                 col_idx.push_back((N-1)*M+i);
+//                 col_idx.push_back((N-1)*M+i+1);
+//             }
+//             if (i == M-1 && j == 0)
+//             {
+//                 col_idx.push_back((N-1)*M+M-2);
+//                 col_idx.push_back((N-1)*M+M-1);
+//                 col_idx.push_back((N-1)*M);
+//             }
+//             
+//             if (i == M-1 && j == N-1)
+//             {
+//                 col_idx.push_back(M-2);
+//                 col_idx.push_back(M-1);
+//                 col_idx.push_back(0);
+//             }
+//             //
+//             if (i == 0 && j == N-1)
+//             {
+//                 col_idx.push_back(M-1);
+//                 col_idx.push_back(0);
+//                 col_idx.push_back(1);
+//             }
+//             
+//             if (j == 0 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back((N-1)*M+i-1);
+//                 col_idx.push_back((N-1)*M+i);
+//                 col_idx.push_back((N-1)*M+i+1);
+//             }
+//             
+//             if (j == N-1 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back(i-1);
+//                 col_idx.push_back(i);
+//                 col_idx.push_back(i+1);
+//             }
+            
         }
+        
+//         template<typename array_type>
+//         inline void add_plane_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx)
+//         {
+//             size_t offset = M/2;
+//             col_idx.push_back(j*M+(i+offset)%M);
+//             if (i == 0 && j == 0)
+//             {
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i+1);
+//                 col_idx.push_back((j+1)*M+i);
+//                 
+//                 col_idx.push_back(j*M+i+2);
+//                 if (N > 2)
+//                     col_idx.push_back((j+2)*M+i);
+//             }
+//             if (i == M-1 && j == 0)
+//             {
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//                 
+//                 col_idx.push_back(j*M+i-2);
+//                 if (N > 2)
+//                     col_idx.push_back((j+2)*M+i);
+//             }
+//             if (i == M-1 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j-1)*M+i-1);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back(j*M+i-2);
+//                 if (N > 2)
+//                     col_idx.push_back((j-2)*M+i);
+//             }
+//             
+//             if (i == 0 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back(j*M+i+2);
+//                 col_idx.push_back((j-1)*M+i);
+//                 if (N > 2)
+//                     col_idx.push_back((j-2)*M+i);
+//             }
+//             if (i == 0 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i+1);
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j+1)*M+i);
+//                 
+//                 col_idx.push_back(j*M+i+2);
+//                 if( j > 1 )
+//                     col_idx.push_back((j-2)*M+i);
+//                 if( j < N-2 )
+//                     col_idx.push_back((j+2)*M+i);
+//             }
+//             if (i == M-1 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back((j-1)*M+i-1);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//                 if( j > 1 )
+//                     col_idx.push_back((j-2)*M+i);
+//                 if( j < N-2 )
+//                     col_idx.push_back((j+2)*M+i);
+//             }
+//             if (j == 0 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i+1);
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//                 if(N > 2)
+//                     col_idx.push_back((j+2)*M+i);
+//                 if(i < M-2)
+//                     col_idx.push_back(j*M+i+2);
+//                 if(i > 1)
+//                     col_idx.push_back(j*M+i-2);
+//             }
+//             if (j == N-1 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j-1)*M+i-1);
+//                 col_idx.push_back(j*M+i-1);
+//                 if(N > 2)
+//                     col_idx.push_back((j-2)*M+i);
+//                 if(i < M-2)
+//                     col_idx.push_back(j*M+i+2);
+//                 if(i > 1)
+//                     col_idx.push_back(j*M+i-2);
+//             }
+//             if (i > 0 && i < M-1 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+i+1);
+//                 col_idx.push_back(j*M+i+1);
+//                 col_idx.push_back((j+1)*M+i+1);
+//                 col_idx.push_back((j-1)*M+i);
+//                 col_idx.push_back((j+1)*M+i);
+//                 col_idx.push_back((j-1)*M+i-1);
+//                 col_idx.push_back(j*M+i-1);
+//                 col_idx.push_back((j+1)*M+i-1);
+//                 if(i < M-2)
+//                     col_idx.push_back(j*M+i+2);
+//                 if(i > 1)
+//                     col_idx.push_back(j*M+i-2);
+//                 if(j < N-2)
+//                     col_idx.push_back((j+2)*M+i);
+//                 if(j > 2)
+//                     col_idx.push_back((j-2)*M+i);
+//                     
+//             }
+//         }
+//         
+//         template<typename array_type>
+//         inline void add_cylinder_connections(size_t i, size_t j,size_t M, size_t N, array_type &col_idx)
+//         {
+//             if (i == 0 && j == 0)
+//             {
+//                 col_idx.push_back(j*M+M-1);
+//                 col_idx.push_back(j*M+M-2);
+//                 col_idx.push_back((j+1)*M+M-1);
+//             }
+//             if (i == M-1 && j == 0)
+//             {
+//                 col_idx.push_back(j*M);
+//                 col_idx.push_back(j*M+1);
+//                 col_idx.push_back((j+1)*M);
+//             }
+//             if (i == M-1 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M);
+//                 col_idx.push_back(j*M);
+//                 col_idx.push_back(j*M+1);
+//             }
+// 
+//             if (i == 0 && j == N-1)
+//             {
+//                 col_idx.push_back((j-1)*M+M-1);
+//                 col_idx.push_back(j*M+M-1);
+//                 col_idx.push_back(j*M+M-2);
+//             }
+//             if (i == 0 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M+M-1);
+//                 col_idx.push_back(j*M+M-1);
+//                 col_idx.push_back(j*M+M-2);
+//                 col_idx.push_back((j+1)*M+M-1);
+//             }
+//             if (i == M-1 && (j > 0 && j < N-1))
+//             {
+//                 col_idx.push_back((j-1)*M);
+//                 col_idx.push_back(j*M);
+//                 col_idx.push_back(j*M+1);
+//                 col_idx.push_back((j+1)*M);
+//             }
+//         }
+// 
+//         template<typename array_type>
+//         inline void add_closed_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx)
+//         {
+//             if (i == 0 && j == 0)
+//             {
+//                 col_idx.push_back((N-1)*M+M-1);
+//                 col_idx.push_back((N-1)*M+i);
+//                 col_idx.push_back((N-1)*M+i+1);
+//                 col_idx.push_back((N-2)*M+i);
+//             }
+//             if (i == M-1 && j == 0)
+//             {
+//                 col_idx.push_back((N-1)*M+M-2);
+//                 col_idx.push_back((N-1)*M+M-1);
+//                 col_idx.push_back((N-1)*M);
+//                 col_idx.push_back((N-2)*M+M-1);
+//             }
+// 
+//             if (i == M-1 && j == N-1)
+//             {
+//                 col_idx.push_back(M-2);
+//                 col_idx.push_back(M-1);
+//                 col_idx.push_back(0);
+//                 col_idx.push_back(M+M-1);
+//             }
+// //
+//             if (i == 0 && j == N-1)
+//             {
+//                 col_idx.push_back(M-1);
+//                 col_idx.push_back(0);
+//                 col_idx.push_back(1);
+//                 col_idx.push_back(M);
+//             }
+// 
+//             if (j == 0 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back((N-1)*M+i-1);
+//                 col_idx.push_back((N-1)*M+i);
+//                 col_idx.push_back((N-1)*M+i+1);
+//                 col_idx.push_back((N-2)*M+i);
+//             }
+// 
+//             if (j == N-1 && (i > 0 && i < M-1))
+//             {
+//                 col_idx.push_back(i-1);
+//                 col_idx.push_back(i);
+//                 col_idx.push_back(i+1);
+//                 col_idx.push_back(M+i);
+//             }
+// 
+//         }
 
-        void set_plane_cells(size_t i, size_t j)
+        void set_plane_cells(size_t i, size_t j, size_t M, size_t N, size_t offset = 0)
         {
-            size_t *dims = derived()->get_dimensions();
-            size_t M = dims[0];
-            size_t N = dims[1];
+//             size_t *dims = derived()->get_dimensions();
+//             size_t M = M;
+//             size_t N = N;
             if (i < M-1 && j < N-1)
             {
-                vtkIdType cell[4] = {j*M+i,j*M+i+1,(j+1)*M+i+1,(j+1)*M+i};
+                vtkIdType cell[4] = {j*M+i+offset,j*M+i+1+offset,(j+1)*M+i+1+offset,(j+1)*M+i+offset};
                 m_cells->InsertNextCell(4, cell);
             }
         }
 
-        void set_corner_cells(size_t i, size_t j)
+        void set_corner_cells(size_t i, size_t j, size_t M, size_t N, size_t offset = 0)
         {
-            size_t *dims = derived()->get_dimensions();
-            size_t M = dims[0];
-            size_t N = dims[1];
+//             size_t *dims = derived()->get_dimensions();
+//             size_t M = M;
+//             size_t N = N;
             if (i == M-1 && j < N-1)
             {
-                vtkIdType cell[4] = {j*M+i,j*M,(j+1)*M,(j+1)*M+i};
+                vtkIdType cell[4] = {j*M+i+offset,j*M+offset,(j+1)*M+offset,(j+1)*M+i+offset};
                 m_cells->InsertNextCell(4, cell);
             }
         }
         
-        void set_top_cells(size_t i, size_t j)
+        void set_top_cells(size_t i, size_t j, size_t M, size_t N, size_t offset = 0)
         {
-            size_t *dims = derived()->get_dimensions();
-            size_t M = dims[0];
-            size_t N = dims[1];
+//             size_t *dims = derived()->get_dimensions();
+//             size_t M = M;
+//             size_t N = N;
             if (i < M-1 && j == N-1)
             {
-                vtkIdType cell[4] = {j*M+i,j*M+i+1,i+1,i};
+                vtkIdType cell[4] = {j*M+i+offset,j*M+i+1+offset,i+1+offset,i+offset};
                 m_cells->InsertNextCell(4, cell);
             }
         }
@@ -243,12 +481,6 @@ protected:
             derived()->surface_point(Bi,Bj,scale,point2,dtheta,dalpha);
             value_type dx[3] = {point1[0]-point2[0],point1[1]-point2[1],point1[2]-point2[2]};
             return std::sqrt(dx[0]*dx[0]+dx[1]*dx[1]+dx[2]*dx[2]);
-        }
-
-        template<typename array_type>
-        inline void get_connections(array_type &col_ptr, array_type &col_idx)
-        {
-            derived()->get_connections(col_ptr,col_idx);
         }
 
         template<typename grid_type>
@@ -268,7 +500,7 @@ protected:
 
         void init(value_type *positions, size_t num_rings)
         {
-            size_t *dims = derived()->get_dimensions();            
+            size_t *dims = derived()->get_dimensions();
             value_type dtheta = 2*M_PI/dims[0];
             value_type dalpha = 2*M_PI/dims[1];
             

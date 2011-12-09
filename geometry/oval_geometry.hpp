@@ -47,7 +47,7 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             m_x0[2] = z;
         }
 
-        inline void get_local_frame(value_type s, value_type x[3],value_type normal[3])
+        void get_local_frame(value_type s, value_type x[3],value_type normal[3])
         {
             value_type Dx[3] = {0};
             value_type b = m_outer_radius;
@@ -78,7 +78,7 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             normal[1] =-Dx[0];
         }
 
-        inline void surface_point(size_t i, size_t j, value_type scale, value_type *point, value_type dtheta, value_type dalpha)
+        void surface_point(size_t i, size_t j, value_type scale, value_type *point, value_type dtheta, value_type dalpha)
         {
 
             value_type s = i*dalpha;
@@ -99,9 +99,9 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             for (size_t i = 0; i < m_dims[0]; ++i)
                 for (size_t j = 0; j < m_dims[1]; ++j)
                 {
-                    this->set_corner_cells(i,j);
-                    this->set_top_cells(i,j);
-                    this->set_plane_cells(i,j);
+                    this->set_corner_cells(i,j,m_dims[0],m_dims[1]);
+                    this->set_top_cells(i,j,m_dims[0],m_dims[1]);
+                    this->set_plane_cells(i,j,m_dims[0],m_dims[1]);
                 }
         }
 
@@ -111,9 +111,9 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             for (size_t j = 0; j < m_dims[1]; ++j)
                 for (size_t i = 0; i < m_dims[0]; ++i)
                 {
-                    this->add_cylinder_connections(i,j,col_idx);
-                    this->add_plane_connections(i,j,col_idx);
-                    this->add_closed_connections(i,j,col_idx);
+                    this->add_cylinder_connections(i,j,m_dims[0],m_dims[1],col_idx);
+                    this->add_plane_connections(i,j,m_dims[0],m_dims[1],col_idx);
+                    this->add_closed_connections(i,j,m_dims[0],m_dims[1],col_idx);
                     col_ptr.push_back(col_idx.size());
                 }
         }

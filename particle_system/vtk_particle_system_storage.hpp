@@ -67,6 +67,9 @@ class vtkParticleSystemStorage<T,particle_type,PSYS::SURFACE,vtk_data_array_type
             m_data.positions = new T[size];
             m_data.velocities = new T[size];
             m_data.forces = new T[size];
+            std::fill(m_data.positions,m_data.positions+size,T(0));
+            std::fill(m_data.velocities,m_data.velocities+size,T(0));
+            std::fill(m_data.forces,m_data.forces+size,T(0));
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
             {

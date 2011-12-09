@@ -1,7 +1,6 @@
 #ifndef SURFACE_HPP
 #define SURFACE_HPP
 
-#include <list>
 #include <map>
 
 template<typename T> struct surface_traits;

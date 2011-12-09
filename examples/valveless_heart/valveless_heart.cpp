@@ -26,7 +26,7 @@
 #include "math/ode_solver/euler/forward_euler.hpp"
 #include "geometry/torus_geometry.hpp"
 #include "geometry/oval_geometry.hpp"
-#include "heart_pump.hpp"
+#include "valveless_heart.hpp"
 #include "io/write_vtu.hpp"
 #include "particle_system/particle_markers.hpp"
 
@@ -130,12 +130,11 @@ public:
     void fake_run()
     {
         particle_system_type::particle_type *particles = m_boundary.particles();
-        size_t lo = 20, hi = 50;
         value_type dtheta = 2*M_PI/M;
         value_type dalpha = 2*M_PI/N;
-        
-        std::vector<value_type> rscale(hi-lo, 0.0);
-        m_heart_pump.radius_scale(m_boundary.time(),lo,hi,rscale);
+        size_t lo,hi;
+        m_heart_pump.get_lohi(lo,hi);
+        std::vector<value_type> &rscale = m_heart_pump.radius_scale(m_boundary.time());
         for(size_t i = lo, idx = lo*M; i < hi; ++i)
             for(size_t j = 0; j < M; ++j, ++idx)
                 m_oval_geometry.surface_point(i,j,rscale[i-lo],particles[idx].position,dtheta,dalpha);
@@ -171,10 +170,9 @@ int main(int ac, char **av)
     pump.boundary()->storage()->grid()->PrintSelf(std::cout, vtkIndent());
     pump.setActor(pump.boundary()->storage()->grid());
     pump.show();
-#endif    
+    return app.exec();
+#else
     while (1)
         pump.run();
-#ifdef USE_QT_GUI
-    return app.exec();
 #endif
 }

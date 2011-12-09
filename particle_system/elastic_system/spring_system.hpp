@@ -51,9 +51,9 @@ class SpringSystem : public particle_system_type
         spring_container const &get_springs() const { return m_springs; }
         spring_lut_type &springs_map() { return m_spring_lut; }
         spring_container &get_springs() { return m_springs; }
-        inline spring_iterator springs_begin() { return m_springs.begin(); }
-        inline spring_iterator springs_end() { return m_springs.end(); }
-        inline void set_surface(Surface<surface_type> &surface) { m_surface = &surface; }
+        spring_iterator springs_begin() { return m_springs.begin(); }
+        spring_iterator springs_end() { return m_springs.end(); }
+        void set_surface(Surface<surface_type> &surface) { m_surface = &surface; }
         size_t springs_size() { return m_springs.size(); }
 
         inline void compute_forces()
