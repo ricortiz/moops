@@ -2,6 +2,7 @@
 #define SURFACE_HPP
 
 #include <map>
+#include "particle_system/particle.hpp"
 
 template<typename T> struct surface_traits;
 
@@ -11,7 +12,7 @@ class Surface
     protected:
         typedef typename surface_traits<Derived>::geometry_type geometry_type;
         typedef typename surface_traits<Derived>::value_type value_type;
-        typedef typename std::map<value_type*,std::pair<size_t,size_t> > grid_type;
+        typedef typename std::map<Particle<value_type>*,std::pair<size_t,size_t> > grid_type;
 
     protected:
         grid_type m_grid;

@@ -3,11 +3,16 @@
 
 #include <cmath>
 #include "base_geometry.hpp"
+#include "particle_system/particle.hpp"
 
 template<typename value_type>
 class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
 {
 
+protected:
+
+    typedef Particle<value_type> particle_type;
+    
     private:
         value_type       m_x0[3];
         size_t           m_dims[2];
@@ -78,7 +83,7 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
             normal[1] =-Dx[0];
         }
 
-        void surface_point(size_t i, size_t j, value_type scale, value_type *point, value_type dtheta, value_type dalpha)
+        inline void surface_point(size_t i, size_t j, value_type scale, value_type *position, value_type dtheta, value_type dalpha)
         {
 
             value_type s = i*dalpha;
@@ -89,11 +94,16 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
 
             value_type theta = j * dtheta;
             value_type R = scale*m_inner_radius;
-            point[0] = R * normal[0] * std::cos(theta) + x[0] + m_x0[0];
-            point[1] = R * normal[1] * std::cos(theta) + x[1] + m_x0[1];
-            point[2] = R * std::sin(theta)                    + m_x0[2];
+            position[0] = R * normal[0] * std::cos(theta) + x[0] + m_x0[0];
+            position[1] = R * normal[1] * std::cos(theta) + x[1] + m_x0[1];
+            position[2] = R * std::sin(theta)                    + m_x0[2];
         }
-
+        
+        void surface_point(size_t i, size_t j, value_type scale, particle_type &particle, value_type dtheta, value_type dalpha)
+        {
+           surface_point(i,j,scale,particle.position,dtheta,dalpha);
+        }
+        
         inline void setCells()
         {
             for (size_t i = 0; i < m_dims[0]; ++i)
@@ -126,6 +136,7 @@ template<typename _value_type>
 struct geometry_traits<OvalGeometry<_value_type> >
 {
     typedef _value_type          value_type;
+    typedef Particle<value_type> particle_type;
 };
 
 #endif

@@ -50,6 +50,15 @@ class ElasticBoundary : public spring_system_type, public integration_policy<Ela
             value_type *f = this->forces();
             m_fluid_solver(x,v,f);
         }
+
+        void Explicit(value_type time, value_type *x, value_type *v)
+        {
+            
+        }
+        void Implicit(value_type time, value_type *x, value_type *v)
+        {
+            
+        }
 };
 
 template< typename _spring_system_type, typename _fluid_solver_type, template<typename> class _integration_policy>

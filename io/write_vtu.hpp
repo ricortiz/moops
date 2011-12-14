@@ -27,14 +27,14 @@ namespace IO
             vtkSmartPointer<vtk_writer_type> m_writer;
 
         public:
-            VTKWriter() {}
+            VTKWriter() : m_file_counter(0){}
             VTKWriter(const std::string &data_path) :
                     m_file_counter(0),
                     m_data_path(data_path),
                     m_writer(vtkSmartPointer<vtk_writer_type>::New())
             {
-                //                 m_writer->SetDataModeToAscii();
-                m_writer->SetDataModeToBinary();
+                m_writer->SetDataModeToAscii();
+//                 m_writer->SetDataModeToBinary();
             }    
 
             template<typename input_type>

@@ -28,23 +28,21 @@ private:
 
 public:
 
-    void init_surface(oval_type &oval_geometry, value_type *positions)
+    template<typename particle_type>
+    void init_surface(oval_type &oval_geometry, particle_type *particles)
     {
         m_lo = 10; m_hi = 60;
         m_radius_scale.resize(m_hi-m_lo);
         m_col_ptr.push_back(0);
         grid_type &grid = this->grid();
-        oval_geometry.init(positions,grid);
-//         std::cout << "p = [";
-//         std::copy(positions,positions+3*20*200,std::ostream_iterator<value_type>(std::cout,","));
-//         std::cout << "];\n";
+        oval_geometry.init(particles,grid);
         oval_geometry.get_connections(m_col_ptr,m_col_idx);
         m_geometry = &oval_geometry;
     }
-    
-    void init_volume(BaseGeometry<oval_type> &oval_geometry, value_type *positions, size_t num_sub_surfaces = 1)
+    template<typename particle_type>
+    void init_volume(BaseGeometry<oval_type> &oval_geometry, particle_type *particles, size_t num_sub_surfaces = 1)
     {
-        oval_geometry.init(positions,num_sub_surfaces);
+        oval_geometry.init(particles,num_sub_surfaces);
     }
 
     template<typename spring_system_type>
@@ -94,10 +92,10 @@ public:
                 particle_type *particle = &particles[idx];
                 for (iterator s = springs_map[particle].begin(), end = springs_map[particle].end(); s != end; ++s)
                 {
-                    size_t Ai = grid[(*s)->A()->position].first;
-                    size_t Aj = grid[(*s)->A()->position].second;
-                    size_t Bi = grid[(*s)->B()->position].first;
-                    size_t Bj = grid[(*s)->B()->position].second;
+                    size_t Ai = grid[(*s)->A()].first;
+                    size_t Aj = grid[(*s)->A()].second;
+                    size_t Bi = grid[(*s)->B()].first;
+                    size_t Bj = grid[(*s)->B()].second;
                     (*s)->resting_length() = m_geometry->get_distance(Ai,Aj,Bi,Bj,m_radius_scale[i-m_lo]);
                 }
             }

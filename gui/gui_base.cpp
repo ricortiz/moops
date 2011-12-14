@@ -32,6 +32,7 @@
 #include "gui_base.hpp"
 
 #include <QMenu>
+#include <QTimer>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -58,6 +59,7 @@ GuiBase::GuiBase()
     menubar       = new QMenuBar(this);
     menuFile      = new QMenu(menubar);
     statusbar     = new QStatusBar(this);
+    m_timer       = new QTimer(this);
     
     actionExit->setObjectName(QString::fromUtf8("actionExit"));
     centralwidget->setObjectName(QString::fromUtf8("centralwidget"));

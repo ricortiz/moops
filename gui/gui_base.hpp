@@ -10,6 +10,7 @@ class QLabel;
 class QMenuBar;
 class QMenu;
 class QStatusBar;
+class QTimer;
 class vtkObject;
 class vtkCommand;
 
@@ -37,6 +38,7 @@ class GuiBase : public QMainWindow
         QMenuBar *menubar;
         QMenu *menuFile;
         QStatusBar *statusbar;
+        QTimer      *m_timer;
 
 };
 

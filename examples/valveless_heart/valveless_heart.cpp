@@ -102,8 +102,8 @@ public:
         dims[0] = M;
         dims[1] = N;
         x0[0] = x0[1] = x0[2] = 0;
-        m_heart_pump.init_surface(m_oval_geometry,m_boundary.positions());
-        m_heart_pump.init_volume(m_oval_geometry,m_volume.positions());
+        m_heart_pump.init_surface(m_oval_geometry,m_boundary.particles());
+        m_heart_pump.init_volume(m_oval_geometry,m_volume.particles());
         m_heart_pump.set_springs(m_boundary);
         m_boundary.set_surface(m_heart_pump);
         m_boundary.fluid_solver().delta() = M_PI/N;
@@ -137,7 +137,7 @@ public:
         std::vector<value_type> &rscale = m_heart_pump.radius_scale(m_boundary.time());
         for(size_t i = lo, idx = lo*M; i < hi; ++i)
             for(size_t j = 0; j < M; ++j, ++idx)
-                m_oval_geometry.surface_point(i,j,rscale[i-lo],particles[idx].position,dtheta,dalpha);
+                m_oval_geometry.surface_point(i,j,rscale[i-lo],particles[idx],dtheta,dalpha);
         m_boundary.time() += m_time_step;
         if (m_record)
             m_surface_writer->write(m_boundary.time());

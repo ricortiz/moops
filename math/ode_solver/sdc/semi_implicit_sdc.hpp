@@ -72,8 +72,8 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
         {
             t += dt;
             std::copy( X ( k ),X ( k )+ode_size,X ( k+1 ));
-            backward_euler ( X ( k+1 ),t,X ( k ),Fe ( k ),Fi ( k+1 ),dt,Vi );
-            V.E ( t, X ( k+1 ), Fe ( k+1 ) );
+            backward_euler ( X ( k+1 ),t,X ( k ),Fe ( k ),Fi ( k+1 ),dt,V );
+            V.Explicit ( t, X ( k+1 ), Fe ( k+1 ) );
         }
 
         /**
@@ -97,8 +97,8 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
             value_type Fold[ode_size];            
             std::copy( Fe(k+1),Fe(k+1)+ode_size,Fold);
             t += dt;
-            backward_euler ( X ( k+1 ),t,X ( k ),fdiff,Fi ( k+1 ),dt,Vi );
-            V.E ( t, X ( k+1 ), Fe ( k+1 ) );
+            backward_euler ( X ( k+1 ),t,X ( k ),fdiff,Fi ( k+1 ),dt,V );
+            V.Explicit ( t, X ( k+1 ), Fe ( k+1 ) );
             std::transform(Fe( k+1 ),Fe( k+1 )+ode_size,Fold,fdiff,std::minus<value_type>());
 //             fdiff = Fe ( k+1 ) - Fold;
         }

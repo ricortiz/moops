@@ -48,7 +48,15 @@ class DirectStokesSolver
                 for (size_t j = 0; j < size_sources; j+=3)
                     compute_velocity(&x[i],&v[i],&y[j],&f[j],m_delta);
         }
-   
+
+        inline void operator()(value_type *x, value_type *v1, value_type *v2, value_type *y, value_type *f, size_t num_sources, size_t num_targets, std::vector<size_t> &)
+        {
+            size_t size_targets = 3*num_targets;
+            size_t size_sources = 3*num_sources;
+            for (size_t i = 0; i < size_targets; i+=3)
+                for (size_t j = 0; j < size_sources; j+=3)
+                    compute_velocity(&x[i],&v1[i],&y[j],&f[j],m_delta);
+        }
         value_type const &delta() const { return m_delta; }
         value_type &delta() { return m_delta; }
 };

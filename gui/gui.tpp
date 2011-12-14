@@ -121,7 +121,8 @@ void Gui<app>::setActor(vtkPolyData *poly_data)
     normals->SetNonManifoldTraversal(1);
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-    mapper->SetInputConnection(normals->GetOutputPort());
+//     mapper->SetInputConnection(normals->GetOutputPort());
+    mapper->SetInput(poly_data);
     actor->SetMapper(mapper);
     m_vtk_renderer->AddViewProp(actor);
 }
