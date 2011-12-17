@@ -33,8 +33,8 @@ namespace IO
                     m_data_path(data_path),
                     m_writer(vtkSmartPointer<vtk_writer_type>::New())
             {
-                m_writer->SetDataModeToAscii();
-//                 m_writer->SetDataModeToBinary();
+//                 m_writer->SetDataModeToAscii();
+                m_writer->SetDataModeToBinary();
             }    
 
             template<typename input_type>

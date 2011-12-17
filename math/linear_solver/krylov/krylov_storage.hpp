@@ -1,5 +1,6 @@
 #ifndef KRYLOV_STORAGE_HPP
 #define KRYLOV_STORAGE_HPP
+#include <stdlib.h>
 
 /** \internal
  *
@@ -24,19 +25,19 @@ struct krylov_arrays
  * This class stores the data of fixed-size sdc vectors
  *
  */
-template<typename T, size_t size, size_t krylov_space>
+template<typename T, size_t krylov_space>
 class krylov_storage;
 
-// purely fixed-size arrays
-template<typename T, size_t size, size_t krylov_space>
+template<typename T, size_t krylov_space>
 class krylov_storage
 {
+        size_t m_system_size;
         krylov_arrays<T,krylov_space> m_data;
     public:
-        inline explicit krylov_storage ( )
+        inline explicit krylov_storage ( size_t system_size ) : m_system_size(system_size)
         {
-            m_data.V = new T[size* ( krylov_space+1 ) ];
-            m_data.R = new T[size];
+            m_data.V = new T[system_size* ( krylov_space+1 ) ];
+            m_data.R = new T[system_size];
         }
         ~krylov_storage()
         {
@@ -48,7 +49,7 @@ class krylov_storage
         inline T *H ( ) { return m_data.H; }
         inline T *residual () { return m_data.R; }
         inline T &residual ( size_t i ) { return * ( m_data.R + i ); }
-        inline T *v ( size_t i ) { return m_data.V + i*size; }
+        inline T *v ( size_t i ) { return m_data.V + i*m_system_size; }
         inline T &c ( size_t i ) { return * ( m_data.C + i ); }
         inline T &s ( size_t i ) { return * ( m_data.S + i ); }
         inline T &g ( size_t i ) { return * ( m_data.G + i ); }

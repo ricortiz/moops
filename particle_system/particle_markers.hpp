@@ -60,7 +60,6 @@ template< typename _particle_system_type, typename _immersed_surface_type, typen
 struct immersed_structure_traits<ParticleMarkers<_particle_system_type,_immersed_surface_type,_fluid_solver_type,_integration_policy> >
 {
     typedef typename _particle_system_type::value_type                  value_type;
-    typedef typename _particle_system_type::particle_integrator_type    particle_integrator_type;
 };
 
 #endif

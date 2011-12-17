@@ -17,22 +17,26 @@
  * Parabolic line search via three point interpolation.
  * Computes Jacobian using finite differences.
  **/
-template< typename value_type, 
-	  size_t system_size, 
-	  int k_max = 40, 
-	  int k_restart = 10, 
-	  typename krylov_method_type = GeneralizedMinimalResidualMethod<value_type,system_size,k_max> >
-class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,system_size,k_max,k_restart,krylov_method_type> >
+template< typename value_type, int k_max, int k_restart, typename krylov_method_type = GeneralizedMinimalResidualMethod<value_type,k_max> >
+class InexactNewtonMethod;
+
+template< typename value_type,int k_max,int k_restart >
+class InexactNewtonMethod<value_type,k_max,k_restart,GeneralizedMinimalResidualMethod<value_type,k_max> >
+    : public NewtonBase<InexactNewtonMethod<value_type,k_max,k_restart,GeneralizedMinimalResidualMethod<value_type,k_max> > >
 {
     private:
-        newton_storage<value_type,system_size> 	m_storage;
-        krylov_method_type			m_gmres;
-        value_type 				m_gamma;
-        value_type 				m_etamax;
+        size_t m_system_size;
+        newton_storage<value_type> 	m_storage;
+        GeneralizedMinimalResidualMethod<value_type,k_max> m_gmres;
+        value_type 			m_gamma;
+        value_type 			m_etamax;
 	
     public:
 
-        InexactNewtonMethod() :
+        InexactNewtonMethod(size_t system_size) :
+                m_system_size(system_size),
+                m_storage(system_size),
+                m_gmres(system_size),
                 m_gamma ( value_type ( .9 ) ),
                 m_etamax ( value_type ( .9 ) )
         {};
@@ -43,6 +47,7 @@ class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,sys
         inline value_type *xt() { return m_storage.xt(); }
         inline value_type &xt ( size_t i ) { return m_storage.xt ()[i]; }
         inline value_type &dx ( size_t i ) { return m_storage.dx ()[i]; }
+        inline size_t system_size() { return m_system_size; }
 
         /**
         * \brief Newton iterations routine.  It solves F(x) = 0.
@@ -57,8 +62,8 @@ class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,sys
         template< typename operator_type>
         void operator() ( operator_type &F, value_type *x, value_type atol, value_type rtol, std::vector<value_type> *stats = 0 )
         {
-            typedef directional_derivative<operator_type,value_type,system_size>   jacobian_operator_type;
-            jacobian_operator_type jacobian ( F,x,f() );
+            typedef directional_derivative<operator_type,value_type>   jacobian_operator_type;
+            jacobian_operator_type jacobian ( F,x,f(),m_system_size);
             /// Evaluate F at initial iterate and compute the stop tolerance
 
             F ( x,f() );
@@ -76,7 +81,7 @@ class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,sys
                 itc++;
                 value_type rat = fnrm / fnrmo;
                 fnrmo = fnrm;
-                std::fill ( dx(),dx() +system_size,value_type ( 0 ) );
+                std::fill ( dx(),dx() +m_system_size,value_type ( 0 ) );
 
                 value_type k_err = std::numeric_limits<value_type>::infinity();
 
@@ -90,7 +95,7 @@ class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,sys
                 value_type fnorm[2]     = {0., 0.};
                 value_type fnorm_sqr[3] = {0., 0., 0.};
 
-                for ( size_t i = 0; i < system_size; ++i )
+                for ( size_t i = 0; i < m_system_size; ++i )
                     xt ( i ) = x[i] + lambda[0] * dx ( i );
 
                 F ( xt(), ft() );
@@ -101,8 +106,8 @@ class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,sys
                 fnorm_sqr[2] = fnorm_sqr[1];
                 armijo(F,x,lambda,fnorm,fnorm_sqr);
 
-                std::copy ( xt(),xt()+system_size,x );
-                std::copy ( ft(),ft()+system_size,f() );
+                std::copy ( xt(),xt()+m_system_size,x );
+                std::copy ( ft(),ft()+m_system_size,f() );
                 /// End of Armijo line search.
                 fnrmo = fnrm;
                 fnrm = norm ( f() );
@@ -124,13 +129,12 @@ class InexactNewtonMethod : public NewtonBase<InexactNewtonMethod<value_type,sys
 
 };
 
-template<typename _value_type, size_t _system_size, int _k_max, int _k_restart, typename _krylov_method_type>
-struct newton_traits<InexactNewtonMethod<_value_type,_system_size,_k_max,_k_restart,_krylov_method_type> >
+template<typename _value_type,int _k_max, int _k_restart, typename _krylov_method_type>
+struct newton_traits<InexactNewtonMethod<_value_type,_k_max,_k_restart,_krylov_method_type> >
 {
     typedef _value_type value_type;
     enum
     {
-        system_size = _system_size,
         k_max = _k_max,
         k_restart = _k_restart
     };

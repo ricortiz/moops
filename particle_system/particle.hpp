@@ -13,7 +13,7 @@
 //
 //=========================================================================
 
-/// @name Particle - Stores particle state.
+/// @name Particle - Stores the particle state.
 /// @section Description Particle is the wrapper for the data arrays.  
 /// 	It contains three pointers that gets set up when the particle system 
 /// 	class is instantiated.

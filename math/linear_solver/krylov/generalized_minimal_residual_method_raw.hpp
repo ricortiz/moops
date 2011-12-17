@@ -6,13 +6,14 @@
 #include "krylov_storage.hpp"
 #include "krylov_base_raw.hpp"
 
-template<typename value_type, size_t system_size, size_t krylov_space_max_dim>
-class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalResidualMethod<value_type, system_size,krylov_space_max_dim> >
+template<typename value_type, size_t krylov_space_max_dim>
+class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalResidualMethod<value_type,krylov_space_max_dim> >
 {
     protected:
-        krylov_storage<value_type,system_size,krylov_space_max_dim> m_storage;
+        krylov_storage<value_type,krylov_space_max_dim> m_storage;
 
     private:
+        size_t m_system_size;
         enum
         {
             k_max = krylov_space_max_dim
@@ -20,6 +21,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
 
     public:
 
+        GeneralizedMinimalResidualMethod(size_t system_size) : m_system_size(system_size), m_storage(system_size) {}
         inline value_type &H ( size_t i,size_t j ) { return m_storage.H ( i,j ); }
         inline value_type *H () { return m_storage.H (); }
         inline value_type *residual() { return m_storage.residual(); }
@@ -43,7 +45,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
         inline value_type operator() ( operator_type &F, const value_type *b, value_type *x, value_type errtol = 1e-6, value_type *stats = 0 )
         {
             F ( x,residual() );
-            std::transform ( b,b+system_size,residual(),residual(),std::plus<value_type>() );
+            std::transform ( b,b+m_system_size,residual(),residual(),std::plus<value_type>() );
             value_type rho = norm ( residual() );
             errtol *= rho;
 
@@ -54,7 +56,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
             std::fill ( g(),g() +k_max+1,value_type ( 0 ) );
             g ( 0 ) = rho;
 
-            for ( size_t i = 0 ; i < system_size; ++i )
+            for ( size_t i = 0 ; i < m_system_size; ++i )
                 v ( 0 ) [i] = -residual ( i ) / rho;
             /// Start GMRES iteration
             unsigned int k;
@@ -83,21 +85,20 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
             this->back_solve ( k );
             /// Update the solution
             for ( int i = 0; i < k; i++ )
-                for ( size_t j = 0; j < system_size; ++j )
+                for ( size_t j = 0; j < m_system_size; ++j )
                     x[j] += g ( i ) * v ( i ) [j];
 
             return rho;
         }
 };
 
-template<typename _value_type, size_t _system_size, size_t _krylov_space_max_dim>
-struct krylov_traits<GeneralizedMinimalResidualMethod<_value_type, _system_size, _krylov_space_max_dim> >
+template<typename _value_type, size_t _krylov_space_max_dim>
+struct krylov_traits<GeneralizedMinimalResidualMethod<_value_type, _krylov_space_max_dim> >
 {
     typedef _value_type value_type;
     enum
     {
-        krylov_space_max_dim = _krylov_space_max_dim,
-        system_size = _system_size
+        krylov_space_max_dim = _krylov_space_max_dim
     };
 };
 

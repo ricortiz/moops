@@ -23,7 +23,6 @@
 #include "particle_system/particle.hpp"
 
 template<typename _value_type,
-         typename _sdc_type,
          size_t _num_particles,
          int immersed_structure_type = PSYS::SURFACE,
          typename storage_type = vtkParticleSystemStorage<_value_type,Particle<_value_type>,immersed_structure_type>
@@ -33,7 +32,6 @@ class ParticleSystem
     public:
         typedef Particle<_value_type> particle_type;
         typedef _value_type          value_type;
-        typedef _sdc_type            particle_integrator_type;
 
         enum
         {

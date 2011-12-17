@@ -70,12 +70,16 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             value_type dalpha = m_length / 4.0 / m_dims[3];
             size_t idx = 1;
             particles[0].position[0] = particles[0].position[1] = particles[0].position[2] = 0;
+            particles[0].i = 0;
+            particles[0].j = 0;
             m_size++;
 //             grid[particles] = std::make_pair(0, 0);
             for(size_t i = 1; i < m_dims[3]; ++i)
                 for(size_t j = 0; j < m_dims[2]; ++j, ++idx)
                 {
                     head_point(i, j, 0.0, particles[idx], dtheta, dalpha);
+                    particles[idx].i = i;
+                    particles[idx].j = j;
 //                     grid[particles+idx] = std::make_pair(i, j);
                     m_size++;
                 }
@@ -158,51 +162,57 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                 {
                     this->add_plane_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1);
                     this->add_cylinder_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1);
+                    if(j == m_dims[3] - 2)
+                    {
+                        size_t head_offset = m_dims[2]*(m_dims[3]-1)+1;
+                        for(size_t k = head_offset; k < head_offset + m_dims[0]; ++k)
+                            col_idx.push_back(k + 1);
+                    }
                     col_ptr.push_back(col_idx.size());
                 }
             }
         }
 
-        void setCells()
+        void setCells(size_t offset)
         {
             // Set cells for the nose of the head
             {
                 for(size_t i = 1; i < m_dims[2]; ++i)
                 {
-                    vtkIdType cell[3] = {0, i + 1, i};
+                    vtkIdType cell[3] = {0+offset, i + 1+offset, i+offset};
                     this->getCells()->InsertNextCell(3, cell);
                 }
-                vtkIdType cell[3] = {0, 1, m_dims[2]};
+                vtkIdType cell[3] = {0+offset, 1+offset, m_dims[2]+offset};
                 this->getCells()->InsertNextCell(3, cell);
             }
             for(size_t j = 0; j < m_dims[3] - 1; ++j)
                 for(size_t i = 0; i < m_dims[2]; ++i)
                 {
-                    this->set_corner_cells(i, j,  m_dims[2], m_dims[3] - 1, 1);
-                    this->set_plane_cells(i, j, m_dims[2], m_dims[3] - 1, 1);
+                    this->set_corner_cells(i, j,  m_dims[2], m_dims[3] - 1, 1+offset);
+                    this->set_plane_cells(i, j, m_dims[2], m_dims[3] - 1, 1+offset);
                 }
-            size_t offset = m_dims[2] * (m_dims[3] - 1) + 1;
+            size_t head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
             for(size_t j = 0; j < m_dims[1]; ++j)
                 for(size_t i = 0; i < m_dims[0]; ++i)
                 {
-                    this->set_corner_cells(i, j, m_dims[0], m_dims[1], offset);
-                    this->set_plane_cells(i, j, m_dims[0], m_dims[1], offset);
+                    this->set_corner_cells(i, j, m_dims[0], m_dims[1], head_offset+offset);
+                    this->set_plane_cells(i, j, m_dims[0], m_dims[1], head_offset+offset);
                 }
-            setJunctionCells();
+            setJunctionCells(offset);
         }
 
     private:
 
-        void setJunctionCells()
+        void setJunctionCells(size_t offset)
         {
             int factor = m_dims[2] / m_dims[0];
             int head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
             int head_points = head_offset - m_dims[2];
             for(size_t i = 0; i < m_dims[0]; ++i)
             {
-                vtkIdType cells[3][3] = {{i + head_offset, head_points + i *factor + 1, head_points + i *factor},
-                    {i + head_offset, (i + 1) % m_dims[0] + head_offset, head_points + i *factor + 1},
-                    {(i + 1) % m_dims[0] + head_offset, head_points + (i *factor + 2) % m_dims[2], head_points + i *factor + 1}
+                vtkIdType cells[3][3] = {{i + head_offset+offset, head_points + i *factor + 1+offset, head_points + i *factor+offset},
+                {i + head_offset+offset, (i + 1) % m_dims[0] + head_offset+offset, head_points + i *factor + 1+offset},
+                {(i + 1) % m_dims[0] + head_offset+offset, head_points + (i *factor + 2) % m_dims[2]+offset, head_points + i *factor + 1+offset}
                 };
                 for(int k = 0; k < 3; ++k)
                     this->getCells()->InsertNextCell(3, cells[k]);

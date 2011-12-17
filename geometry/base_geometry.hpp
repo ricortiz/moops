@@ -32,20 +32,16 @@ class BaseGeometry
         inline void add_plane_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
         {
 
-            int connections[12][2] = {{i - 1, j - 1},
+            int connections[8][2] = {{i - 1, j - 1},
                 {i, j - 1},
-                {i, j - 2},
                 {i + 1, j - 1},
-                {i + 2, j},
                 {i + 1, j},
                 {i - 1, j},
-                {i - 2, j},
                 {i + 1, j + 1},
                 {i, j + 1},
-                {i, j + 2},
                 {i - 1, j + 1}
             };
-            for(int k = 0; k < 12; ++k)
+            for(int k = 0; k < 8; ++k)
                 if((connections[k][0] >= 0 && connections[k][1] >= 0) && (connections[k][0] <= M - 1 && connections[k][1] <= N - 1))
                     col_idx.push_back(connections[k][1]*M + connections[k][0] + offset);
         }
@@ -53,21 +49,23 @@ class BaseGeometry
         template<typename array_type>
         inline void add_cylinder_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
         {
-            int connections[8][2] = {{i + 1, j - 1},
-                {i + 2, j},
+            int connections[6][2] = {{i + 1, j - 1},
                 {i + 1, j},
                 {i + 1, j + 1},
                 {i - 1, j - 1},
-                {i - 2, j},
                 {i - 1, j},
                 {i - 1, j + 1}
             };
-            for(int k = 0; k < 4; ++k)
+            for(int k = 0; k < 3; ++k)
+            {
                 if((connections[k][1] >= 0 && connections[k][1] <= N - 1) && i == M - 1)
                     col_idx.push_back(connections[k][1]*M + (connections[k][0] + M) % M + offset);
-            for(int k = 4; k < 8; ++k)
+            }
+            for(int k = 3; k < 6; ++k)
+            {
                 if((connections[k][1] >= 0 && connections[k][1] <= N - 1) && i == 0)
                     col_idx.push_back(connections[k][1]*M + (connections[k][0] + M) % M + offset);
+            }
         }
 
         template<typename array_type>
@@ -128,6 +126,22 @@ class BaseGeometry
                                 points[0][2] - points[1][2]
                                };
             return std::sqrt(dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2]);
+        }
+
+        template<typename spring_type>
+        inline void setRestingLength(spring_type *spring, value_type time)
+        {
+            value_type points[2][3] = {0};
+            size_t *dims = derived()->get_dimensions();
+            value_type dtheta = 2 * M_PI / dims[0];
+            value_type dalpha = 2 * M_PI / dims[1];
+            derived()->surface_point(spring->A()->i, spring->A()->j, time, points[0], dtheta, dalpha);
+            derived()->surface_point(spring->B()->i, spring->B()->j, time, points[1], dtheta, dalpha);
+            value_type dx[3] = {points[0][0] - points[1][0],
+            points[0][1] - points[1][1],
+            points[0][2] - points[1][2]
+            };
+            spring->resting_length() = std::sqrt(dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2]);
         }
 
         template<typename particle_type, typename grid_type>

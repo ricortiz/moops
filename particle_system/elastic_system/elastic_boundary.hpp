@@ -21,19 +21,19 @@
 
 template<typename spring_system_type, 
 	 typename fluid_solver_type, 
-	 template<typename> class integration_policy>
-class ElasticBoundary : public spring_system_type, public integration_policy<ElasticBoundary<spring_system_type,fluid_solver_type,integration_policy> >
+	 template<typename,int,int> class integration_policy>
+class ElasticBoundary : public spring_system_type, public integration_policy<ElasticBoundary<spring_system_type,fluid_solver_type,integration_policy>,5,4 >
 { 
     public:
         typedef typename spring_system_type::value_type    value_type;
         typedef typename spring_system_type::spring_type   spring_type;
         typedef typename spring_system_type::particle_type particle_type;
-
+        typedef integration_policy<ElasticBoundary<spring_system_type,fluid_solver_type,integration_policy>,5,4 > time_integrator_type;
     private:
         fluid_solver_type                m_fluid_solver;
 
     public:
-        ElasticBoundary() {  }
+        ElasticBoundary(size_t ode_size) : time_integrator_type(ode_size) {  }
         ~ElasticBoundary() {}
         inline fluid_solver_type &fluid_solver() { return m_fluid_solver; }
         inline fluid_solver_type const &fluid_solver() const { return m_fluid_solver; }
@@ -47,25 +47,23 @@ class ElasticBoundary : public spring_system_type, public integration_policy<Ela
         void operator()(value_type time, value_type *x, value_type *v)
         {
             this->update_forces(time);
-            value_type *f = this->forces();
-            m_fluid_solver(x,v,f);
+            m_fluid_solver(x,v,this->forces());
         }
 
         void Explicit(value_type time, value_type *x, value_type *v)
         {
-            
+            m_fluid_solver(x,v,this->forces(),*this);
         }
         void Implicit(value_type time, value_type *x, value_type *v)
         {
-            
+            m_fluid_solver(x,v,this->forces(),*this);
         }
 };
 
-template< typename _spring_system_type, typename _fluid_solver_type, template<typename> class _integration_policy>
+template< typename _spring_system_type, typename _fluid_solver_type, template<typename,int,int> class _integration_policy>
 struct immersed_structure_traits<ElasticBoundary<_spring_system_type,_fluid_solver_type,_integration_policy> >
 {
     typedef typename _spring_system_type::value_type    value_type;
-    typedef typename _spring_system_type::particle_integrator_type    particle_integrator_type;
 };
 
 #endif

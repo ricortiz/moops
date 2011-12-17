@@ -15,14 +15,10 @@ class NewtonBase
         value_type m_sigma0; //< safeguarding bounds for the linesearch
         value_type m_sigma1; //< safeguarding bounds for the linesearch
         size_t m_maxarm;
-        
-        enum
-        {
-            system_size = newton_traits<Derived>::system_size            
-        };
+        size_t m_system_size;
 
     public:
-        NewtonBase() : m_alpha ( value_type ( 1e-4 ) ), m_sigma0 ( value_type ( .1 ) ), m_sigma1 ( value_type ( .5 ) ), m_maxarm ( 20 )
+        NewtonBase() : m_alpha ( value_type ( 1e-4 ) ), m_sigma0 ( value_type ( .1 ) ), m_sigma1 ( value_type ( .5 ) ), m_maxarm ( 20 ), m_system_size(derived().system_size())
         {}
         
         /**
@@ -48,7 +44,7 @@ class NewtonBase
                     lambda[0] = parab3p ( lambda[1], lambda[2], fnorm_sqr[0], fnorm_sqr[1], fnorm_sqr[2] );
 
                 /// Update x and keep books on lambda
-                for ( size_t i = 0; i < system_size; ++i )
+                for ( size_t i = 0; i < m_system_size; ++i )
                     derived().xt(i) = x[i] + lambda[0] * derived().dx ( i );
                 lambda[2] = lambda[1];
                 lambda[1] = lambda[0];
@@ -105,7 +101,7 @@ class NewtonBase
         inline value_type dot ( const value_type *x, const value_type *y )
         {
             value_type s = value_type ( 0 );
-            for ( size_t i = 0; i < system_size; ++i )
+            for ( size_t i = 0; i < m_system_size; ++i )
                 s += x[i]*y[i];
             return s;
         }
@@ -129,23 +125,24 @@ class NewtonBase
  * \param eps Difference increment. Defaults to value_type(1e-7).
  *
  **/
-template<typename operator_type, typename value_type, size_t system_size>
+template<typename operator_type, typename value_type>
 struct directional_derivative
 {
     
     operator_type &m_F;
     const value_type *m_x;
     const value_type *m_f0;
+    size_t m_system_size;
     
-    directional_derivative ( operator_type &F, const value_type *x, const value_type *f0 ) : m_F ( F ), m_x ( x ), m_f0 ( f0 ) {}
+    directional_derivative ( operator_type &F, const value_type *x, const value_type *f0, size_t system_size ) : m_F ( F ), m_x ( x ), m_f0 ( f0 ), m_system_size(system_size) {}
     
     inline void operator() ( const value_type *w, value_type *DF, value_type eps = value_type ( 1e-7 ) )
     {
         value_type wnorm = norm ( w );
         if ( wnorm == 0 )
         {
-	  std::fill(DF,DF+system_size,value_type(0));
-//             for ( size_t i = 0; i < system_size; ++i )
+	  std::fill(DF,DF+m_system_size,value_type(0));
+//             for ( size_t i = 0; i < m_system_size; ++i )
 //                 DF[i] = value_type ( 0 );
             return;
         }
@@ -159,19 +156,19 @@ struct directional_derivative
         /// Scale the difference increment
             eps /= wnorm;
             
-            value_type f1[system_size];
-            value_type x1[system_size];
-            for ( size_t i = 0; i < system_size; ++i )
+            value_type f1[m_system_size];
+            value_type x1[m_system_size];
+            for ( size_t i = 0; i < m_system_size; ++i )
                 x1[i] = m_x[i] + eps * w[i];
             m_F ( x1, f1 );
             value_type fac = value_type ( 1 ) / eps;
-            for ( size_t i = 0; i < system_size; ++i )
+            for ( size_t i = 0; i < m_system_size; ++i )
                 DF[i] = ( f1[i] - m_f0[i] ) * fac;
     }
     inline value_type dot ( const value_type *x, const value_type *y )
     {
         value_type s = value_type ( 0 );
-        for ( size_t i = 0; i < system_size; ++i )
+        for ( size_t i = 0; i < m_system_size; ++i )
             s += x[i]*y[i];
         return s;
     }

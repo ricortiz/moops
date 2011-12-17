@@ -31,7 +31,6 @@ struct sdc_arrays
 template<typename T, int sdc_nodes, int multirate_nodes, int sdc_type>
 class sdc_storage;
 
-// purely fixed-size sdc arrays
 template<typename T, int sdc_nodes, int multirate_nodes, int sdc_type>
 class sdc_storage
 {

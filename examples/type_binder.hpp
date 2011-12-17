@@ -23,6 +23,7 @@
 #endif
 #include "particle_system/fluid_solver/direct_stokes_solver.hpp"
 #include "math/ode_solver/sdc/explicit_sdc.hpp"
+#include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
 #include "math/ode_solver/euler/forward_euler.hpp"
 #include "geometry/torus_geometry.hpp"
 #include "geometry/oval_geometry.hpp"
@@ -38,18 +39,15 @@ struct TypeBinder
 {
     typedef TypeBinder<value_type,num_particles,sdc_nodes,data_size,fmm_max_particles,fmm_order> Types;
     
-    typedef ClenshawCurtis<value_type,data_size,sdc_nodes>                      sdc_integrator_type;
-    typedef ExplicitSDC<value_type,sdc_integrator_type,sdc_nodes,sdc_nodes>     sdc_type;
-    typedef ForwardEuler<value_type>                                            euler_type;
     typedef Particle<value_type>                                                particle_type;
 #ifdef USE_CUDA_FLUID_SOLVER
     typedef vtkParticleSystemStorage<value_type,particle_type,PSYS::SURFACE,vtkFloatArray> surface_storage_type;
     typedef vtkParticleSystemStorage<value_type,particle_type,PSYS::VOLUME,vtkFloatArray> volume_storage_type;
-    typedef ParticleSystem<value_type,sdc_type,num_particles,PSYS::SURFACE,surface_storage_type> particle_system_type;
-    typedef ParticleSystem<value_type,euler_type,num_particles,PSYS::VOLUME,volume_storage_type> particle_system_tracers_type;
+    typedef ParticleSystem<value_type,num_particles,PSYS::SURFACE,surface_storage_type> particle_system_type;
+    typedef ParticleSystem<value_type,num_particles,PSYS::VOLUME,volume_storage_type> particle_system_tracers_type;
 #else
-    typedef ParticleSystem<value_type,sdc_type,num_particles>                   particle_system_type;
-    typedef ParticleSystem<value_type,euler_type,num_particles,PSYS::VOLUME>    particle_system_tracers_type;
+    typedef ParticleSystem<value_type,num_particles>                   particle_system_type;
+    typedef ParticleSystem<value_type,num_particles,PSYS::VOLUME>      particle_system_tracers_type;
 #endif
     typedef HeartPump<value_type>                                               heart_pump_surface_type;
     typedef Swarm<value_type>                                                   swarm_surface_type;                                              

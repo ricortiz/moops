@@ -16,15 +16,17 @@
 /// @section Description EulerIntegrator wraps the integrator so it can be used by the simulator
 ///                      It contains the main method that drives the simulation: void integrate()
 /// @section See also ForwardEuler
+
+#include "math/ode_solver/euler/forward_euler.hpp"
+
 template<typename boundary_type>
 class EulerIntegrator
 {
     protected:
         typedef typename immersed_structure_traits<boundary_type>::value_type          value_type;
-        typedef typename immersed_structure_traits<boundary_type>::particle_integrator_type integrator_type;
 
     private:
-        integrator_type euler_integrator;
+        ForwardEuler<value_type> euler_integrator;
 
     public:
 

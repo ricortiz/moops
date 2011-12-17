@@ -39,37 +39,38 @@ class Swarm : public Surface<Swarm<value_type> >
             {
                 geometry.init(&particles[idx], grid);
                 value_type *translation_point = &mesh2d[3 * i];
-                if(i != 0)
                 for(size_t k = 0; k < points_per_geometry; ++k, ++idx)
                 {
                     particles[idx].position[0] += translation_point[0];
                     particles[idx].position[1] += translation_point[1];
                     particles[idx].position[2] += translation_point[2];
                 }
-
             }
-
             geometry.get_head_connections(m_head_col_ptr, m_head_col_idx);
             geometry.get_tail_connections(m_tail_col_ptr, m_tail_col_idx);
             m_sperm = &geometry;
         }
 
-        template<typename geometry_type>
-        void init_volume(BaseGeometry<geometry_type> &geometry, value_type *positions)
-        {
-            geometry.init(positions);
-        }
+//         template<typename geometry_type>
+//         void init_volume(BaseGeometry<geometry_type> &geometry, value_type *positions)
+//         {
+//             geometry.init(positions);
+//         }
 
         template<typename spring_system_type>
         void set_springs(spring_system_type &spring_system)
         {
             typedef typename spring_system_type::particle_type particle_type;
-
             particle_type *particles = spring_system.particles();
             size_t *dimensions = m_sperm->get_dimensions();
             size_t tail_offset = dimensions[0] * dimensions[1];
             size_t head_offset = dimensions[2] * (dimensions[3] - 1) + 1;
             size_t offset = tail_offset + head_offset;
+//             std::cout << "idx = [";
+//             for(size_t p = 0; p < m_tail_col_ptr.size() - 1; ++p)                
+//                 for(size_t i = m_tail_col_ptr[p], end = m_tail_col_ptr[p + 1]; i < end; ++i)
+//                     std::cout << "[" << p+1 << "," << m_tail_col_idx[i]+1 << "];";
+//             std::cout << "];" << std::endl;
 
 //             std::cout << "springs = [";
             for(size_t i = 0; i < m_num_geometries; ++i)
@@ -79,7 +80,7 @@ class Swarm : public Surface<Swarm<value_type> >
                     for(size_t i = m_head_col_ptr[p], end = m_head_col_ptr[p + 1]; i < end; ++i)
                         if(!spring_system.exist_spring(&particles[p + idx], &particles[m_head_col_idx[i] + idx]))
                         {
-                            spring_system.add_spring(&particles[p + idx], &particles[m_head_col_idx[i] + idx], 1.,0);
+                            spring_system.add_spring(&particles[p + idx], &particles[m_head_col_idx[i] + idx],.1);
 //                             std::cout << p + idx + 1 << "," << m_head_col_idx[i] + idx + 1 << ";";
                         }
 
@@ -87,18 +88,9 @@ class Swarm : public Surface<Swarm<value_type> >
                     for(size_t i = m_tail_col_ptr[p], end = m_tail_col_ptr[p + 1]; i < end; ++i)
                         if(!spring_system.exist_spring(&particles[p + idx + head_offset], &particles[m_tail_col_idx[i] + idx + head_offset]))
                         {
-                            spring_system.add_spring(&particles[p + idx + head_offset], &particles[m_tail_col_idx[i] + idx + head_offset], 1.);
-//                             std::cout << p + idx + head_offset + 1 << "," << m_tail_col_idx[i] + idx + head_offset + 1 << ";";
+                            spring_system.add_spring(&particles[p + idx + head_offset], &particles[m_tail_col_idx[i] + idx + head_offset],.1,true);
+//                             std::cout << "Spring added: [" << p + idx + head_offset << "," << m_tail_col_idx[i] + idx + head_offset  << "]" << std::endl;
                         }
-
-                for(size_t p = head_offset - dimensions[2]; p < head_offset; ++p)
-                    for(size_t i = head_offset; i < head_offset + dimensions[0]; ++i)
-                        if(!spring_system.exist_spring(&particles[p + idx], &particles[i + idx]))
-                        {
-                            spring_system.add_spring(&particles[p + idx], &particles[i + idx], 1.,0) ;
-//                             std::cout << p + idx + 1 << "," << i + idx + 1 << ";";
-                        }
-                    
             }
 //             std::cout << "];\n";
             std::cout << "Created " << spring_system.springs_size() << " springs." << std::endl;
@@ -107,36 +99,16 @@ class Swarm : public Surface<Swarm<value_type> >
         template<typename spring_system_type>
         void update(spring_system_type &spring_system, value_type time)
         {
+            typedef typename spring_system_type::spring_ptr_container spring_ptr_type;
             typedef typename spring_system_type::spring_ptr_container::iterator iterator;
-            typedef typename spring_system_type::spring_lut_type spring_map_type;
             typedef typename spring_system_type::spring_type spring_type;
-            typedef typename spring_system_type::particle_type particle_type;
             grid_type &grid = this->grid();
-            spring_map_type &springs_map = spring_system.springs_map();
-            particle_type *particles = spring_system.particles();
-            size_t *dimensions = m_sperm->get_dimensions();
-            size_t tail_offset = dimensions[0] * dimensions[1];
-            size_t head_offset = dimensions[2] * (dimensions[3]-1)+1;
-            size_t offset = tail_offset+head_offset;
+            spring_ptr_type &springs_map = spring_system.springs_update_map();
             spring_type *spring;
-            for(size_t i = 0; i < m_num_geometries; ++i)
+            for(iterator s = springs_map.begin(), end = springs_map.end(); s != end; ++s)
             {
-//                 std::cout << "p = [";
-                for(size_t p = i*offset+head_offset, p_end = p+tail_offset; p < p_end; ++p)
-                {
-                    particle_type *particle = &particles[p];
-//                     std::cout << particle->position[0] << "," << particle->position[1] << "," << particle->position[2] << ",";
-                    for(iterator s = springs_map[particle].begin(), s_end = springs_map[particle].end(); s != s_end; ++s)
-                    {
-                        spring = *s;
-                        size_t Ai = grid[spring->A()].first;
-                        size_t Aj = grid[spring->A()].second;
-                        size_t Bi = grid[spring->B()].first;
-                        size_t Bj = grid[spring->B()].second;
-                        spring->resting_length() = m_sperm->get_distance(Ai, Aj, Bi, Bj, time);
-                    }
-                }
-//                 std::cout << "];\n";
+                spring = *s;
+                m_sperm->setRestingLength(spring,time);
             }
             updateForceGradient(spring_system);
         }

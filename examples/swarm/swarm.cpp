@@ -17,7 +17,8 @@ class SwarmApp
             M = 6,
             N = 100,
             head_particles = 20 * 12 + 1,
-            num_particles = num_sperms * (M *N + head_particles),
+            sperm_particles = M * N + head_particles,
+            num_particles = num_sperms * sperm_particles,
             data_size = 3 * num_particles,
             fmm_max_particles = 20,
             fmm_order = 3
@@ -43,8 +44,8 @@ class SwarmApp
 
     public:
 
-        SwarmApp(std::string &data_path) :
-            m_time_step(0.001),
+        SwarmApp(std::string &data_path) : m_boundary(data_size),
+            m_time_step(0.01),
             m_record(true),
             m_surface_writer(new types::vtk_writer(data_path + "/surface/")),
             m_volume_writer(new types::vtk_writer(data_path + "/volume/")),
@@ -64,10 +65,11 @@ class SwarmApp
 //             m_swarm.init_volume ( m_sine_geometry, m_volume.positions() );
             m_swarm.set_springs(m_boundary);
             m_boundary.set_surface(m_swarm);
-            m_boundary.fluid_solver().delta() = .1;            
-            m_sine_geometry.speed() = m_time_step*10;
-            
-            m_sine_geometry.setCells();
+            m_boundary.fluid_solver().delta() = .1;
+            m_sine_geometry.speed() = m_time_step * 10;
+
+            for(size_t i = 0; i < num_sperms; ++i)
+                m_sine_geometry.setCells(i * sperm_particles);
             m_boundary.storage()->grid()->SetPolys(m_sine_geometry.getCells());
 
             m_surface_writer->setInput(m_boundary.storage()->grid());
@@ -88,7 +90,7 @@ class SwarmApp
 
         void fake_run()
         {
-            
+
             m_sine_geometry.speed() = 100;
             if(m_record)
                 m_surface_writer->write(m_boundary.time());
@@ -98,16 +100,17 @@ class SwarmApp
             size_t tail_offset = M * N;
             size_t head_offset = 20 * 12 + 1;
             size_t offset = tail_offset + head_offset;
-            
+
             value_type *x0 = m_sine_geometry.getX0();
-            for(int i = 0, idx = head_offset; i < N; ++i)
-                for(int j = 0; j < M; ++j, ++idx)
-                {
-                    m_sine_geometry.surface_point(i, j, m_boundary.time(), particles[idx], dtheta, dalpha);
-                    particles[idx].position[0] += x0[0];
-                    particles[idx].position[1] += x0[1] + m_sine_geometry.length()/4.0*(1-1.0/42);
-                    particles[idx].position[2] += x0[2];
-                }
+            for(int s = 0; s < num_sperms; ++s)
+                for(int i = 0, idx = head_offset + s * sperm_particles; i < N; ++i)
+                    for(int j = 0; j < M; ++j, ++idx)
+                    {
+                        m_sine_geometry.surface_point(i, j, m_boundary.time(), particles[idx], dtheta, dalpha);
+                        particles[idx].position[0] += x0[0];
+                        particles[idx].position[1] += x0[1] + m_sine_geometry.length() / 4.0 * (1 - 1.0 / 42);
+                        particles[idx].position[2] += x0[2];
+                    }
             m_boundary.time() += m_time_step;
         }
 

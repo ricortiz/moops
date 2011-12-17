@@ -13,12 +13,11 @@ class KrylovBase
         typedef typename krylov_traits<Derived>::value_type     value_type;
 
     protected:
-        enum
-        {
-            m_size = krylov_traits<Derived>::system_size
-        };
+        size_t m_system_size;
         
     public:
+
+        KrylovBase() : m_system_size(derived().system_size()) {}
 
         /**
          * @brief This function returns an instance of the derived type.
@@ -45,7 +44,7 @@ class KrylovBase
             for ( unsigned int i = 0; i <= k; ++i )
             {
                 derived().H ( i,k ) = dot ( derived().v ( i ),derived().v ( k+1 ) );
-                for ( int j = 0; j < m_size; ++j )
+                for ( int j = 0; j < m_system_size; ++j )
                     derived().v ( k+1 ) [j] -= derived().H ( i,k ) *derived().v ( i ) [j];
             }
             Hip = norm ( derived().v ( k+1 ) );
@@ -56,7 +55,7 @@ class KrylovBase
                 {
                     value_type hr = dot ( derived().v ( i ),derived().v ( k+1 ) );
                     derived().H ( i,k ) += hr;
-                    for ( int j = 0; j < m_size; ++j )
+                    for ( int j = 0; j < m_system_size; ++j )
                         derived().v ( k+1 ) [j] -= hr*derived().v ( i ) [j];
                 }
 
@@ -64,7 +63,7 @@ class KrylovBase
             }
             /// Normalize
             if ( Hip != value_type ( 0 ) )
-                for ( int j = 0; j < m_size; ++j )
+                for ( int j = 0; j < m_system_size; ++j )
                     derived().v ( k+1 ) [j] /= Hip;
 
             return Hip;
@@ -146,7 +145,7 @@ class KrylovBase
         inline value_type dot ( const value_type *x, const value_type *y )
         {
             value_type s = value_type ( 0 );
-            for ( size_t i = 0; i < m_size; ++i )
+            for ( size_t i = 0; i < m_system_size; ++i )
                 s += x[i]*y[i];
             return s;
         }

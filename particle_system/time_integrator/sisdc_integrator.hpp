@@ -50,15 +50,16 @@ class SISDCIntegrator
             value_type *positions = boundary().positions();
             value_type *velocities = boundary().velocities();
             value_type time = boundary().time();
-            std::copy(positions,positions+m_ode_size,m_sdc.X(0));
-            std::copy(velocities,velocities+m_ode_size,m_sdc.Fe(0));
-            std::copy(velocities,velocities+m_ode_size,m_sdc.Fi(0));
+            std::vector<value_type> Vi(m_ode_size,0.0);
+            std::vector<value_type> Ve(m_ode_size,0.0);
+            boundary().Implicit(time,positions,&Vi[0]);
+            boundary().Explicit(time,positions,&Ve[0]);
+            m_sdc.init(positions,&Vi[0],&Ve[0]);
             m_sdc.predictor(boundary(),time,timestep);
             m_sdc.corrector(boundary(),time,timestep);
             std::copy(m_sdc.X(0),m_sdc.X(0)+m_ode_size,positions);
-            std::copy(m_sdc.F(0),m_sdc.F(0)+m_ode_size,velocities);
+            std::transform(m_sdc.Fi(0),m_sdc.Fi(0)+m_ode_size,m_sdc.Fe(0),velocities,std::plus<value_type>());
         }
-
 };
 
 

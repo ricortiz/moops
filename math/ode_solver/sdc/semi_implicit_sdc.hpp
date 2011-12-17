@@ -18,17 +18,14 @@
  * \param sdc_corrections Number of corrections to do.
  **/
 template<typename value_type, typename integrator_type, int sdc_nodes, int sdc_corrections>
-class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type, integrator_type, sdc_nodes, sdc_corrections> >
+class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, integrator_type, sdc_nodes, sdc_corrections> >
 {
     public:
         enum
         {
             ode_size = integrator_type::ode_size
         };
-    protected:
-        typedef typename function_type::implicit_type implicit_type;
-        typedef typename function_type::explicit_type explicit_type;
-
+        
     protected:
         sdc_storage<value_type,sdc_nodes,0,SDC::SEMI_IMPLICIT> m_storage;
         integrator_type m_integrator;
@@ -53,6 +50,7 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
         inline const value_type dt ( int i ) const   { return m_integrator.dt[i]; }
         inline value_type &Immk ( int i, int j ) { return m_integrator.Immk[i][j]; }
         inline const value_type &Immk ( int i, int j ) const { return m_integrator.Immk[i][j]; }
+        inline void init(value_type *x, value_type *F_i, value_type *F_e) { m_storage.init(x,F_i,F_e); }
 
         /**
         * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method
@@ -71,6 +69,7 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
         inline void predictor_step ( function_type &V, const int k, value_type &t, const value_type &dt )
         {
             t += dt;
+            V.update_forces(t);
             std::copy( X ( k ),X ( k )+ode_size,X ( k+1 ));
             backward_euler ( X ( k+1 ),t,X ( k ),Fe ( k ),Fi ( k+1 ),dt,V );
             V.Explicit ( t, X ( k+1 ), Fe ( k+1 ) );
@@ -97,6 +96,7 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
             value_type Fold[ode_size];            
             std::copy( Fe(k+1),Fe(k+1)+ode_size,Fold);
             t += dt;
+            V.update_forces(t);
             backward_euler ( X ( k+1 ),t,X ( k ),fdiff,Fi ( k+1 ),dt,V );
             V.Explicit ( t, X ( k+1 ), Fe ( k+1 ) );
             std::transform(Fe( k+1 ),Fe( k+1 )+ode_size,Fold,fdiff,std::minus<value_type>());
@@ -106,7 +106,7 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
 };
 
 template<typename _value_type, typename _integrator_type, int _sdc_nodes, int _sdc_corrections>
-struct sdc_traits<SemiImplicitSDC<_value_type, _function_type, _integrator_type, _sdc_nodes, _sdc_corrections> >
+struct sdc_traits<SemiImplicitSDC<_value_type, _integrator_type, _sdc_nodes, _sdc_corrections> >
 {
     typedef _value_type value_type;
     typedef _integrator_type integrator_type;

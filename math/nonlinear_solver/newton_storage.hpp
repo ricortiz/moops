@@ -22,16 +22,16 @@ struct newton_arrays
  * This class stores the data of fixed-size sdc vectors
  *
  */
-template<typename T, size_t size>
+template<typename T>
 class newton_storage;
 
 // purely fixed-size arrays
-template<typename T, size_t size>
+template<typename T>
 class newton_storage
 {
         newton_arrays<T> m_data;
     public:
-        inline explicit newton_storage ( )
+        inline explicit newton_storage (size_t size)
         {
             m_data.dx = new T[size];
             m_data.f = new T[size];

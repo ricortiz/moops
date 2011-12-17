@@ -9,7 +9,6 @@
 **/
 
 #include "sdc_base.hpp"
-#include "integrator/clenshaw_curtis.hpp"
 
 /**
  * \brief This class implements a fully explicit SDC method.
@@ -27,14 +26,12 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, integrator_type, sdc_
 
         sdc_storage<value_type,sdc_nodes,0,SDC::EXPLICIT> m_storage;
         integrator_type m_integrator;
+        size_t m_ode_size;
         /**< This is the integrator used to compute the spectral integrals of the right hand sides F. **/
-        enum
-        {
-            ode_size = integrator_type::ode_size
-        };
+
     public:
 
-        ExplicitSDC() : m_storage(ode_size) {}
+        ExplicitSDC(size_t ode_size) : m_storage(ode_size), m_integrator(ode_size), m_ode_size(ode_size) {}
         
         inline void update()                        { m_storage.update(); }
         inline const value_type *F ( int i ) const  { return m_storage.F() [i]; }
@@ -49,7 +46,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, integrator_type, sdc_
         inline value_type &Immk ( int i, int j )    { return m_integrator.Immk[i][j]; }
         inline void integrate()                     { m_integrator.integrate ( F() ); }
         inline void init(const value_type *x, const value_type *Fx) { m_storage.init(x,Fx); }
-        
+        inline size_t ode_size() { return m_ode_size; }
         /**
         * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method
         *
@@ -86,12 +83,12 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, integrator_type, sdc_
         template<typename function_type>
         inline void corrector_predictor_step ( function_type &V, const int k, value_type *fdiff, value_type &t, const value_type &dt )
         {
-            value_type Fold[ode_size];
-            std::copy( F(k+1),F(k+1)+ode_size,Fold);
+            value_type Fold[m_ode_size];
+            std::copy( F(k+1),F(k+1)+m_ode_size,Fold);
             t += dt;
             forward_euler ( X ( k+1 ), X ( k ), fdiff, dt );
             V ( t, X ( k+1 ), F ( k+1 ) );
-            std::transform(F( k+1 ),F( k+1 )+ode_size,Fold,fdiff,std::minus<value_type>());
+            std::transform(F( k+1 ),F( k+1 )+m_ode_size,Fold,fdiff,std::minus<value_type>());
         }
 
 };
@@ -104,7 +101,6 @@ struct sdc_traits<ExplicitSDC<_value_type, _integrator_type, _sdc_nodes, _sdc_co
     enum
     {
         sdc_nodes = _sdc_nodes,
-        ode_size = integrator_type::ode_size,
         sdc_corrections = _sdc_corrections
     };
 };

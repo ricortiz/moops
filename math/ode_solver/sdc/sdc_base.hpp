@@ -49,6 +49,7 @@ class SDCBase
         typedef typename sdc_traits<Derived>::value_type value_type;
     private:
 
+        size_t m_ode_size;
         enum
         {
             m_sdc_nodes = sdc_traits<Derived>::sdc_nodes,
@@ -58,15 +59,12 @@ class SDCBase
             m_sdc_corrections = sdc_traits<Derived>::sdc_corrections,
             /**< The number of SDC corrections sweps at compile-time. This is just a copy of the value provided
             * by the \a Derived type. **/
-
-            m_ode_size = sdc_traits<Derived>::ode_size
-            /**< Size of the problem at compile-time. This is just a copy of the value provided
-             * by the \a Derived type. **/
-        };
-
+        };        
 
     public:
 
+        SDCBase() : m_ode_size(sdc_method().ode_size()) {}
+        
         /**
          * @brief This function returns an instance of the sdc_method type.
          *
@@ -76,11 +74,6 @@ class SDCBase
         {
             return *static_cast<Derived*> ( this );
         }
-        
-//         inline const value_type *F ( int i ) const  { return sdc_method().F(i); }
-//         inline const value_type *X ( int i ) const  { return sdc_method().X(i); }
-//         inline value_type *F ( int i )              { return sdc_method().F(i); }
-//         inline value_type *X ( int i )              { return sdc_method().X(i); }
 
         /**
          * \brief Predictor loop.
@@ -114,7 +107,7 @@ class SDCBase
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
             value_type fdiff[m_ode_size];
-            for ( size_t i = 0; i < m_sdc_corrections; ++i )
+            for ( size_t i = 0; i < m_sdc_corrections-1; ++i )
             {
                 std::fill ( fdiff,fdiff+m_ode_size,value_type ( 0 ) );
                 sdc_method().integrate();
@@ -160,7 +153,7 @@ class SDCBase
         template<typename operator_type>
         inline void backward_euler ( value_type *x, value_type t, const value_type *xold, const value_type *Fold, value_type *Fi, value_type dt, operator_type &V )
         {
-            InexactNewtonMethod<value_type,m_ode_size> newton_solve;
+            InexactNewtonMethod<value_type,40,10> newton_solve(m_ode_size);
             value_type rhs[m_ode_size];
             std::fill(rhs,rhs+m_ode_size,value_type(0));
             
