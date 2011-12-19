@@ -42,6 +42,7 @@ class SpringSystem : public particle_system_type
     public:
 
         SpringSystem() : m_surface(0) {}
+        SpringSystem(size_t data_size) : m_surface(0), particle_system_type(data_size) {}
         ~SpringSystem() {}
 
         inline Surface<surface_type> *surface() { return m_surface; }

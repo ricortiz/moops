@@ -33,7 +33,7 @@ class ElasticBoundary : public spring_system_type, public integration_policy<Ela
         fluid_solver_type                m_fluid_solver;
 
     public:
-        ElasticBoundary(size_t ode_size) : time_integrator_type(ode_size) {  }
+        ElasticBoundary(size_t ode_size) : spring_system_type(ode_size), time_integrator_type(ode_size), m_fluid_solver(ode_size/3) {  }
         ~ElasticBoundary() {}
         inline fluid_solver_type &fluid_solver() { return m_fluid_solver; }
         inline fluid_solver_type const &fluid_solver() const { return m_fluid_solver; }

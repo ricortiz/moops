@@ -27,17 +27,14 @@ class DirectStokesSolver
     private:
 
         value_type m_delta;
-
-        enum
-        {
-            num_particles = particle_system_type::num_particles
-        };
-
-
+      size_t m_num_particles;
+      
     public:
+      DirectStokesSolver() : m_num_particles(0) {}
+      DirectStokesSolver(size_t num_particles) : m_num_particles(num_particles) {}
         inline void operator()(value_type *x, value_type *v, value_type *f)
         {
-            operator()(x, v, x, f, num_particles, num_particles);
+            operator()(x, v, x, f, m_num_particles, m_num_particles);
         }
         
         template<typename spring_system_type>
@@ -60,9 +57,8 @@ class DirectStokesSolver
         {
             typedef typename spring_system_type::particle_type particle_type;
             particle_type *particles = spring_system.particles();
-            
-            for(size_t i = 0, xidx = 0; i < num_particles; ++i, xidx+=3)
-                for(size_t j = 0, yidx = 0; j < num_particles; ++j, yidx +=3)
+            for(size_t i = 0, xidx = 0; i < m_num_particles; ++i, xidx+=3)
+                for(size_t j = 0, yidx = 0; j < m_num_particles; ++j, yidx +=3)
                     if(spring_system.exist_spring(particles[i],particles[j]))
                         compute_velocity(&x[xidx],&v[xidx],&y[yidx],&f[yidx],m_delta);
         }
@@ -73,8 +69,8 @@ class DirectStokesSolver
             typedef typename spring_system_type::particle_type particle_type;
             particle_type *particles = spring_system.particles();
             
-            for(size_t i = 0, xidx = 0; i < num_particles; ++i, xidx+=3)
-                for(size_t j = 0, yidx = 0; j < num_particles; ++j, yidx +=3)
+            for(size_t i = 0, xidx = 0; i < m_num_particles; ++i, xidx+=3)
+                for(size_t j = 0, yidx = 0; j < m_num_particles; ++j, yidx +=3)
                     if(!spring_system.exist_spring(particles[i],particles[j]))
                         compute_velocity(&x[xidx],&v[xidx],&y[yidx],&f[yidx],m_delta);
         }

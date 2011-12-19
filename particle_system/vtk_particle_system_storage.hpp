@@ -61,15 +61,15 @@ class vtkParticleSystemStorage<T,particle_type,PSYS::SURFACE,vtk_data_array_type
         vtkSmartPointer<vtkPolyData>            m_poly_data; 
 
     public:
-        inline explicit vtkParticleSystemStorage(size_t num_particles) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
+        inline explicit vtkParticleSystemStorage(size_t data_size) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
         {
-            size_t size = 3*num_particles;
-            m_data.positions = new T[size];
-            m_data.velocities = new T[size];
-            m_data.forces = new T[size];
-            std::fill(m_data.positions,m_data.positions+size,T(0));
-            std::fill(m_data.velocities,m_data.velocities+size,T(0));
-            std::fill(m_data.forces,m_data.forces+size,T(0));
+            size_t num_particles = data_size/3;
+            m_data.positions = new T[data_size];
+            m_data.velocities = new T[data_size];
+            m_data.forces = new T[data_size];
+            std::fill(m_data.positions,m_data.positions+data_size,T(0));
+            std::fill(m_data.velocities,m_data.velocities+data_size,T(0));
+            std::fill(m_data.forces,m_data.forces+data_size,T(0));
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
             {
@@ -82,9 +82,9 @@ class vtkParticleSystemStorage<T,particle_type,PSYS::SURFACE,vtk_data_array_type
             m_vtk_data.velocities = vtkSmartPointer<vtk_data_array_type>::New();
             m_vtk_data.forces = vtkSmartPointer<vtk_data_array_type>::New();
             
-            m_vtk_data.positions->SetArray(m_data.positions,size,1);
-            m_vtk_data.velocities->SetArray(m_data.velocities,size,1);
-            m_vtk_data.forces->SetArray(m_data.forces,size,1);
+            m_vtk_data.positions->SetArray(m_data.positions,data_size,1);
+            m_vtk_data.velocities->SetArray(m_data.velocities,data_size,1);
+            m_vtk_data.forces->SetArray(m_data.forces,data_size,1);
             m_vtk_data.positions->SetNumberOfComponents(3);
             m_vtk_data.positions->SetName("positions");
             m_vtk_data.velocities->SetNumberOfComponents(3);
@@ -149,11 +149,11 @@ class vtkParticleSystemStorage<T,particle_type,PSYS::VOLUME,vtk_data_array_type>
         vtkSmartPointer<vtkPolyData>            m_poly_data; 
 
     public:
-        inline explicit vtkParticleSystemStorage(size_t num_particles) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
+        inline explicit vtkParticleSystemStorage(size_t data_size) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
         {
-            size_t size = 3*num_particles;
-            m_data.positions = new T[size];
-            m_data.velocities = new T[size];
+            size_t num_particles = data_size/3;
+            m_data.positions = new T[data_size];
+            m_data.velocities = new T[data_size];
             m_data.forces = 0;
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
@@ -166,8 +166,8 @@ class vtkParticleSystemStorage<T,particle_type,PSYS::VOLUME,vtk_data_array_type>
             m_vtk_data.velocities = vtkSmartPointer<vtk_data_array_type>::New();
             m_vtk_data.forces = vtkSmartPointer<vtk_data_array_type>::New();
             
-            m_vtk_data.positions->SetArray(m_data.positions,size,1);
-            m_vtk_data.velocities->SetArray(m_data.velocities,size,1);
+            m_vtk_data.positions->SetArray(m_data.positions,data_size,1);
+            m_vtk_data.velocities->SetArray(m_data.velocities,data_size,1);
             m_vtk_data.positions->SetNumberOfComponents(3);
             m_vtk_data.positions->SetName("positions");
             m_vtk_data.velocities->SetNumberOfComponents(3);

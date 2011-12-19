@@ -31,7 +31,6 @@ class BaseGeometry
         template<typename array_type>
         inline void add_plane_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
         {
-
             int connections[8][2] = {{i - 1, j - 1},
                 {i, j - 1},
                 {i + 1, j - 1},
@@ -44,6 +43,7 @@ class BaseGeometry
             for(int k = 0; k < 8; ++k)
                 if((connections[k][0] >= 0 && connections[k][1] >= 0) && (connections[k][0] <= M - 1 && connections[k][1] <= N - 1))
                     col_idx.push_back(connections[k][1]*M + connections[k][0] + offset);
+
         }
 
         template<typename array_type>
@@ -68,9 +68,11 @@ class BaseGeometry
             }
         }
 
+
         template<typename array_type>
         inline void add_closed_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
         {
+
             int connections[8][2] = {{i - 1, j - 1},
                 {i, j - 1},
                 {i, j - 2},
@@ -83,6 +85,7 @@ class BaseGeometry
             for(int k = 0; k < 8; ++k)
                 if((connections[0][k] >= 0) && (connections[0][k] <= M - 1) && (j == 0 || j == N - 1))
                     col_idx.push_back((connections[1][k] + N) % N * M + connections[0][k] + offset);
+
         }
 
         void set_plane_cells(size_t i, size_t j, size_t M, size_t N, size_t offset = 0)

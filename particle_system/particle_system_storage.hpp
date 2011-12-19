@@ -45,12 +45,12 @@ class ParticleSystemStorage<T,particle_type,PSYS::SURFACE>
         particle_system_arrays<T,particle_type> m_data;
 
     public:
-        inline explicit ParticleSystemStorage(size_t num_particles)
+        inline explicit ParticleSystemStorage(size_t data_size)
         {
-            size_t size = 3*num_particles;
-            m_data.positions = new T[size];
-            m_data.velocities = new T[size];
-            m_data.forces = new T[size];
+            size_t num_particles = data_size/3;
+            m_data.positions = new T[data_size];
+            m_data.velocities = new T[data_size];
+            m_data.forces = new T[data_size];
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
             {
@@ -101,11 +101,11 @@ class ParticleSystemStorage<T,particle_type,PSYS::VOLUME>
         particle_system_arrays<T,particle_type> m_data;
 
     public:
-        inline explicit ParticleSystemStorage(size_t num_particles)
+        inline explicit ParticleSystemStorage(size_t data_size)
         {
-            size_t size = 3*num_particles;
-            m_data.positions = new T[size];
-            m_data.velocities = new T[size];
+            size_t num_particles = data_size/3;
+            m_data.positions = new T[data_size];
+            m_data.velocities = new T[data_size];
             m_data.forces = 0;
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)

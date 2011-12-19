@@ -34,20 +34,20 @@
 #include "swarm/swarm.hpp"
 #include "valveless_heart/valveless_heart.hpp"
 
-template<typename value_type, int num_particles, int sdc_nodes = 5, int data_size= 3*num_particles, int fmm_max_particles = 0, int fmm_order = 0>
+template<typename _value_type, int num_particles, int sdc_nodes = 5, int data_size= 3*num_particles, int fmm_max_particles = 0, int fmm_order = 0>
 struct TypeBinder
 {
-    typedef TypeBinder<value_type,num_particles,sdc_nodes,data_size,fmm_max_particles,fmm_order> Types;
-    
+    typedef TypeBinder<_value_type,num_particles,sdc_nodes,data_size,fmm_max_particles,fmm_order> Types;
+    typedef _value_type value_type;
     typedef Particle<value_type>                                                particle_type;
 #ifdef USE_CUDA_FLUID_SOLVER
     typedef vtkParticleSystemStorage<value_type,particle_type,PSYS::SURFACE,vtkFloatArray> surface_storage_type;
     typedef vtkParticleSystemStorage<value_type,particle_type,PSYS::VOLUME,vtkFloatArray> volume_storage_type;
-    typedef ParticleSystem<value_type,num_particles,PSYS::SURFACE,surface_storage_type> particle_system_type;
-    typedef ParticleSystem<value_type,num_particles,PSYS::VOLUME,volume_storage_type> particle_system_tracers_type;
+    typedef ParticleSystem<value_type,PSYS::SURFACE,surface_storage_type> particle_system_type;
+    typedef ParticleSystem<value_type,PSYS::VOLUME,volume_storage_type> particle_system_tracers_type;
 #else
-    typedef ParticleSystem<value_type,num_particles>                   particle_system_type;
-    typedef ParticleSystem<value_type,num_particles,PSYS::VOLUME>      particle_system_tracers_type;
+    typedef ParticleSystem<value_type>                   particle_system_type;
+    typedef ParticleSystem<value_type,PSYS::VOLUME>      particle_system_tracers_type;
 #endif
     typedef HeartPump<value_type>                                               heart_pump_surface_type;
     typedef Swarm<value_type>                                                   swarm_surface_type;                                              

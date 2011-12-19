@@ -21,8 +21,8 @@
 template<typename particle_system_type,
          typename immersed_surface_type,
          typename fluid_solver_type,
-         template<typename> class integration_policy>
-         class ParticleMarkers : public particle_system_type, public integration_policy<ParticleMarkers<particle_system_type,immersed_surface_type,fluid_solver_type,integration_policy> >
+         template<typename> class time_integrator_type>
+         class ParticleMarkers : public particle_system_type, public time_integrator_type<ParticleMarkers<particle_system_type,immersed_surface_type,fluid_solver_type,time_integrator_type> >
 { 
     public:
         typedef typename particle_system_type::value_type    value_type;
@@ -34,7 +34,7 @@ template<typename particle_system_type,
 
     public:
         
-        ParticleMarkers(immersed_surface_type *surface) : m_surface(surface), m_fluid_solver(surface->fluid_solver()) {  }
+        ParticleMarkers(immersed_surface_type *surface, size_t ode_size) : particle_system_type(ode_size), m_surface(surface), m_fluid_solver(surface->fluid_solver()) {  }
         ~ParticleMarkers() {}
                 
         inline fluid_solver_type &fluid_solver() { return m_fluid_solver; }

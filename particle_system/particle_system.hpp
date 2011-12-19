@@ -23,7 +23,6 @@
 #include "particle_system/particle.hpp"
 
 template<typename _value_type,
-         size_t _num_particles,
          int immersed_structure_type = PSYS::SURFACE,
          typename storage_type = vtkParticleSystemStorage<_value_type,Particle<_value_type>,immersed_structure_type>
          >
@@ -33,17 +32,15 @@ class ParticleSystem
         typedef Particle<_value_type> particle_type;
         typedef _value_type          value_type;
 
-        enum
-        {
-            num_particles = _num_particles
-        };
     private:
         storage_type          m_storage;
         value_type            m_time;         ///< Current time.
+        size_t 		      m_data_size;
+	size_t 		      m_num_particles;
 
     public:
 
-        ParticleSystem() : m_time(0.0), m_storage(num_particles) {}
+        ParticleSystem(size_t data_size) : m_time(0.0), m_storage(data_size), m_data_size(data_size), m_num_particles(data_size/3) {}
         ~ParticleSystem() { };
 
     public:
@@ -68,7 +65,7 @@ class ParticleSystem
             value_type max[3] = {lowest,lowest,lowest};
             center[0] = center[1] = center[2] = 0;
             extent[0] = extent[1] = extent[2] = 0;
-            for (int i = 0; i < num_particles; i++)
+            for (int i = 0; i < m_num_particles; i++)
             {
                 value_type *position = m_storage.position(i);
                 for (int k = 0 ; k < 3; ++k)
@@ -83,7 +80,7 @@ class ParticleSystem
 
             for (int i = 0; i < 3; ++i)
             {
-                center[i] /= num_particles;
+                center[i] /= m_num_particles;
                 max[i] = std::abs(max[i]-center[i])+.001;
                 min[i] = std::abs(min[i]-center[i])+.001;
                 extent[i] = std::max(max[i],min[i]);
@@ -93,20 +90,20 @@ class ParticleSystem
         void clear() { m_time = 0.; }
         void clear_forces()
         {
-            size_t size = 3*num_particles;
+            size_t size = 3*m_num_particles;
             value_type *f = forces();
             std::fill(f,f+size,0.0);
         }
         void clear_velocities()
         {
-            size_t size = 3*num_particles;
+            size_t size = 3*m_num_particles;
             value_type *v = velocities();
             std::fill(v,v+size,0.0);
         }
 
         std::size_t particles_size() const
         {
-            return num_particles;
+            return m_num_particles;
         }
 
         storage_type *storage() { return &m_storage; }

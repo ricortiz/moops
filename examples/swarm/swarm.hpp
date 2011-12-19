@@ -49,6 +49,7 @@ class Swarm : public Surface<Swarm<value_type> >
             geometry.get_head_connections(m_head_col_ptr, m_head_col_idx);
             geometry.get_tail_connections(m_tail_col_ptr, m_tail_col_idx);
             m_sperm = &geometry;
+	    
         }
 
 //         template<typename geometry_type>

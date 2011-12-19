@@ -37,7 +37,7 @@ class SwarmApp
         types::swarm_surface_type m_swarm;
         types::swarm_boundary_type m_boundary;
         types::swarm_volume_type m_volume;
-        value_type m_time_step;
+        types::value_type m_time_step;
         std::auto_ptr<types::vtk_writer> m_surface_writer;
         std::auto_ptr<types::vtk_writer> m_volume_writer;
         bool m_record;
@@ -46,10 +46,10 @@ class SwarmApp
 
         SwarmApp(std::string &data_path) : m_boundary(data_size),
             m_time_step(0.01),
-            m_record(true),
+            m_record(false),
             m_surface_writer(new types::vtk_writer(data_path + "/surface/")),
             m_volume_writer(new types::vtk_writer(data_path + "/volume/")),
-            m_volume(&m_boundary)
+            m_volume(&m_boundary,2*data_size)
         {
             size_t *dims = m_sine_geometry.get_dimensions();
             value_type *x0 = m_sine_geometry.getX0();
