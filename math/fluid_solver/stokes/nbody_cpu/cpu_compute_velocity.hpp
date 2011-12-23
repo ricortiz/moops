@@ -37,9 +37,9 @@ inline void compute_velocity(const value_type *target, value_type *velocity, con
     
     value_type fdx = (force[0]*dx[0]+force[1]*dx[1]+force[2]*dx[2]);
     
-    velocity[0] += H* (force[0]*R2+fdx*dx[0]);
-    velocity[1] += H* (force[1]*R2+fdx*dx[1]);
-    velocity[2] += H* (force[2]*R2+fdx*dx[2]);
+    velocity[0] += H * (force[0]*R2+fdx*dx[0]);
+    velocity[1] += H * (force[1]*R2+fdx*dx[1]);
+    velocity[2] += H * (force[2]*R2+fdx*dx[2]);
 }
 
 #endif

@@ -37,6 +37,14 @@ class newton_storage
             m_data.f = new T[size];
             m_data.ft = new T[size];
             m_data.xt = new T[size];
+            clear(size);
+        }
+        void clear(size_t size)
+        {
+            std::fill(m_data.dx,m_data.dx+size,0.0);
+            std::fill(m_data.f,m_data.f+size,0.0);
+            std::fill(m_data.ft,m_data.ft+size,0.0);
+            std::fill(m_data.xt,m_data.xt+size,0.0);
         }
         ~newton_storage()
         {

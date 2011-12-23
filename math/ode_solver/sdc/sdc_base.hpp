@@ -49,7 +49,6 @@ class SDCBase
         typedef typename sdc_traits<Derived>::value_type value_type;
     private:
 
-        size_t m_ode_size;
         enum
         {
             m_sdc_nodes = sdc_traits<Derived>::sdc_nodes,
@@ -107,19 +106,19 @@ class SDCBase
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
 	    size_t ode_size = sdc_method().ode_size();
-            value_type fdiff[ode_size];
+            std::vector<value_type> fdiff(ode_size,0.0);
             for ( size_t i = 0; i < m_sdc_corrections-1; ++i )
             {
-                std::fill ( fdiff,fdiff+m_ode_size,value_type ( 0 ) );
                 sdc_method().integrate();
                 value_type time = t;
                 for ( size_t k = 0; k < m_sdc_nodes - 1; ++k )
                 {
                     value_type dt = Dt*sdc_method().dt ( k );
-                    for(size_t j = 0; j < m_ode_size; ++j)
+                    for(size_t j = 0; j < ode_size; ++j)
                         fdiff[j] += sdc_method().Immk( k,j ) / sdc_method().dt ( k );
-                    sdc_method().corrector_predictor_step ( V, k, fdiff, time, dt );
+                    sdc_method().corrector_predictor_step ( V, k, &fdiff[0], time, dt );
                 }
+                std::fill ( fdiff.begin(),fdiff.end(),value_type ( 0 ) );
             }
 
             sdc_method().update();
@@ -155,16 +154,17 @@ class SDCBase
         template<typename operator_type>
         inline void backward_euler ( value_type *x, value_type t, const value_type *xold, const value_type *Fold, value_type *Fi, value_type dt, operator_type &V )
         {
-	    size_t ode_size = sdc_method().ode_size();
-            InexactNewtonMethod<value_type,40,10> newton_solve(ode_size);
-            value_type rhs[ode_size];
-            std::fill(rhs,rhs+ode_size,value_type(0));
+            size_t ode_size = sdc_method().ode_size();
+            std::vector<value_type> rhs(ode_size,0.0);
             
-            forward_euler ( rhs, xold, Fold, dt );
-            implicit_operator<operator_type,value_type> F ( V,t,dt,rhs );
-            newton_solve ( F, x, 1e-12, 1e-12 );
+            InexactNewtonMethod<value_type,40,10> newton_solve(ode_size);            
+            forward_euler ( &rhs[0], xold, Fold, dt );
+            implicit_operator<operator_type,value_type> F ( V,t,dt,&rhs[0],ode_size );
+            newton_solve ( F, x, 1e-6, 1e-6 );
+
             for ( size_t i = 0; i < ode_size; ++i )
                 Fi[i] = ( x[i] - rhs[i] ) / dt;
+
         }
 
         template<typename function_type, typename value_type>
@@ -174,17 +174,16 @@ class SDCBase
             const value_type &m_t;
             const value_type &m_dt;
             const value_type *m_rhs;
+            size_t m_ode_size;
 
-	    size_t ode_size = sdc_method().ode_size();
-            implicit_operator ( function_type &V, const value_type &t, const value_type &dt, const value_type *rhs )
-                    : m_V ( V ), m_t ( t ), m_dt ( dt ), m_rhs ( rhs ) {}
+            implicit_operator ( function_type &V, const value_type &t, const value_type &dt, const value_type *rhs, size_t ode_size )
+                    : m_V ( V ), m_t ( t ), m_dt ( dt ), m_rhs ( rhs ), m_ode_size(ode_size) {}
 
             void operator() ( const value_type *x, value_type *Fx )
             {
-		size_t ode_size = sdc_method().ode_size();
-                value_type Vx[ode_size];
-                m_V.Implicit ( m_t, x, Vx );
-                for ( size_t i = 0; i < ode_size; ++i )
+                std::vector<value_type> Vx(m_ode_size,0.0);
+                m_V.Implicit ( m_t, x, &Vx[0] );
+                for ( size_t i = 0; i < m_ode_size; ++i )
                     Fx[i] = x[i] - m_dt * Vx[i] - m_rhs[i];
             }
 

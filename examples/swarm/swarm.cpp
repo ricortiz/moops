@@ -30,7 +30,7 @@ class SwarmApp
 #else
         typedef double value_type;
 #endif
-        typedef TypeBinder<value_type, num_particles> types;
+        typedef TypeBinder<value_type> types;
 
     private:
         types::sine_type m_sine_geometry;
@@ -46,7 +46,7 @@ class SwarmApp
 
         SwarmApp(std::string &data_path) : m_boundary(data_size),
             m_time_step(0.01),
-            m_record(false),
+            m_record(true),
             m_surface_writer(new types::vtk_writer(data_path + "/surface/")),
             m_volume_writer(new types::vtk_writer(data_path + "/volume/")),
             m_volume(&m_boundary,2*data_size)

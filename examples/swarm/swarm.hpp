@@ -90,9 +90,10 @@ class Swarm : public Surface<Swarm<value_type> >
                         if(!spring_system.exist_spring(&particles[p + idx + head_offset], &particles[m_tail_col_idx[i] + idx + head_offset]))
                         {
                             spring_system.add_spring(&particles[p + idx + head_offset], &particles[m_tail_col_idx[i] + idx + head_offset],.1,true);
-//                             std::cout << "Spring added: [" << p + idx + head_offset << "," << m_tail_col_idx[i] + idx + head_offset  << "]" << std::endl;
+//                             std::cout << p + idx + head_offset+1 << "," << m_tail_col_idx[i] + idx + head_offset+1  << ";";
                         }
             }
+            spring_system.fluid_solver().initMaps(spring_system);
 //             std::cout << "];\n";
             std::cout << "Created " << spring_system.springs_size() << " springs." << std::endl;
         }
@@ -158,8 +159,6 @@ class Swarm : public Surface<Swarm<value_type> >
             particles[0].force[0] += gradient[0];
             particles[0].force[1] += gradient[1];
             particles[0].force[2] += gradient[2];
-
-
         }
 
 

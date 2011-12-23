@@ -13,6 +13,7 @@
 #include <vtkXMLPolyDataWriter.h>
 
 #include "particle_system/time_integrator/sdc_integrator.hpp"
+#include "particle_system/time_integrator/sisdc_integrator.hpp"
 #include "particle_system/time_integrator/euler_integrator.hpp"
 #include "particle_system/elastic_system/elastic_boundary.hpp"
 #include "particle_system/elastic_system/spring_system.hpp"
@@ -22,9 +23,6 @@
 #include "particle_system/fluid_solver/cuda_stokes_solver.hpp"
 #endif
 #include "particle_system/fluid_solver/direct_stokes_solver.hpp"
-#include "math/ode_solver/sdc/explicit_sdc.hpp"
-#include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
-#include "math/ode_solver/euler/forward_euler.hpp"
 #include "geometry/torus_geometry.hpp"
 #include "geometry/oval_geometry.hpp"
 
@@ -34,10 +32,10 @@
 #include "swarm/swarm.hpp"
 #include "valveless_heart/valveless_heart.hpp"
 
-template<typename _value_type, int num_particles, int sdc_nodes = 5, int data_size= 3*num_particles, int fmm_max_particles = 0, int fmm_order = 0>
+template<typename _value_type, int sdc_nodes = 5, int fmm_max_particles = 0, int fmm_order = 0>
 struct TypeBinder
 {
-    typedef TypeBinder<_value_type,num_particles,sdc_nodes,data_size,fmm_max_particles,fmm_order> Types;
+    typedef TypeBinder<_value_type,sdc_nodes,fmm_max_particles,fmm_order> Types;
     typedef _value_type value_type;
     typedef Particle<value_type>                                                particle_type;
 #ifdef USE_CUDA_FLUID_SOLVER
@@ -62,7 +60,7 @@ struct TypeBinder
     typedef FMMStokesSolver<particle_system_type,fmm_max_particles,fmm_order> fmm_fluid_solver_type;
 #endif
     typedef ElasticBoundary<heart_pump_spring_system_type,fluid_solver_type,SDCIntegrator> heart_pump_boundary_type;
-    typedef ElasticBoundary<swarm_spring_system_type,fluid_solver_type,SDCIntegrator> swarm_boundary_type;
+    typedef ElasticBoundary<swarm_spring_system_type,fluid_solver_type,SISDCIntegrator> swarm_boundary_type;
     typedef ParticleMarkers<particle_system_tracers_type,heart_pump_boundary_type,fluid_solver_type,EulerIntegrator> heart_pump_volume_type;
     typedef ParticleMarkers<particle_system_tracers_type,swarm_boundary_type,fluid_solver_type,EulerIntegrator> swarm_volume_type;
     

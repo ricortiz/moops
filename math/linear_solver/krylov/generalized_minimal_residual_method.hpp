@@ -4,7 +4,7 @@
 #include<algorithm>
 
 #include "krylov_storage.hpp"
-#include "krylov_base_raw.hpp"
+#include "krylov_base.hpp"
 
 template<typename value_type, size_t krylov_space_max_dim>
 class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalResidualMethod<value_type,krylov_space_max_dim> >
@@ -31,6 +31,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
         inline value_type &g ( size_t i ) { return m_storage.g ( i ); }
         inline value_type *g ( ) { return m_storage.g(); }
         inline value_type *v ( size_t i ) { return m_storage.v ( i ); }
+        inline size_t system_size () { return m_system_size; }
 
         /**
         * \brief Gneralized Minimal Residual Method.  Solves the linear system:  F'(xc)*x = -f0.
@@ -44,9 +45,10 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
         template<typename operator_type>
         inline value_type operator() ( operator_type &F, const value_type *b, value_type *x, value_type errtol = 1e-6, value_type *stats = 0 )
         {
+            /// Compute the residual
             F ( x,residual() );
             std::transform ( b,b+m_system_size,residual(),residual(),std::plus<value_type>() );
-            value_type rho = norm ( residual() );
+            value_type rho = this->norm ( residual() );
             errtol *= rho;
 
             /// Test for early termination
@@ -57,7 +59,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
             g ( 0 ) = rho;
 
             for ( size_t i = 0 ; i < m_system_size; ++i )
-                v ( 0 ) [i] = -residual ( i ) / rho;
+                v ( 0 )[i] = -residual ( i ) / rho;
             /// Start GMRES iteration
             unsigned int k;
             for ( k = 0; k < k_max && rho > errtol; ++k )
@@ -71,17 +73,18 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
                 /// Perform Givens rotations in order to eliminate the H(k+1,k) entry from the
                 /// Hessenberg matrix.
                 for ( size_t i = 0; i < k; ++i )
-                    apply_rotation ( H ( i,k ), H ( i+1,k ), c ( i ), s ( i ) );
-                get_rotation ( H ( k,k ), ld, c ( k ), s ( k ) );
-                apply_rotation ( H ( k,k ), ld, c ( k ), s ( k ) );
-                apply_rotation ( g ( k ), g ( k+1 ), c ( k ), s ( k ) );
+                    this->apply_rotation ( H ( i,k ), H ( i+1,k ), c ( i ), s ( i ) );
+                this->get_rotation ( H ( k,k ), ld, c ( k ), s ( k ) );
+                this->apply_rotation ( H ( k,k ), ld, c ( k ), s ( k ) );
+                this->apply_rotation ( g ( k ), g ( k+1 ), c ( k ), s ( k ) );
 
                 assert ( ld < 1e-16 || !"rotation failed: Lower diagonal is non-zero" );
+                
                 ///  The norm of the residual is the last entry in g
                 rho = std::fabs ( g ( k+1 ) );
             }
 
-            /// Solve the least square problem by solving a upper triangular linear system
+            /// Solve the least square problem by solving the upper triangular linear system
             this->back_solve ( k );
             /// Update the solution
             for ( int i = 0; i < k; i++ )

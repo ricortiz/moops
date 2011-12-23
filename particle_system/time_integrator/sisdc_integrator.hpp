@@ -17,27 +17,26 @@
 ///                      It contains the main method that drives the simulation: void integrate()
 /// @section See also ExplicitSDC SemiImplicitSDC
 
-#include "math/ode_solver/sdc/sdc_base.hpp"
+#include<iterator>
+#include "math/ode_solver/sdc/integrator/clenshaw_curtis.hpp"
+#include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
 
 template<typename T> struct immersed_structure_traits;
 
-template<typename boundary_type>
+template<typename boundary_type, int sdc_nodes = 5, int sdc_corrections = 4>
 class SISDCIntegrator
 {
     protected:
         typedef typename immersed_structure_traits<boundary_type>::value_type          value_type;
-        typedef typename immersed_structure_traits<boundary_type>::particle_integrator_type sdc_integrator_type;
+        typedef SDCSpectralIntegrator<value_type, 0,sdc_nodes,2,sdc_nodes>             spectral_integrator_type;
 
     private:
-        enum
-        {
-            m_ode_size = sdc_traits<sdc_integrator_type>::ode_size
-        };
-        sdc_integrator_type m_sdc;
+        size_t m_ode_size;
+        SemiImplicitSDC<value_type,spectral_integrator_type,sdc_nodes,sdc_corrections> m_sdc;
 
     public:
 
-        SISDCIntegrator() {}
+        SISDCIntegrator(size_t ode_size) : m_ode_size(ode_size), m_sdc(ode_size) {}
 
         inline boundary_type &boundary()
         {
@@ -50,11 +49,7 @@ class SISDCIntegrator
             value_type *positions = boundary().positions();
             value_type *velocities = boundary().velocities();
             value_type time = boundary().time();
-            std::vector<value_type> Vi(m_ode_size,0.0);
-            std::vector<value_type> Ve(m_ode_size,0.0);
-            boundary().Implicit(time,positions,&Vi[0]);
-            boundary().Explicit(time,positions,&Ve[0]);
-            m_sdc.init(positions,&Vi[0],&Ve[0]);
+            m_sdc.init(time,positions,boundary());
             m_sdc.predictor(boundary(),time,timestep);
             m_sdc.corrector(boundary(),time,timestep);
             std::copy(m_sdc.X(0),m_sdc.X(0)+m_ode_size,positions);

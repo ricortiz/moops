@@ -157,7 +157,6 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                 col_idx.push_back(i + 1);
             col_ptr.push_back(col_idx.size());
             for(size_t j = 0; j < m_dims[3] - 1; ++j)
-            {
                 for(size_t i = 0; i < m_dims[2]; ++i)
                 {
                     this->add_plane_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1);
@@ -166,11 +165,10 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                     {
                         size_t head_offset = m_dims[2]*(m_dims[3]-1)+1;
                         for(size_t k = head_offset; k < head_offset + m_dims[0]; ++k)
-                            col_idx.push_back(k + 1);
+                            col_idx.push_back(k);
                     }
                     col_ptr.push_back(col_idx.size());
-                }
-            }
+                }            
         }
 
         void setCells(size_t offset)

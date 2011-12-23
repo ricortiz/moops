@@ -30,10 +30,11 @@ class ElasticBoundary : public spring_system_type, public integration_policy<Ela
         typedef typename spring_system_type::particle_type particle_type;
         typedef integration_policy<ElasticBoundary<spring_system_type,fluid_solver_type,integration_policy>,5,4 > time_integrator_type;
     private:
+        size_t m_ode_size;
         fluid_solver_type                m_fluid_solver;
 
     public:
-        ElasticBoundary(size_t ode_size) : spring_system_type(ode_size), time_integrator_type(ode_size), m_fluid_solver(ode_size/3) {  }
+        ElasticBoundary(size_t ode_size) : m_ode_size(ode_size), spring_system_type(ode_size), time_integrator_type(ode_size), m_fluid_solver(ode_size/3) {  }
         ~ElasticBoundary() {}
         inline fluid_solver_type &fluid_solver() { return m_fluid_solver; }
         inline fluid_solver_type const &fluid_solver() const { return m_fluid_solver; }
@@ -46,17 +47,22 @@ class ElasticBoundary : public spring_system_type, public integration_policy<Ela
 
         void operator()(value_type time, value_type *x, value_type *v)
         {
+            std::copy(x,x+m_ode_size,this->positions());
             this->update_forces(time);
             m_fluid_solver(x,v,this->forces());
         }
 
-        void Explicit(value_type time, value_type *x, value_type *v)
+        void Explicit(value_type time, const value_type *x, value_type *v)
         {
-            m_fluid_solver(x,v,this->forces(),*this);
+            std::copy(x,x+m_ode_size,this->positions());
+            this->update_forces(time);
+            m_fluid_solver.ExplicitOperator(x,v,this->forces());
         }
-        void Implicit(value_type time, value_type *x, value_type *v)
+        void Implicit(value_type time, const value_type *x, value_type *v)
         {
-            m_fluid_solver(x,v,this->forces(),*this);
+            std::copy(x,x+m_ode_size,this->positions());
+            this->update_forces(time);
+            m_fluid_solver.ImplicitOperator(x,v,this->forces());
         }
 };
 

@@ -33,11 +33,18 @@ class krylov_storage
 {
         size_t m_system_size;
         krylov_arrays<T,krylov_space> m_data;
+        
     public:
         inline explicit krylov_storage ( size_t system_size ) : m_system_size(system_size)
         {
             m_data.V = new T[system_size* ( krylov_space+1 ) ];
             m_data.R = new T[system_size];
+            std::fill(m_data.H,m_data.H+krylov_space* ( krylov_space+1 ) /2,0.0);
+            std::fill(m_data.C,m_data.C+krylov_space+1,0.0);
+            std::fill(m_data.S,m_data.S+krylov_space+1,0.0);
+            std::fill(m_data.G,m_data.G+krylov_space+1,0.0);
+            std::fill(m_data.V,m_data.V+system_size* ( krylov_space+1 ),0.0);
+            std::fill(m_data.R,m_data.R+system_size,0.0);
         }
         ~krylov_storage()
         {

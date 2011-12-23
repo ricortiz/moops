@@ -17,7 +17,6 @@
 ///                      It contains the main method that drives the simulation: void integrate()
 /// @section See also ExplicitSDC SemiImplicitSDC
 
-
 #include "math/ode_solver/sdc/integrator/clenshaw_curtis.hpp"
 #include "math/ode_solver/sdc/explicit_sdc.hpp"
 
@@ -49,8 +48,7 @@ class SDCIntegrator
             value_type *positions = boundary().positions();
             value_type *velocities = boundary().velocities();
             value_type time = boundary().time();
-            std::copy(positions,positions+m_ode_size,m_sdc.X(0));
-            std::copy(velocities,velocities+m_ode_size,m_sdc.F(0));
+            m_sdc.init(time,positions,boundary());
             m_sdc.predictor(boundary(),time,timestep);
             m_sdc.corrector(boundary(),time,timestep);
             std::copy(m_sdc.X(0),m_sdc.X(0)+m_ode_size,positions);

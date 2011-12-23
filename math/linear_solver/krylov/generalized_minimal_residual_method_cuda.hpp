@@ -4,7 +4,7 @@
 #include<algorithm>
 
 #include "krylov_storage.hpp"
-#include "krylov_base_raw.hpp"
+#include "krylov_base.hpp"
 
 template<typename value_type, size_t system_size, size_t krylov_space_max_dim>
 class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalResidualMethod<value_type, system_size,krylov_space_max_dim> >

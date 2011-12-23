@@ -45,8 +45,17 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, integrator_type, sdc_
         inline value_type dt ( int i )              { return m_integrator.dt[i]; }
         inline value_type &Immk ( int i, int j )    { return m_integrator.Immk[i][j]; }
         inline void integrate()                     { m_integrator.integrate ( F() ); }
+        inline size_t ode_size()                    { return m_ode_size; }
+        
         inline void init(const value_type *x, const value_type *Fx) { m_storage.init(x,Fx); }
-        inline size_t ode_size() { return m_ode_size; }
+        
+        template<typename function_type>
+        inline void init(value_type t, value_type *x, function_type &V)
+        {
+            std::copy(x,x+m_ode_size,m_storage.X(0));
+            V(t,m_storage.X(0),m_storage.F(0));
+        }
+        
         /**
         * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method
         *

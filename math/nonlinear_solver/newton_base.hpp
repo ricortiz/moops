@@ -1,6 +1,8 @@
 #ifndef NEWTON_BASE_HPP
 #define NEWTON_BASE_HPP
 
+#include<iterator>
+
 template<typename T>
 class newton_traits;
 
@@ -9,18 +11,17 @@ class NewtonBase
 {
     public:
         typedef typename newton_traits<Derived>::value_type value_type;
-        
+
     private:
         value_type m_alpha;
         value_type m_sigma0; //< safeguarding bounds for the linesearch
         value_type m_sigma1; //< safeguarding bounds for the linesearch
         size_t m_maxarm;
-        size_t m_system_size;
 
     public:
-        NewtonBase() : m_alpha ( value_type ( 1e-4 ) ), m_sigma0 ( value_type ( .1 ) ), m_sigma1 ( value_type ( .5 ) ), m_maxarm ( 20 ), m_system_size(derived().system_size())
+        NewtonBase() : m_alpha ( value_type ( 1e-4 ) ), m_sigma0 ( value_type ( .1 ) ), m_sigma1 ( value_type ( .5 ) ), m_maxarm ( 20 )
         {}
-        
+
         /**
          * @brief This function returns an instance of the derived type.
          *
@@ -30,12 +31,13 @@ class NewtonBase
         {
             return *static_cast<Derived*> ( this );
         }
-        
+
         template< typename operator_type>
         inline void armijo ( operator_type &F, value_type *x, value_type *lambda, value_type *fnorm, value_type *fnorm_sqr )
         {
+            size_t system_size = derived().system_size();
             unsigned int iarm = 0; // Armijo iteration counter
-            while ( fnorm[1] >= ( value_type ( 1 ) - m_alpha*lambda[0] ) *fnorm[0] )
+            while ( fnorm[1] >= ( value_type ( 1 ) - m_alpha * lambda[0] ) *fnorm[0] )
             {
                 /// Apply three point parabolic model
                 if ( iarm == 0 )
@@ -44,13 +46,15 @@ class NewtonBase
                     lambda[0] = parab3p ( lambda[1], lambda[2], fnorm_sqr[0], fnorm_sqr[1], fnorm_sqr[2] );
 
                 /// Update x and keep books on lambda
-                for ( size_t i = 0; i < m_system_size; ++i )
-                    derived().xt(i) = x[i] + lambda[0] * derived().dx ( i );
+                for ( size_t i = 0; i < system_size; ++i )
+                    derived().xt ( i ) = x[i] + lambda[0] * derived().dx ( i );
                 lambda[2] = lambda[1];
                 lambda[1] = lambda[0];
                 /// Keeps books on function norms
                 F ( derived().xt(), derived().ft() );
-                fnorm[1] = norm ( derived().ft() );
+                std::copy(derived().ft(),derived().ft()+system_size,std::ostream_iterator<value_type>(std::cout," "));
+                std::cout << std::endl;
+                fnorm[1] = norm ( derived().ft(), system_size );
                 fnorm_sqr[2] = fnorm_sqr[1];
                 fnorm_sqr[1] = fnorm[1] * fnorm[1];
                 iarm++;
@@ -83,31 +87,32 @@ class NewtonBase
             ///    lambda = m_sigma1*lambda
             value_type c2 = lamm * ( ffc - ff0 ) - lamc * ( ffm - ff0 );
             if ( c2 >= 0 )
-                return m_sigma0*lamc;
+                return m_sigma0 * lamc;
 
             value_type lambda = 0;
             value_type c1 = lamc * lamc * ( ffm - ff0 ) - lamm * lamm * ( ffc - ff0 );
             lambda = -.5 * c1 / c2;
 
-            if ( lambda < m_sigma0*lamc )
+            if ( lambda < m_sigma0 * lamc )
                 lambda = m_sigma0 * lamc;
-            if ( lambda > m_sigma1*lamc )
+            if ( lambda > m_sigma1 * lamc )
                 lambda = m_sigma1 * lamc;
 
             return lambda;
 
         }
 
-        inline value_type dot ( const value_type *x, const value_type *y )
+        inline value_type dot ( const value_type *x, const value_type *y, size_t system_size )
         {
             value_type s = value_type ( 0 );
-            for ( size_t i = 0; i < m_system_size; ++i )
-                s += x[i]*y[i];
+            for ( size_t i = 0; i < system_size; ++i )
+                s += x[i] * y[i];
+            assert(!isnan(s));
             return s;
         }
-        inline value_type norm ( const value_type *x )
+        inline value_type norm ( const value_type *x, size_t system_size )
         {
-            return std::sqrt ( dot ( x,x ) );
+            return std::sqrt ( dot ( x, x, system_size ) );
         }
 
 };
@@ -128,53 +133,53 @@ class NewtonBase
 template<typename operator_type, typename value_type>
 struct directional_derivative
 {
-    
+
     operator_type &m_F;
     const value_type *m_x;
     const value_type *m_f0;
     size_t m_system_size;
-    
-    directional_derivative ( operator_type &F, const value_type *x, const value_type *f0, size_t system_size ) : m_F ( F ), m_x ( x ), m_f0 ( f0 ), m_system_size(system_size) {}
-    
+
+    directional_derivative ( operator_type &F, const value_type *x, const value_type *f0, size_t system_size ) : m_F ( F ), m_x ( x ), m_f0 ( f0 ), m_system_size ( system_size ) {}
+
     inline void operator() ( const value_type *w, value_type *DF, value_type eps = value_type ( 1e-7 ) )
     {
-        value_type wnorm = norm ( w );
+        value_type wnorm = norm ( w, m_system_size );
         if ( wnorm == 0 )
         {
-	  std::fill(DF,DF+m_system_size,value_type(0));
+            std::fill ( DF, DF + m_system_size, value_type ( 0 ) );
 //             for ( size_t i = 0; i < m_system_size; ++i )
 //                 DF[i] = value_type ( 0 );
             return;
         }
-        
+
         /// Scale the step
-        value_type xs = dot ( m_x,w ) / wnorm;
-        
+        value_type xs = dot ( m_x, w, m_system_size ) / wnorm;
+
         if ( xs != value_type ( 0 ) )
             eps = eps * std::max ( std::fabs ( xs ), value_type ( 1 ) ) * ( xs < 0 ? value_type ( -1 ) : value_type ( 1 ) );
-        
+
         /// Scale the difference increment
-            eps /= wnorm;
-            
-            value_type f1[m_system_size];
-            value_type x1[m_system_size];
-            for ( size_t i = 0; i < m_system_size; ++i )
-                x1[i] = m_x[i] + eps * w[i];
-            m_F ( x1, f1 );
-            value_type fac = value_type ( 1 ) / eps;
-            for ( size_t i = 0; i < m_system_size; ++i )
-                DF[i] = ( f1[i] - m_f0[i] ) * fac;
+        eps /= wnorm;
+
+        value_type f1[m_system_size];
+        value_type x1[m_system_size];
+        for ( size_t i = 0; i < m_system_size; ++i )
+            x1[i] = m_x[i] + eps * w[i];
+        m_F ( x1, f1 );
+        value_type fac = value_type ( 1 ) / eps;
+        for ( size_t i = 0; i < m_system_size; ++i )
+            DF[i] = ( f1[i] - m_f0[i] ) * fac;
     }
-    inline value_type dot ( const value_type *x, const value_type *y )
+    inline value_type dot ( const value_type *x, const value_type *y, size_t system_size )
     {
         value_type s = value_type ( 0 );
-        for ( size_t i = 0; i < m_system_size; ++i )
-            s += x[i]*y[i];
+        for ( size_t i = 0; i < system_size; ++i )
+            s += x[i] * y[i];
         return s;
     }
-    inline value_type norm ( const value_type *x )
+    inline value_type norm ( const value_type *x, size_t system_size )
     {
-        return std::sqrt ( dot ( x,x ) );
+        return std::sqrt ( dot ( x, x, system_size ) );
     }
 };
 

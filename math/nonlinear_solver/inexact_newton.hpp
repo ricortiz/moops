@@ -7,7 +7,7 @@
 
 #include "math/nonlinear_solver/newton_storage.hpp"
 #include "math/nonlinear_solver/newton_base.hpp"
-#include "math/linear_solver/krylov/generalized_minimal_residual_method_raw.hpp"
+#include "math/linear_solver/krylov/generalized_minimal_residual_method.hpp"
 
 
 /**
@@ -17,12 +17,8 @@
  * Parabolic line search via three point interpolation.
  * Computes Jacobian using finite differences.
  **/
-template< typename value_type, int k_max, int k_restart, typename krylov_method_type = GeneralizedMinimalResidualMethod<value_type,k_max> >
-class InexactNewtonMethod;
-
-template< typename value_type,int k_max,int k_restart >
-class InexactNewtonMethod<value_type,k_max,k_restart,GeneralizedMinimalResidualMethod<value_type,k_max> >
-    : public NewtonBase<InexactNewtonMethod<value_type,k_max,k_restart,GeneralizedMinimalResidualMethod<value_type,k_max> > >
+template< typename value_type,int k_max,int k_restart, typename linear_solver_type = GeneralizedMinimalResidualMethod<value_type,k_max> >
+class InexactNewtonMethod: public NewtonBase<InexactNewtonMethod<value_type,k_max,k_restart,linear_solver_type> >
 {
     private:
         size_t m_system_size;
@@ -60,14 +56,14 @@ class InexactNewtonMethod<value_type,k_max,k_restart,GeneralizedMinimalResidualM
         *
         **/
         template< typename operator_type>
-        void operator() ( operator_type &F, value_type *x, value_type atol, value_type rtol, std::vector<value_type> *stats = 0 )
+        void operator() ( operator_type &F, value_type *x, value_type atol, value_type rtol = 0, std::vector<value_type> *stats = 0 )
         {
             typedef directional_derivative<operator_type,value_type>   jacobian_operator_type;
             jacobian_operator_type jacobian ( F,x,f(),m_system_size);
             /// Evaluate F at initial iterate and compute the stop tolerance
 
             F ( x,f() );
-            value_type fnrm = norm ( f() );
+            value_type fnrm = this->norm ( f(),m_system_size );
             value_type fnrmo = value_type ( 1 );
             value_type stop_tol = atol + rtol * fnrm;
             value_type gmres_tol = m_etamax;
@@ -88,8 +84,11 @@ class InexactNewtonMethod<value_type,k_max,k_restart,GeneralizedMinimalResidualM
                 /// Solve for descend direction using GMRES
                 unsigned int k_it = 0;
                 while ( k_err > gmres_tol*fnrm && k_it++ < k_restart && fnrm != 0 )
+                {
                     k_err = m_gmres ( jacobian, f(), dx(), gmres_tol );
-
+//                     std::cout << k_err << std::endl;
+                }
+                
                 /// Start Armijo line search
                 value_type lambda[3]    = {1., 1., 1.};
                 value_type fnorm[2]     = {0., 0.};
@@ -99,18 +98,19 @@ class InexactNewtonMethod<value_type,k_max,k_restart,GeneralizedMinimalResidualM
                     xt ( i ) = x[i] + lambda[0] * dx ( i );
 
                 F ( xt(), ft() );
-                fnorm[0] = norm ( f() );
-                fnorm[1] = norm ( ft() );
+                fnorm[0] = this->norm ( f(), m_system_size );
+                fnorm[1] = this->norm ( ft(), m_system_size );
                 fnorm_sqr[0] = fnorm[0] * fnorm[0];
                 fnorm_sqr[1] = fnorm[1] * fnorm[1];
                 fnorm_sqr[2] = fnorm_sqr[1];
-                armijo(F,x,lambda,fnorm,fnorm_sqr);
+                this->armijo(F,x,lambda,fnorm,fnorm_sqr);
 
                 std::copy ( xt(),xt()+m_system_size,x );
                 std::copy ( ft(),ft()+m_system_size,f() );
                 /// End of Armijo line search.
                 fnrmo = fnrm;
-                fnrm = norm ( f() );
+                fnrm = this->norm ( f(), m_system_size );
+//                 std::cout << fnrm << std::endl;
                 rat = fnrm / fnrmo;
 
                 /// Adjust eta as per Eisenstat-Walker.

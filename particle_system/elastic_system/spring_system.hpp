@@ -66,13 +66,20 @@ class SpringSystem : public particle_system_type
                 f->apply();
         }
 
+        inline void update_forces(value_type time, value_type *x)
+        {
+            if(m_surface)
+                m_surface->update(*this, time);
+            compute_forces();
+        }
+        
         inline void update_forces(value_type time)
         {
             if(m_surface)
                 m_surface->update(*this, time);
             compute_forces();
         }
-
+        
         void clear()
         {
             m_spring_lut.clear();
