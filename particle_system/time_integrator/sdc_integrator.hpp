@@ -26,18 +26,19 @@ template<typename boundary_type, int sdc_nodes = 5, int sdc_corrections = 4 >
 class SDCIntegrator
 {
     protected:
+        typedef SDCIntegrator<boundary_type,sdc_nodes,sdc_corrections>                 self_type;
         typedef typename immersed_structure_traits<boundary_type>::value_type          value_type;        
         typedef SDCSpectralIntegrator<value_type, 0,sdc_nodes,2,sdc_nodes>             spectral_integrator_type;
 
     private:
         size_t m_ode_size;
-        ExplicitSDC<value_type,spectral_integrator_type,sdc_nodes,sdc_corrections> m_sdc;
+        ExplicitSDC<value_type,self_type,spectral_integrator_type,sdc_nodes,sdc_corrections> m_sdc;
 
     public:
 
-        SDCIntegrator(size_t ode_size) : m_ode_size(ode_size), m_sdc(ode_size) {}
+        SDCIntegrator(size_t ode_size) : m_ode_size(ode_size), m_sdc(*this) {}
         
-        inline boundary_type &boundary()
+        inline boundary_type &derived()
         {
             return *static_cast<boundary_type*>(this);
         }
@@ -45,15 +46,24 @@ class SDCIntegrator
         template<typename value_type>
         void integrate(value_type timestep)
         {
-            value_type *positions = boundary().positions();
-            value_type *velocities = boundary().velocities();
-            value_type time = boundary().time();
-            m_sdc.init(time,positions,boundary());
-            m_sdc.predictor(boundary(),time,timestep);
-            m_sdc.corrector(boundary(),time,timestep);
+            value_type *positions = derived().positions();
+            value_type *velocities = derived().velocities();
+            value_type time = derived().time();
+            m_sdc.init(time,positions);
+            m_sdc.predictor(time,timestep);
+            m_sdc.corrector(time,timestep);
             std::copy(m_sdc.X(0),m_sdc.X(0)+m_ode_size,positions);
             std::copy(m_sdc.F(0),m_sdc.F(0)+m_ode_size,velocities);
         }
+
+        void operator()(value_type time, value_type *x, value_type *v)
+        {
+            std::copy(x,x+m_ode_size,derived().positions());
+            derived().update_forces(time);
+            derived().fluid_solver()(x,v,derived().forces());
+        }
+
+        size_t ode_size() { return m_ode_size; }
 
 };
 

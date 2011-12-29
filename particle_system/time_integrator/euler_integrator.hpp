@@ -23,14 +23,17 @@ template<typename boundary_type>
 class EulerIntegrator
 {
     protected:
+        typedef EulerIntegrator<boundary_type>                                         self_type;
         typedef typename immersed_structure_traits<boundary_type>::value_type          value_type;
 
     private:
-        ForwardEuler<value_type> euler_integrator;
+        ForwardEuler<value_type,self_type> m_euler_integrator;
 
     public:
-
-        inline boundary_type &boundary()
+        
+        EulerIntegrator() : m_euler_integrator(*this) {}
+        
+        inline boundary_type &derived()
         {
             return *static_cast<boundary_type*>(this);
         }
@@ -38,10 +41,15 @@ class EulerIntegrator
         template<typename value_type>
         inline void integrate(value_type timestep)
         {
-            value_type time = boundary().time();
-            euler_integrator(boundary(),time,timestep);
-        }
+            value_type time = derived().time();
+            value_type positions = derived().positions();
+            value_type velocities = derived().velocities();
+            size_t data_size = derived().data_size();
+            m_euler_integrator(time,positions,velocities,timestep,data_size);
+        }       
 
+        size_t ode_size() { return derived().data_size(); }
+        
 };
 
 

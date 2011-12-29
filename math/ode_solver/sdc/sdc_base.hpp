@@ -81,8 +81,7 @@ class SDCBase
          * \param F Vector containing step's data for rigth hand side
          * \param t Global time
          **/
-        template<typename function_type>
-        inline void predictor (function_type &V, value_type t, value_type Dt )
+        inline void predictor (value_type t, value_type Dt )
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
             value_type time = t;
@@ -90,7 +89,7 @@ class SDCBase
             for ( size_t k = 0; k < m_sdc_nodes - 1; ++k )
             {
                 value_type dt = Dt*sdc_method().dt ( k );
-                sdc_method().predictor_step ( V, k, time, dt );
+                sdc_method().predictor_step ( k, time, dt );
             }
         }
 
@@ -101,8 +100,7 @@ class SDCBase
         * \param F Vector containing step's data for rigth hand side
         * \param t Global time
         **/
-        template<typename function_type>
-        inline void corrector ( function_type&V, value_type t, value_type Dt )
+        inline void corrector ( value_type t, value_type Dt )
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
 	    size_t ode_size = sdc_method().ode_size();
@@ -116,7 +114,7 @@ class SDCBase
                     value_type dt = Dt*sdc_method().dt ( k );
                     for(size_t j = 0; j < ode_size; ++j)
                         fdiff[j] += sdc_method().Immk( k,j ) / sdc_method().dt ( k );
-                    sdc_method().corrector_predictor_step ( V, k, &fdiff[0], time, dt );
+                    sdc_method().corrector_predictor_step ( k, &fdiff[0], time, dt );
                 }
                 std::fill ( fdiff.begin(),fdiff.end(),value_type ( 0 ) );
             }

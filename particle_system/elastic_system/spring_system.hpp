@@ -19,6 +19,7 @@
 #include<map>
 #include "particle_system/forces/spring.hpp"
 #include "geometry/surface.hpp"
+#include <boost/type_traits/detail/is_mem_fun_pointer_impl.hpp>
 
 template <typename surface_type, typename particle_system_type>
 class SpringSystem : public particle_system_type
@@ -68,7 +69,7 @@ class SpringSystem : public particle_system_type
 
         inline void update_forces(value_type time, value_type *x)
         {
-            if(m_surface)
+            if(m_surface && time != this->time())
                 m_surface->update(*this, time);
             compute_forces();
         }

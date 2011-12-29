@@ -38,3 +38,5 @@ IF(BUILD_TESTING)
 ENDIF(BUILD_TESTING)
 
 ADD_SUBDIRECTORY(examples)
+
+add_subdirectory(particle_system/testing)

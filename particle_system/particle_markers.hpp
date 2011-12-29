@@ -46,14 +46,14 @@ template<typename particle_system_type,
             this->time() += timestep;
         }
 
-        void operator()(value_type time, value_type *x, value_type *v)
-        {
-            value_type *f = m_surface->forces();
-            value_type *y = m_surface->positions();
-            size_t num_targets = this->particles_size();
-            size_t num_sources = m_surface->particles_size();
-            m_fluid_solver(x,v,y,f,num_sources,num_targets);
-        }
+//         void operator()(value_type time, value_type *x, value_type *v)
+//         {
+//             value_type *f = m_surface->forces();
+//             value_type *y = m_surface->positions();
+//             size_t num_targets = this->particles_size();
+//             size_t num_sources = m_surface->particles_size();
+//             m_fluid_solver(x,v,y,f,num_sources,num_targets);
+//         }
 };
 
 template< typename _particle_system_type, typename _immersed_surface_type, typename _fluid_solver_type, template<typename> class _integration_policy>

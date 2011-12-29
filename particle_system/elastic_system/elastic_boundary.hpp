@@ -24,7 +24,7 @@ template<typename spring_system_type,
 	 template<typename,int,int> class integration_policy>
 class ElasticBoundary : public spring_system_type, public integration_policy<ElasticBoundary<spring_system_type,fluid_solver_type,integration_policy>,5,4 >
 { 
-    public:
+    public:        
         typedef typename spring_system_type::value_type    value_type;
         typedef typename spring_system_type::spring_type   spring_type;
         typedef typename spring_system_type::particle_type particle_type;
@@ -45,25 +45,26 @@ class ElasticBoundary : public spring_system_type, public integration_policy<Ela
             this->time() += timestep;
         }
 
-        void operator()(value_type time, value_type *x, value_type *v)
-        {
-            std::copy(x,x+m_ode_size,this->positions());
-            this->update_forces(time);
-            m_fluid_solver(x,v,this->forces());
-        }
-
-        void Explicit(value_type time, const value_type *x, value_type *v)
-        {
-            std::copy(x,x+m_ode_size,this->positions());
-            this->update_forces(time);
-            m_fluid_solver.ExplicitOperator(x,v,this->forces());
-        }
-        void Implicit(value_type time, const value_type *x, value_type *v)
-        {
-            std::copy(x,x+m_ode_size,this->positions());
-            this->update_forces(time);
-            m_fluid_solver.ImplicitOperator(x,v,this->forces());
-        }
+//         void operator()(value_type time, value_type *x, value_type *v)
+//         {
+//             std::copy(x,x+m_ode_size,this->positions());
+//             this->update_forces(time);
+//             m_fluid_solver(x,v,this->forces());
+//         }
+// 
+//         void Explicit(value_type time, const value_type *x, value_type *v)
+//         {
+//             std::copy(x,x+m_ode_size,this->positions());
+//             this->update_forces(time);
+//             m_fluid_solver.Explicit(x,v,this->forces());
+//         }
+//         
+//         void Implicit(value_type time, const value_type *x, value_type *v)
+//         {
+//             std::copy(x,x+m_ode_size,this->positions());
+//             this->update_forces(time);
+//             m_fluid_solver.Implicit(x,v,this->forces());
+//         }
 };
 
 template< typename _spring_system_type, typename _fluid_solver_type, template<typename,int,int> class _integration_policy>

@@ -105,7 +105,12 @@ class ParticleSystem
         {
             return m_num_particles;
         }
-
+        
+        std::size_t data_size() const
+        {
+            return m_data_size;
+        }
+        
         storage_type *storage() { return &m_storage; }
 };
 

@@ -26,7 +26,7 @@ class DirectStokesSolver
     protected:
         typedef typename particle_system_type::value_type value_type;
         typedef typename particle_system_type::particle_type particle_type;
-        typedef std::map<size_t,std::vector<size_t> > map_type;
+        typedef std::vector<std::vector<size_t> > map_type;
 
     private:
 
@@ -37,7 +37,7 @@ class DirectStokesSolver
 
     public:
         DirectStokesSolver() : m_num_particles ( 0 ) {}
-        DirectStokesSolver ( size_t num_particles ) : m_num_particles ( num_particles ) {}
+        DirectStokesSolver ( size_t num_particles ) : m_num_particles ( num_particles ), m_map_explicit(num_particles), m_map_implicit(num_particles) {}
 
         inline void operator() ( const value_type *x, value_type *v,const  value_type *f )
         {
@@ -53,17 +53,17 @@ class DirectStokesSolver
                     compute_velocity ( &x[i], &v[i], &y[j], &f[j], m_delta );
         }
         
-        inline void ImplicitOperator( const value_type *x, value_type *v, const value_type *f )
+        inline void Implicit( const value_type *x, value_type *v, const value_type *f )
         {
-            ImplicitOperator( x, v, x, f );
+            Implicit( x, v, x, f );
         }
         
-        inline void ExplicitOperator(const  value_type *x, value_type *v, const value_type *f )
+        inline void Explicit(const  value_type *x, value_type *v, const value_type *f )
         {
-            ExplicitOperator  ( x, v, x, f );
+            Explicit  ( x, v, x, f );
         }
         
-        inline void ImplicitOperator ( const value_type *x, value_type *v, const value_type *y, const value_type *f )
+        inline void Implicit ( const value_type *x, value_type *v, const value_type *y, const value_type *f )
         {
             typedef std::vector<size_t>::iterator iterator;
             for ( size_t i = 0, xidx = 0; i < m_num_particles; ++i, xidx += 3 )
@@ -74,7 +74,7 @@ class DirectStokesSolver
                 }
         }
         
-        inline void ExplicitOperator ( const value_type *x, value_type *v, const value_type *y, const value_type *f )
+        inline void Explicit ( const value_type *x, value_type *v, const value_type *y, const value_type *f )
         {
             typedef std::vector<size_t>::iterator iterator;            
             for ( size_t i = 0, xidx = 0; i < m_num_particles; ++i, xidx += 3 )
@@ -98,7 +98,6 @@ class DirectStokesSolver
                     else
                         m_map_explicit[i].push_back(yidx);
         }
-        
         
         value_type const &delta() const { return m_delta; }
         value_type &delta() { return m_delta; }
