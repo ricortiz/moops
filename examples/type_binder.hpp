@@ -61,8 +61,8 @@ struct TypeBinder
 #endif
     typedef ElasticBoundary<heart_pump_spring_system_type,fluid_solver_type,SDCIntegrator> heart_pump_boundary_type;
     typedef ElasticBoundary<swarm_spring_system_type,fluid_solver_type,SISDCIntegrator> swarm_boundary_type;
-    typedef ParticleMarkers<particle_system_tracers_type,heart_pump_boundary_type,fluid_solver_type,EulerIntegrator> heart_pump_volume_type;
-    typedef ParticleMarkers<particle_system_tracers_type,swarm_boundary_type,fluid_solver_type,EulerIntegrator> swarm_volume_type;
+    typedef ParticleMarkers<particle_system_tracers_type,heart_pump_boundary_type,EulerIntegrator> heart_pump_volume_type;
+    typedef ParticleMarkers<particle_system_tracers_type,swarm_boundary_type,EulerIntegrator> swarm_volume_type;
     
     typedef IO::VTKWriter<vtkXMLPolyDataWriter>                                 vtk_writer;
 };

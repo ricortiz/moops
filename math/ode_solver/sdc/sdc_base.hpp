@@ -77,8 +77,6 @@ class SDCBase
         /**
          * \brief Predictor loop.
          *
-         * \param x Vector containing step's data for unknown variables
-         * \param F Vector containing step's data for rigth hand side
          * \param t Global time
          **/
         inline void predictor (value_type t, value_type Dt )
@@ -96,8 +94,6 @@ class SDCBase
         /**
         * \brief Corrector loop.
         *
-        * \param x Vector containing step's data for unknown variables
-        * \param F Vector containing step's data for rigth hand side
         * \param t Global time
         **/
         inline void corrector ( value_type t, value_type Dt )
@@ -122,70 +118,6 @@ class SDCBase
             sdc_method().update();
         }
 
-        /**
-        * \brief Forward Euler step, used in predictor and corrector steps.
-        *
-        * \param xnew New update
-        * \param xold Old value
-        * \param F Function value: F(x_k)
-        * \param dt local timestep
-        *
-        * \sa predictor_step()
-        **/
-        inline void forward_euler ( value_type *xnew, const value_type *xold, const value_type *F, const value_type &dt )
-        {
-	    size_t ode_size = sdc_method().ode_size();
-            for ( size_t i = 0; i < ode_size; ++i )
-                xnew[i] = xold[i] + dt * F[i];
-        }
-
-        /**
-         * \brief Backward Euler step, used in predictor and corrector steps.
-         *
-         * \param xnew New update
-         * \param xold Old value
-         * \param F Function value: F(x_k)
-         * \param dt local timestep
-         *
-         * \sa predictor_step()
-         **/
-        template<typename operator_type>
-        inline void backward_euler ( value_type *x, value_type t, const value_type *xold, const value_type *Fold, value_type *Fi, value_type dt, operator_type &V )
-        {
-            size_t ode_size = sdc_method().ode_size();
-            std::vector<value_type> rhs(ode_size,0.0);
-            
-            InexactNewtonMethod<value_type,40,10> newton_solve(ode_size);            
-            forward_euler ( &rhs[0], xold, Fold, dt );
-            implicit_operator<operator_type,value_type> F ( V,t,dt,&rhs[0],ode_size );
-            newton_solve ( F, x, 1e-6, 1e-6 );
-
-            for ( size_t i = 0; i < ode_size; ++i )
-                Fi[i] = ( x[i] - rhs[i] ) / dt;
-
-        }
-
-        template<typename function_type, typename value_type>
-        struct implicit_operator
-        {
-            function_type &m_V;
-            const value_type &m_t;
-            const value_type &m_dt;
-            const value_type *m_rhs;
-            size_t m_ode_size;
-
-            implicit_operator ( function_type &V, const value_type &t, const value_type &dt, const value_type *rhs, size_t ode_size )
-                    : m_V ( V ), m_t ( t ), m_dt ( dt ), m_rhs ( rhs ), m_ode_size(ode_size) {}
-
-            void operator() ( const value_type *x, value_type *Fx )
-            {
-                std::vector<value_type> Vx(m_ode_size,0.0);
-                m_V.Implicit ( m_t, x, &Vx[0] );
-                for ( size_t i = 0; i < m_ode_size; ++i )
-                    Fx[i] = x[i] - m_dt * Vx[i] - m_rhs[i];
-            }
-
-        };
 };
 
 

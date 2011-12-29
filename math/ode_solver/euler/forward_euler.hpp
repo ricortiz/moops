@@ -20,7 +20,7 @@ class ForwardEuler
     size_t m_ode_size;
     
     public:
-        ForwardEuler(function_type &F) : m_F(F), m_ode_size(F.ode_size()) {}
+        ForwardEuler(function_type &F) : m_F(F), m_ode_size(F.data_size()) {}
         
         inline void operator()(value_type t, value_type *x, value_type *v, value_type dt)
         {

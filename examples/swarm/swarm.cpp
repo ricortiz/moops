@@ -49,7 +49,7 @@ class SwarmApp
             m_record(true),
             m_surface_writer(new types::vtk_writer(data_path + "/surface/")),
             m_volume_writer(new types::vtk_writer(data_path + "/volume/")),
-            m_volume(&m_boundary,2*data_size)
+            m_volume(m_boundary,2*data_size)
         {
             size_t *dims = m_sine_geometry.get_dimensions();
             value_type *x0 = m_sine_geometry.getX0();

@@ -23,23 +23,30 @@
 
 template<typename T> struct immersed_structure_traits;
 
-template<typename boundary_type, int sdc_nodes = 5, int sdc_corrections = 4>
+template<typename boundary_type>
 class SISDCIntegrator
 {
     protected:
-        typedef SISDCIntegrator<boundary_type,sdc_nodes,sdc_corrections>               self_type;
-        typedef typename immersed_structure_traits<boundary_type>::value_type          value_type;
-        typedef SDCSpectralIntegrator<value_type, 0,sdc_nodes,2,sdc_nodes>             spectral_integrator_type;
-
+        typedef SISDCIntegrator<boundary_type>               self_type;
+        typedef typename immersed_structure_traits<boundary_type>::value_type              value_type;
+        typedef typename immersed_structure_traits<boundary_type>::fluid_solver_type       fluid_solver_type;
+        typedef SDCSpectralIntegrator<value_type, 0, 5, 2, 5>                  spectral_integrator_type;
+	typedef SemiImplicitSDC<value_type, boundary_type, spectral_integrator_type, 5, 4> semi_implicit_sdc_type;
+	
     private:
         size_t m_ode_size;
-        SemiImplicitSDC<value_type,self_type,spectral_integrator_type,sdc_nodes,sdc_corrections> m_sdc;
+        semi_implicit_sdc_type m_sdc;
+        fluid_solver_type &m_fluid_solver;
+        std::vector<value_type> m_Fe0;
+        std::vector<value_type> m_Fi0;
 
     public:
+        SISDCIntegrator(size_t ode_size) : m_ode_size(ode_size), m_sdc(derived()), m_fluid_solver(derived().fluid_solver()), m_Fi0(ode_size, 0.0), m_Fe0(ode_size, 0.0)
+        {
+            m_sdc.init(derived().positions(), &m_Fi0[0], &m_Fe0[0]);
+        }
 
-        SISDCIntegrator(size_t ode_size) : m_ode_size(ode_size), m_sdc(*this) {}
-
-        inline boundary_type &boundary()
+        inline boundary_type &derived()
         {
             return *static_cast<boundary_type*>(this);
         }
@@ -47,30 +54,26 @@ class SISDCIntegrator
         template<typename value_type>
         void integrate(value_type timestep)
         {
-            value_type *positions = boundary().positions();
-            value_type *velocities = boundary().velocities();
-            value_type time = boundary().time();
-            m_sdc.init(time,positions);
-            m_sdc.predictor(time,timestep);
-            m_sdc.corrector(time,timestep);
-            std::copy(m_sdc.X(0),m_sdc.X(0)+m_ode_size,positions);
-            std::transform(m_sdc.Fi(0),m_sdc.Fi(0)+m_ode_size,m_sdc.Fe(0),velocities,std::plus<value_type>());
+            value_type time = derived().time();
+            m_sdc.predictor(time, timestep);
+            m_sdc.corrector(time, timestep);
+            std::transform(m_Fi0.begin(), m_Fi0.end(), m_Fe0.begin(), derived().velocities(), std::plus<value_type>());
         }
 
         void Explicit(value_type time, const value_type *x, value_type *v)
         {
-            std::copy(x,x+m_ode_size,boundary().positions());
-            boundary().update_forces(time);
-            boundary().fluid_solver().Explicit(x,v,boundary().forces());
+            std::copy(x, x + m_ode_size, derived().positions());
+            derived().update_forces(time);
+            m_fluid_solver.Explicit(x, v, derived().forces());
         }
-        
+
         void Implicit(value_type time, const value_type *x, value_type *v)
         {
-            std::copy(x,x+m_ode_size,boundary().positions());
-            boundary().update_forces(time);
-            boundary().fluid_solver().Implicit(x,v,boundary().forces());
+            std::copy(x, x + m_ode_size, derived().positions());
+            derived().update_forces(time);
+            m_fluid_solver.Implicit(x, v, derived().forces());
         }
-        
+
         size_t ode_size() { return m_ode_size; }
 };
 

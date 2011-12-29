@@ -12,16 +12,18 @@
 #include "math/ode_solver/euler/backward_euler.hpp"
 
 template<typename function_type>
-struct implicit_function_type : public function_type
+struct implicit_function
 {
     function_type &m_F;
-    implicit_function_type ( function_type &F ) : m_F ( F ) {}
+    implicit_function ( function_type &F ) : m_F ( F ) {}
 
     template<typename value_type>
-    inline void operator() ( value_type t, value_type *x, value_type Fx )
+    inline void operator() ( value_type t, const value_type *x, value_type *Fx )
     {
-        this->Implicit ( t, x, Fx );
+        m_F.Implicit ( t, x, Fx );
     }
+    
+    inline size_t data_size() { return m_F.data_size(); }
 };
 
 /**
@@ -35,23 +37,26 @@ template<typename value_type, typename function_type, typename integrator_type, 
 class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type, integrator_type, sdc_nodes, sdc_corrections> >
 {
     protected:
-        typedef BackwardEuler<value_type, function_type> backward_euler_type;
+	typedef implicit_function<function_type> 	 implicit_function_type;
+        typedef BackwardEuler<value_type, implicit_function_type> backward_euler_type;
 
     protected:
         sdc_storage<value_type, sdc_nodes, 0, SDC::SEMI_IMPLICIT> m_storage;
         integrator_type m_integrator;
         size_t m_ode_size;
         function_type   &m_F;
+	implicit_function_type m_Fimplicit;
         backward_euler_type m_backward_euler;
 
     public:
-        SemiImplicitSDC ( function_type &F )
+        SemiImplicitSDC ( function_type &Rhs )
             :
-            m_storage ( F.ode_size() ),
-            m_integrator ( F.ode_size() ),
-            m_ode_size ( F.ode_size() ),
-            m_F ( F ),
-            m_backward_euler ( implicit_function_type<function_type> ( F ) ) {}
+            m_storage ( Rhs.ode_size() ),
+            m_integrator ( Rhs.ode_size() ),
+            m_ode_size ( Rhs.ode_size() ),
+            m_F ( Rhs ),
+            m_Fimplicit(Rhs),
+            m_backward_euler ( m_Fimplicit ) {}
 
         inline const value_type* Fi ( int i ) const { return m_storage.Fi() [i]; }
         inline value_type* Fi ( int i )             { return m_storage.Fi() [i]; }
@@ -74,13 +79,6 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
 
         inline void init ( value_type *x, value_type *F_i, value_type *F_e ) { m_storage.init ( x, F_i, F_e ); }
 
-        inline void init ( value_type t, value_type *x )
-        {
-            value_type *x0 = X ( 0 );
-            std::copy ( x, x + m_ode_size, x0 );
-            m_F.Explicit ( t, x0, Fe ( 0 ) );
-            m_F.Implicit ( t, x0, Fi ( 0 ) );
-        }
 
         /**
         * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method

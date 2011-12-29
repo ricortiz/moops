@@ -40,7 +40,7 @@ class sdc_storage
     public:
         inline explicit sdc_storage ( size_t ode_size ) : m_ode_size ( ode_size )
         {
-            for ( int i = 0; i < sdc_nodes; ++i )
+            for ( int i = 1; i < sdc_nodes; ++i )
             {
                 m_data.X[i] = new T[ode_size];
                 m_data.F[i] = new T[ode_size];
@@ -49,7 +49,7 @@ class sdc_storage
 
         ~sdc_storage()
         {
-            for ( int i = 0; i < sdc_nodes; ++i )
+            for ( int i = 1; i < sdc_nodes; ++i )
             {
                 delete [] m_data.X[i];
                 delete [] m_data.F[i];
@@ -64,8 +64,10 @@ class sdc_storage
 
         inline void init(T *x, T *Fx)
         {
-            std::copy ( x,x+m_ode_size,m_data.X[0] );
-            std::copy ( Fx,Fx+m_ode_size,m_data.F[0] );
+	  m_data.X[0] = x;
+	  m_data.F[0] = Fx;
+//             std::copy ( x,x+m_ode_size,m_data.X[0] );
+//             std::copy ( Fx,Fx+m_ode_size,m_data.F[0] );
         }
         
         inline const T **F() const { return m_data.F; }
@@ -82,7 +84,7 @@ class sdc_storage<T,sdc_nodes,0,SDC::EXPLICIT>
     public:
         inline explicit sdc_storage ( size_t ode_size ) : m_ode_size ( ode_size )
         {
-            for ( int i = 0; i < sdc_nodes; ++i )
+            for ( int i = 1; i < sdc_nodes; ++i )
             {
                 m_data.X[i] = new T[ode_size];
                 m_data.F[i] = new T[ode_size];
@@ -91,7 +93,7 @@ class sdc_storage<T,sdc_nodes,0,SDC::EXPLICIT>
 
         ~sdc_storage()
         {
-            for ( int i = 0; i < sdc_nodes; ++i )
+            for ( int i = 1; i < sdc_nodes; ++i )
             {
                 delete [] m_data.X[i];
                 delete [] m_data.F[i];
@@ -106,8 +108,10 @@ class sdc_storage<T,sdc_nodes,0,SDC::EXPLICIT>
 
         inline void init(T *x, T *Fx)
         {
-            std::copy ( x,x+m_ode_size,m_data.X[0] );
-            std::copy ( Fx,Fx+m_ode_size,m_data.F[0] );
+	  m_data.X[0] = x;
+	  m_data.F[0] = Fx;
+//             std::copy ( x,x+m_ode_size,m_data.X[0] );
+//             std::copy ( Fx,Fx+m_ode_size,m_data.F[0] );
         }
         
         inline const T **F() const { return m_data.F; }
@@ -124,7 +128,7 @@ class sdc_storage<T,sdc_nodes,0,SDC::SEMI_IMPLICIT>
     public:
         inline explicit sdc_storage ( size_t ode_size ) : m_ode_size ( ode_size )
         {
-            for ( int i = 0; i < sdc_nodes; ++i )
+            for ( int i = 1; i < sdc_nodes; ++i )
             {
                 m_data.X[i] = new T[ode_size];
                 m_data.F[i] = new T[ode_size];
@@ -134,7 +138,7 @@ class sdc_storage<T,sdc_nodes,0,SDC::SEMI_IMPLICIT>
 
         ~sdc_storage()
         {
-            for ( int i = 0; i < sdc_nodes; ++i )
+            for ( int i = 1; i < sdc_nodes; ++i )
             {
                 delete [] m_data.X[i];
                 delete [] m_data.F[i];
@@ -153,9 +157,13 @@ class sdc_storage<T,sdc_nodes,0,SDC::SEMI_IMPLICIT>
 
         inline void init(T *x, T *Fx_i, T *Fx_e)
         {
-            std::copy ( x,x+m_ode_size,m_data.X[0] );
-            std::copy ( Fx_i,Fx_i+m_ode_size,m_data.F[0] );
-            std::copy ( Fx_e,Fx_e+m_ode_size,m_data.F[sdc_nodes] );
+	  
+	  m_data.X[0] = x;
+	  m_data.F[0] = Fx_i;
+	  m_data.F[sdc_nodes] = Fx_e;
+//             std::copy ( x,x+m_ode_size,m_data.X[0] );
+//             std::copy ( Fx_i,Fx_i+m_ode_size,m_data.F[0] );
+//             std::copy ( Fx_e,Fx_e+m_ode_size,m_data.F[sdc_nodes] );
         }
         
         inline const T **Fi() const { return m_data.F; }
