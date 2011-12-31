@@ -40,3 +40,5 @@ ENDIF(BUILD_TESTING)
 ADD_SUBDIRECTORY(examples)
 
 add_subdirectory(particle_system/testing)
+
+add_subdirectory(math/testing)

@@ -35,7 +35,7 @@ class krylov_storage
         krylov_arrays<T,krylov_space> m_data;
         
     public:
-        inline explicit krylov_storage ( size_t system_size ) : m_system_size(system_size)
+        explicit krylov_storage ( size_t system_size ) : m_system_size(system_size)
         {
             m_data.V = new T[system_size* ( krylov_space+1 ) ];
             m_data.R = new T[system_size];

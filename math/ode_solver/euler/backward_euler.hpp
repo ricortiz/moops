@@ -16,7 +16,7 @@
 #include "math/ode_solver/euler/forward_euler.hpp"
 #include "math/nonlinear_solver/inexact_newton.hpp"
 
-template < typename value_type, typename function_type, int gmres_iterations = 40, int gmres_restarts = 10 >
+template < typename value_type, typename function_type, int gmres_iterations = 1000, int gmres_restarts = 100 >
 class BackwardEuler
 {
     protected:
@@ -34,7 +34,7 @@ class BackwardEuler
 
             public:
 
-                implicit_operator(function_type &V) : m_V(V), m_forward_euler_solver(V), m_b(V.data_size(), 0.0), m_Vx(V.data_size(), 0.0), m_ode_size(V.data_size()) {}
+                implicit_operator(function_type &V) : m_V(V), m_forward_euler_solver(V), m_b(V.ode_size(), 0.0), m_Vx(V.ode_size(), 0.0), m_ode_size(V.ode_size()) {}
 
                 inline void operator()(const value_type *x, value_type *Fx)
                 {
@@ -62,12 +62,12 @@ class BackwardEuler
         size_t m_ode_size;
 
     public:
-        BackwardEuler(function_type &F) : m_F(F),  m_ode_size(F.data_size()), m_newton_solver(F.data_size()) {}
+        BackwardEuler(function_type &F) : m_F(F),  m_ode_size(F.ode_size()), m_newton_solver(F.ode_size()) {}
 
         inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *v, const value_type *vold, value_type dt)
         {
             m_F.setParameters(t, xold, vold, dt);
-            m_newton_solver(m_F, x, 1e-6, 1e-6);
+            m_newton_solver(m_F, x, 1e-16, 1e-16);
             value_type inv_dt = 1.0 / dt;
             const value_type *b = m_F.getRhs();
             for (size_t i = 0; i < m_ode_size; ++i)
@@ -83,8 +83,6 @@ class BackwardEuler
         {
             operator()(t,x, xold, v, v, dt);
         }
-
-
 
 };
 

@@ -2,6 +2,7 @@
 #define NEWTON_BASE_HPP
 
 #include<iterator>
+#include<cassert>
 
 template<typename T>
 class newton_traits;
@@ -32,8 +33,8 @@ class NewtonBase
             return *static_cast<Derived*> ( this );
         }
 
-        template< typename operator_type>
-        inline void armijo ( operator_type &F, value_type *x, value_type *lambda, value_type *fnorm, value_type *fnorm_sqr )
+        template< typename operator_type, typename vector_type>
+        inline bool armijo ( operator_type &F, value_type *x, value_type lambda[3], value_type fnorm[2], value_type fnorm_sqr[3], std::map<std::string,vector_type> *stats = 0 )
         {
             size_t system_size = derived().system_size();
             unsigned int iarm = 0; // Armijo iteration counter
@@ -47,24 +48,36 @@ class NewtonBase
 
                 /// Update x and keep books on lambda
                 for ( size_t i = 0; i < system_size; ++i )
-                    derived().xt ( i ) = x[i] + lambda[0] * derived().dx ( i );
+                    x[i] -= lambda[0] * derived().dx ( i );
                 lambda[2] = lambda[1];
                 lambda[1] = lambda[0];
                 /// Keeps books on function norms
-                F ( derived().xt(), derived().ft() );
-                std::copy(derived().ft(),derived().ft()+system_size,std::ostream_iterator<value_type>(std::cout," "));
-                std::cout << std::endl;
-                fnorm[1] = norm ( derived().ft(), system_size );
+                F ( x, derived().f() );
+
+                fnorm[1] = norm ( derived().f(), system_size );
                 fnorm_sqr[2] = fnorm_sqr[1];
                 fnorm_sqr[1] = fnorm[1] * fnorm[1];
                 iarm++;
 
                 if ( iarm > m_maxarm )
                 {
+                    if(stats)
+                    {
+                        std::map<std::string,vector_type> &s = *stats;
+                        std::string armijo_it_key = "armijo_fn_evals";
+                        s[armijo_it_key].push_back(iarm);
+                    }
                     std::cout << "Warning!  Armijo failure, too many reductions." << std::endl;
-                    return;
+                    return false;
                 }
             }
+            if(stats)
+            {
+                std::map<std::string,vector_type> &s = *stats;
+                std::string armijo_it_key = "armijo_fn_evals";
+                s[armijo_it_key].push_back(iarm);
+            }
+            return true;
         }
 
         /**
@@ -141,14 +154,12 @@ struct directional_derivative
 
     directional_derivative ( operator_type &F, const value_type *x, const value_type *f0, size_t system_size ) : m_F ( F ), m_x ( x ), m_f0 ( f0 ), m_system_size ( system_size ) {}
 
-    inline void operator() ( const value_type *w, value_type *DF, value_type eps = value_type ( 1e-7 ) )
+    inline void operator() ( const value_type *w, value_type *DF, value_type eps = value_type ( 1e-9 ) )
     {
         value_type wnorm = norm ( w, m_system_size );
         if ( wnorm == 0 )
         {
             std::fill ( DF, DF + m_system_size, value_type ( 0 ) );
-//             for ( size_t i = 0; i < m_system_size; ++i )
-//                 DF[i] = value_type ( 0 );
             return;
         }
 
@@ -166,9 +177,9 @@ struct directional_derivative
         for ( size_t i = 0; i < m_system_size; ++i )
             x1[i] = m_x[i] + eps * w[i];
         m_F ( x1, f1 );
-        value_type fac = value_type ( 1 ) / eps;
+        value_type h = value_type ( 1 ) / eps;
         for ( size_t i = 0; i < m_system_size; ++i )
-            DF[i] = ( f1[i] - m_f0[i] ) * fac;
+            DF[i] = ( f1[i] - m_f0[i] ) * h;
     }
     inline value_type dot ( const value_type *x, const value_type *y, size_t system_size )
     {

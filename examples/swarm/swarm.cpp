@@ -45,7 +45,7 @@ class SwarmApp
     public:
 
         SwarmApp(std::string &data_path) : m_boundary(data_size),
-            m_time_step(0.01),
+            m_time_step(0.1),
             m_record(true),
             m_surface_writer(new types::vtk_writer(data_path + "/surface/")),
             m_volume_writer(new types::vtk_writer(data_path + "/volume/")),
@@ -65,8 +65,8 @@ class SwarmApp
 //             m_swarm.init_volume ( m_sine_geometry, m_volume.positions() );
             m_swarm.set_springs(m_boundary);
             m_boundary.set_surface(m_swarm);
-            m_boundary.fluid_solver().delta() = .1;
-            m_sine_geometry.speed() = m_time_step * 10;
+            m_boundary.fluid_solver().delta() = .02;
+            m_sine_geometry.speed() = m_time_step / 5;
 
             for(size_t i = 0; i < num_sperms; ++i)
                 m_sine_geometry.setCells(i * sperm_particles);
