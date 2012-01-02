@@ -114,8 +114,31 @@ class SDCBase
                 }
                 std::fill ( fdiff.begin(),fdiff.end(),value_type ( 0 ) );
             }
-
             sdc_method().update();
+        }
+
+        inline void operator()(value_type t, value_type *x, const value_type *f, value_type dt)
+        {
+            operator()(t,x,x,f,f,dt);
+        }
+        
+        inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *f, const value_type *fold, value_type dt)
+        {
+            std::copy(xold,xold+sdc_method().ode_size(),x);
+            std::copy(fold,fold+sdc_method().ode_size(),f);
+            sdc_method().init(x,f);
+            predictor(t,dt);
+            corrector(t,dt);
+        }
+
+        inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *f1, const value_type *f1old, value_type *f2, const value_type *f2old, value_type dt)
+        {
+            std::copy(xold,xold+sdc_method().ode_size(),x);
+            std::copy(f1old,f1old+sdc_method().ode_size(),f1);
+            std::copy(f2old,f2old+sdc_method().ode_size(),f2);
+            sdc_method().init(x,f1,f2);
+            predictor(t,dt);
+            corrector(t,dt);
         }
 
 };

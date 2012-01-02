@@ -77,6 +77,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integr
         **/
         inline void predictor_step(const int k, value_type &t, const value_type &dt)
         {
+            assert( k < sdc_nodes );
             t += dt;
             m_forward_euler(X(k + 1), X(k), F(k), dt);
             m_F(t, X(k + 1), F(k + 1));
@@ -95,14 +96,15 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integr
          *
          * \sa predictor(), corrector()
          **/
-        inline void corrector_predictor_step(const int k, value_type *fdiff, value_type &t, const value_type &dt)
+        inline int corrector_predictor_step(const int k, value_type *fdiff, value_type &t, const value_type &dt)
         {
-            value_type Fold[m_ode_size];
-            std::copy(F(k + 1), F(k + 1) + m_ode_size, Fold);
+            assert( k < sdc_nodes );
+            std::vector<value_type> Fold(m_ode_size,0.0);
+            std::copy(F(k + 1), F(k + 1) + m_ode_size, Fold.begin());
             t += dt;
             m_forward_euler(X(k + 1), X(k), fdiff, dt);
-            m_F(t, X(k + 1), F(k + 1));
-            std::transform(F(k + 1), F(k + 1) + m_ode_size, Fold, fdiff, std::minus<value_type>());
+            m_F(t, X(k + 1), F(k + 1));            
+            std::transform(F(k + 1), F(k + 1) + m_ode_size, Fold.begin(), fdiff, std::minus<value_type>());
         }
 
 };
