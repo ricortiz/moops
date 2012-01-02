@@ -23,7 +23,7 @@ struct implicit_function
         m_F.Implicit ( t, x, Fx );
     }
     
-    inline size_t data_size() { return m_F.data_size(); }
+    inline size_t ode_size() { return m_F.ode_size(); }
 };
 
 /**

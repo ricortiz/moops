@@ -67,7 +67,7 @@ class BackwardEuler
         inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *v, const value_type *vold, value_type dt)
         {
             m_F.setParameters(t, xold, vold, dt);
-            m_newton_solver(m_F, x, 1e-16, 1e-16);
+            m_newton_solver(m_F, x, 1e-15, 1e-15);
             value_type inv_dt = 1.0 / dt;
             const value_type *b = m_F.getRhs();
             for (size_t i = 0; i < m_ode_size; ++i)

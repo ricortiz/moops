@@ -91,7 +91,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
                 this->apply_rotation(H(k, k), ld, c(k), s(k));
                 this->apply_rotation(g(k), g(k + 1), c(k), s(k));
 
-                assert(ld < 1e-14 || !"rotation failed: Lower diagonal is non-zero");
+                assert(ld < 1e-10 || !"rotation failed: Lower diagonal is non-zero");
 
                 ///  The norm of the residual is the last entry in g
                 rho = std::fabs(g(k + 1));

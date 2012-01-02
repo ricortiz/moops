@@ -67,7 +67,6 @@ class NewtonBase
                         std::string armijo_it_key = "armijo_fn_evals";
                         s[armijo_it_key].push_back(iarm);
                     }
-                    std::cout << "Warning!  Armijo failure, too many reductions." << std::endl;
                     return false;
                 }
             }
