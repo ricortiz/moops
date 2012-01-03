@@ -7,7 +7,6 @@
 #include<map>
 
 #include "math/linear_solver/krylov/generalized_minimal_residual_method.hpp"
-#include <boost/type_traits/detail/is_mem_fun_pointer_impl.hpp>
 
 template<typename value_type>
 value_type dot(value_type *x,value_type *y, int size)

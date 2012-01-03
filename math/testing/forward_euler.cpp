@@ -6,42 +6,8 @@
 #include<algorithm>
 
 #include "math/ode_solver/euler/forward_euler.hpp"
-#include <boost/type_traits/detail/is_mem_fun_pointer_impl.hpp>
+#include "rhs_functions.hpp"
 
-template<int size>
-struct function_type;
-
-template<>
-struct function_type<1>
-{
-    template<typename value_type>
-    void operator()(value_type t, value_type *x, value_type *v)
-    {
-        v[0] = x[0] * std::cos(t);
-    }
-
-    const size_t ode_size() {return 1;}
-};
-/// Robertson
-template<>
-struct function_type<3>
-{
-    template<typename value_type>
-    void operator()(value_type t, const value_type *x, value_type *v)
-    {
-        v[0] = -.04 * x[0] + 1e4 * x[1] * x[2];
-        v[1] = .04 * x[0] - 1e4 * x[1] * x[2] - 3 * 1e7 * x[1] * x[1];
-        v[2] = 3 * 1e7 * x[1] * x[1];
-    }
-    template<typename value_type>
-    void copy(const value_type *x, value_type *y)
-    {
-        y[0] = x[0];
-        y[1] = x[1];
-        y[2] = x[2];
-    }
-    const size_t ode_size() {return 3;}
-};
 int main()
 {
     typedef double value_type;

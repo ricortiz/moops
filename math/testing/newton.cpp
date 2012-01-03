@@ -37,7 +37,6 @@ void display_stats(stats_type &stats)
     }
 }
 
-// gmres(const vector_type &f0, function_type &F, const vector_type &xc, vector_type &x)
 int main()
 {
     typedef double value_type;
