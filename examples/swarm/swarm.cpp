@@ -59,9 +59,9 @@ class SwarmApp
             dims[3] = 21;
             x0[0] = x0[1] = x0[2] = 10.0;
             m_swarm.init_surface(m_sine_geometry, m_boundary.particles(), num_particles);
-//             std::cout << "p = [";
-//             std::copy(m_boundary.positions(), m_boundary.positions() + data_size, std::ostream_iterator<value_type>(std::cout, ","));
-//             std::cout << "];\n";
+            std::cout << "p = {";
+            std::copy(m_boundary.positions(), m_boundary.positions() + data_size, std::ostream_iterator<value_type>(std::cout, ","));
+            std::cout << "};\n";
 //             m_swarm.init_volume ( m_sine_geometry, m_volume.positions() );
             m_swarm.set_springs(m_boundary);
             m_boundary.set_surface(m_swarm);

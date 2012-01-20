@@ -111,9 +111,12 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
             /// Solve the least square problem by solving the upper triangular linear system
             this->back_solve(k);
             /// Update the solution
+//             value_type u = g(0)*v(0)[0];
             for(int i = 0; i < k; i++)
+            {
                 for(size_t j = 0; j < m_system_size; ++j)
-                    x[j] += g(i) * v(i) [j];
+                    x[j] += g(i)*v(i)[j];
+            }
 
             return rho;
         }

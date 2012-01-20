@@ -16,24 +16,22 @@
  *
  * \param function_type The right hand function of the differential equation.
  * \param integrator_type The integrator method used in the correction step.
- * \param sdc_nodes The umber of subnodes.
  * \param sdc_corrections Number of corrections to do.
  *
  **/
-template<typename value_type, typename function_type, typename integrator_type, int sdc_nodes, int sdc_corrections>
-class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integrator_type, sdc_nodes, sdc_corrections> >
+template<typename value_type, typename function_type, typename integrator_type, int sdc_corrections>
+class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,function_type,integrator_type,sdc_corrections> >
 {
 
     protected:
         typedef ForwardEuler<value_type, function_type> forward_euler_type;
 
-    protected:
+    private:
 
-        sdc_storage<value_type, sdc_nodes, 0, SDC::EXPLICIT> m_storage;
+        sdc_storage<value_type, integrator_type::sdc_nodes, 0, SDC::EXPLICIT> m_storage;
         integrator_type m_integrator;
-        size_t m_ode_size;
         function_type &m_F;
-        forward_euler_type m_forward_euler;
+        forward_euler_type m_euler_solver;
         /**< This is the integrator used to compute the spectral integrals of the right hand sides F. **/
 
     public:
@@ -41,26 +39,29 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integr
         ExplicitSDC(function_type &Rhs)
                 :
                 m_storage(Rhs.ode_size()),
-                m_integrator(Rhs.ode_size()),
-                m_ode_size(Rhs.ode_size()),
                 m_F(Rhs),
-                m_forward_euler(Rhs) {}
+                m_euler_solver(Rhs)
+                {
+                    m_integrator.init(m_storage.m_ode_size);
+                }
 
-        inline void update()                        { m_storage.update(); }
+        inline void update()                     { m_storage.update(); }
         inline const value_type *F(int i) const  { return m_storage.F()[i]; }
         inline const value_type *X(int i) const  { return m_storage.X()[i]; }
         inline value_type *F(int i)              { return m_storage.F()[i]; }
         inline value_type *X(int i)              { return m_storage.X()[i]; }
-        inline const value_type **F() const         { return m_storage.F(); }
-        inline const value_type **X() const         { return m_storage.X(); }
-        inline value_type **F()                     { return m_storage.F(); }
-        inline value_type **X()                     { return m_storage.X(); }
-        inline value_type dt(int i)              { return m_integrator.dt[i]; }
+        inline const value_type **F() const      { return m_storage.F(); }
+        inline const value_type **X() const      { return m_storage.X(); }
+        inline value_type **F()                  { return m_storage.F(); }
+        inline value_type **X()                  { return m_storage.X(); }
+        inline value_type dt(int i)              { return m_integrator.dt(i); }
         inline value_type &Immk(int i, int j)    { return m_integrator.Immk[i][j]; }
-        inline void integrate()                     { m_integrator.integrate(F()); }
-        inline size_t ode_size()                    { return m_ode_size; }
+        inline void integrate(value_type Dt)     { m_integrator.integrate(F(),Dt); }
+        inline size_t ode_size()                 { return m_storage.m_ode_size; }
 
         inline void init(value_type *x, value_type *Fx) { m_storage.init(x, Fx); }
+        inline void setX0(value_type *x) { m_storage.setX0(x); }
+        inline void setF0(value_type *Fx) { m_storage.setF0(Fx); }
 
         /**
         * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method
@@ -77,9 +78,9 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integr
         **/
         inline void predictor_step(const int k, value_type &t, const value_type &dt)
         {
-            assert( k < sdc_nodes );
+            assert( k < integrator_type::sdc_nodes );
             t += dt;
-            m_forward_euler(X(k + 1), X(k), F(k), dt);
+            m_euler_solver(X(k + 1), X(k), F(k), dt);
             m_F(t, X(k + 1), F(k + 1));
         }
 
@@ -98,26 +99,26 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integr
          **/
         inline int corrector_predictor_step(const int k, value_type *fdiff, value_type &t, const value_type &dt)
         {
-            assert( k < sdc_nodes );
-            std::vector<value_type> Fold(m_ode_size,0.0);
-            std::copy(F(k + 1), F(k + 1) + m_ode_size, Fold.begin());
+            assert( k < integrator_type::sdc_nodes );
+            std::vector<value_type> Fold(m_storage.m_ode_size,0.0);
+            std::copy(F(k + 1), F(k + 1) + m_storage.m_ode_size, Fold.begin());
             t += dt;
-            m_forward_euler(X(k + 1), X(k), fdiff, dt);
+            m_euler_solver(X(k + 1), X(k), fdiff, dt);
             m_F(t, X(k + 1), F(k + 1));            
-            std::transform(F(k + 1), F(k + 1) + m_ode_size, Fold.begin(), fdiff, std::minus<value_type>());
+            std::transform(F(k + 1), F(k + 1) + m_storage.m_ode_size, Fold.begin(), fdiff, std::minus<value_type>());
         }
 
 };
 
-template<typename _value_type, typename _function_type, typename _integrator_type, int _sdc_nodes, int _sdc_corrections>
-struct sdc_traits<ExplicitSDC<_value_type, _function_type, _integrator_type, _sdc_nodes, _sdc_corrections> >
+template<typename _value_type, typename _function_type, typename _integrator_type, int _sdc_corrections>
+struct sdc_traits<ExplicitSDC<_value_type, _function_type, _integrator_type, _sdc_corrections> >
 {
     typedef _value_type value_type;
     typedef _integrator_type integrator_type;
     typedef _function_type function_type;
     enum
     {
-        sdc_nodes = _sdc_nodes,
+        sdc_nodes = _integrator_type::sdc_nodes,
         sdc_corrections = _sdc_corrections
     };
 };

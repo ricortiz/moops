@@ -28,6 +28,8 @@ class Spring
         particle_type * m_B;           ///< Pointer to one other affected particle.
         value_type      m_l;      ///< Rest length between the two particles.
         value_type      m_k;           ///< Spring Constant.
+        size_t          m_Aidx;           ///< Particle A index in particle array
+        size_t          m_Bidx;           ///< Particle B index in particle array
 
 
     public:
@@ -40,6 +42,10 @@ class Spring
         value_type const & stiffness()   const { return m_k; }
         value_type & resting_length()  { return m_l; }
         value_type const & resting_length() const { return m_l; }
+        size_t const &getAidx() const { return m_Aidx; }
+        size_t const &getBidx() const { return m_Bidx; }
+        size_t &getAidx() { return m_Aidx; }
+        size_t &getBidx() { return m_Bidx; }
 
     public:
 
@@ -72,16 +78,26 @@ class Spring
 
         void apply()
         {
-            value_type dx[3] = {m_A->position[0] - m_B->position[0],m_A->position[1] - m_B->position[1],m_A->position[2] - m_B->position[2]};
-            value_type magnitude = std::sqrt(dx[0]*dx[0]+dx[1]*dx[1]+dx[2]*dx[2]);
-            assert ( magnitude > 0 || !"Spring::apply(): Non-positive spring length" );
-            value_type L = m_k * ( 1.0 - m_l/magnitude );
-            m_A->force[0] -= L*dx[0];
-            m_A->force[1] -= L*dx[1];
-            m_A->force[2] -= L*dx[2];
-            m_B->force[0] += L*dx[0];
-            m_B->force[1] += L*dx[1];
-            m_B->force[2] += L*dx[2];
+            apply(m_A->position,m_B->position,m_A->force,m_B->force);
+        }
+
+        inline void apply(const value_type *x1, const value_type *x2)
+        {
+            apply(x1,x2,m_A->force,m_B->force);
+        }
+
+        inline void apply(const value_type *x1, const value_type *x2, value_type *f1, value_type *f2)
+        {
+            value_type dx[3] = {x1[0] - x2[0],x1[1] - x2[1],x1[2] - x2[2]};
+            value_type l = std::sqrt(dx[0]*dx[0]+dx[1]*dx[1]+dx[2]*dx[2]);
+            assert ( l > 0 || !"Spring::apply(): Non-positive spring length" );
+            value_type L = m_k * ( 1.0 - m_l/l );
+            f1[0] -= L*dx[0];
+            f1[1] -= L*dx[1];
+            f1[2] -= L*dx[2];
+            f2[0] += L*dx[0];
+            f2[1] += L*dx[1];
+            f2[2] += L*dx[2];
         }
 
 };

@@ -52,6 +52,8 @@ class Swarm : public Surface<Swarm<value_type> >
 	    
         }
 
+
+
 //         template<typename geometry_type>
 //         void init_volume(BaseGeometry<geometry_type> &geometry, value_type *positions)
 //         {
@@ -104,13 +106,12 @@ class Swarm : public Surface<Swarm<value_type> >
             typedef typename spring_system_type::spring_ptr_container spring_ptr_type;
             typedef typename spring_system_type::spring_ptr_container::iterator iterator;
             typedef typename spring_system_type::spring_type spring_type;
-            grid_type &grid = this->grid();
             spring_ptr_type &springs_map = spring_system.springs_update_map();
             spring_type *spring;
             for(iterator s = springs_map.begin(), end = springs_map.end(); s != end; ++s)
             {
                 spring = *s;
-                m_sperm->setRestingLength(spring,time);
+                m_sperm->resetRestingLength(spring,time);
             }
             updateForceGradient(spring_system);
         }

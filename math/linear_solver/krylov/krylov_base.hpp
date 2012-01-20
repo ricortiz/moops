@@ -44,6 +44,7 @@ class KrylovBase
                 derived().H ( i,k ) = dot ( derived().v ( i ),derived().v ( k+1 ) );
                 for ( int j = 0; j < system_size; ++j )
                     derived().v ( k+1 ) [j] -= derived().H ( i,k ) *derived().v ( i ) [j];
+                
             }
             Hip = norm ( derived().v ( k+1 ) );
             /// Re-orthogonalize if necessary

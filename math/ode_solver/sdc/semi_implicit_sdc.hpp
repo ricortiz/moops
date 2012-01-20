@@ -33,17 +33,16 @@ struct implicit_function
  * \param integrator_type The integrator method used in the correction step.
  * \param sdc_corrections Number of corrections to do.
  **/
-template<typename value_type, typename function_type, typename integrator_type, int sdc_nodes, int sdc_corrections>
-class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type, integrator_type, sdc_nodes, sdc_corrections> >
+template<typename value_type, typename function_type, typename integrator_type, int sdc_corrections>
+class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type, integrator_type, sdc_corrections> >
 {
     protected:
 	typedef implicit_function<function_type> 	 implicit_function_type;
         typedef BackwardEuler<value_type, implicit_function_type> backward_euler_type;
 
     protected:
-        sdc_storage<value_type, sdc_nodes, 0, SDC::SEMI_IMPLICIT> m_storage;
+        sdc_storage<value_type, integrator_type::sdc_nodes, 0, SDC::SEMI_IMPLICIT> m_storage;
         integrator_type m_integrator;
-        size_t m_ode_size;
         function_type   &m_F;
 	implicit_function_type m_Fimplicit;
         backward_euler_type m_backward_euler;
@@ -52,11 +51,12 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
         SemiImplicitSDC ( function_type &Rhs )
             :
             m_storage ( Rhs.ode_size() ),
-            m_integrator ( Rhs.ode_size() ),
-            m_ode_size ( Rhs.ode_size() ),
             m_F ( Rhs ),
             m_Fimplicit(Rhs),
-            m_backward_euler ( m_Fimplicit ) {}
+            m_backward_euler ( m_Fimplicit )
+            {
+                m_integrator.init(Rhs.ode_size());
+            }
 
         inline const value_type* Fi ( int i ) const { return m_storage.Fi() [i]; }
         inline value_type* Fi ( int i )             { return m_storage.Fi() [i]; }
@@ -71,11 +71,11 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
         inline const value_type** X() const          { return m_storage.X(); }
         inline value_type** X()                      { return m_storage.X(); }
         inline void update()                         { m_storage.update(); }
-        inline void integrate()                      { m_integrator.integrate ( m_storage.Fi(), m_storage.Fe() ); }
-        inline const value_type dt ( int i ) const   { return m_integrator.dt[i]; }
+        inline void integrate(value_type Dt)                      { m_integrator.integrate ( m_storage.Fi(), m_storage.Fe(), Dt ); }
+        inline value_type dt(int i)              { return m_integrator.dt(i); }
         inline value_type &Immk ( int i, int j ) { return m_integrator.Immk[i][j]; }
         inline const value_type &Immk ( int i, int j ) const { return m_integrator.Immk[i][j]; }
-        inline size_t ode_size() { return m_ode_size; }
+        inline size_t ode_size() { return m_storage.m_ode_size; }
 
         inline void init ( value_type *x, value_type *F_i, value_type *F_e ) { m_storage.init ( x, F_i, F_e ); }
 
@@ -95,8 +95,9 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
         **/
         inline void predictor_step ( const int k, value_type &t, const value_type &dt )
         {
+            assert( k < integrator_type::sdc_nodes );
             t += dt;
-            std::copy ( X ( k ), X ( k ) + m_ode_size, X ( k + 1 ) );
+            std::copy ( X ( k ), X ( k ) + m_storage.m_ode_size, X ( k + 1 ) );
             m_backward_euler ( t, X ( k + 1 ), X ( k ), Fi ( k + 1 ), Fe ( k ), dt );
             m_F.Explicit ( t, X ( k + 1 ), Fe ( k + 1 ) );
         }
@@ -116,14 +117,15 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
          **/
         inline void corrector_predictor_step ( const int k, value_type *fdiff, value_type &t, const value_type &dt )
         {
+            assert( k < integrator_type::sdc_nodes );
 //             fdiff -= Fi ( k+1 );
-            std::transform ( fdiff, fdiff + m_ode_size, Fi ( k + 1 ), fdiff, std::minus<value_type>() );
-            std::vector<value_type> Fold ( m_ode_size );
-            std::copy ( Fe ( k + 1 ), Fe ( k + 1 ) + m_ode_size, Fold.begin() );
+            std::transform ( fdiff, fdiff + m_storage.m_ode_size, Fi ( k + 1 ), fdiff, std::minus<value_type>() );
+            std::vector<value_type> Fold ( m_storage.m_ode_size );
+            std::copy ( Fe ( k + 1 ), Fe ( k + 1 ) + m_storage.m_ode_size, Fold.begin() );
             t += dt;
             m_backward_euler ( t, X ( k + 1 ), X ( k ), Fi ( k + 1 ), fdiff, dt );
             m_F.Explicit ( t, X ( k + 1 ), Fe ( k + 1 ) );
-            std::transform ( Fe ( k + 1 ), Fe ( k + 1 ) + m_ode_size, Fold.begin(), fdiff, std::minus<value_type>() );
+            std::transform ( Fe ( k + 1 ), Fe ( k + 1 ) + m_storage.m_ode_size, Fold.begin(), fdiff, std::minus<value_type>() );
 //             fdiff = Fe ( k+1 ) - Fold;
         }
 
@@ -131,15 +133,15 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
 
 };
 
-template<typename _value_type, typename _function_type, typename _integrator_type, int _sdc_nodes, int _sdc_corrections>
-struct sdc_traits<SemiImplicitSDC<_value_type, _function_type, _integrator_type, _sdc_nodes, _sdc_corrections> >
+template<typename _value_type, typename _function_type, typename _integrator_type,int _sdc_corrections>
+struct sdc_traits<SemiImplicitSDC<_value_type, _function_type, _integrator_type, _sdc_corrections> >
 {
     typedef _value_type value_type;
     typedef _integrator_type integrator_type;
     typedef _function_type function_type;
     enum
     {
-        sdc_nodes = _sdc_nodes,
+        sdc_nodes = _integrator_type::sdc_nodes,
         sdc_corrections = _sdc_corrections
     };
 };

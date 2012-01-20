@@ -56,8 +56,8 @@ struct TypeBinder
 #ifdef USE_CUDA_FLUID_SOLVER
     typedef CudaStokesSolver<particle_system_type>                              fluid_solver_type;
 #else
-    typedef DirectStokesSolver<particle_system_type>                            fluid_solver_type;
-    typedef FMMStokesSolver<particle_system_type,fmm_max_particles,fmm_order> fmm_fluid_solver_type;
+    typedef DirectStokesSolver<value_type>                            fluid_solver_type;
+//     typedef FMMStokesSolver<particle_system_type,fmm_max_particles,fmm_order> fmm_fluid_solver_type;
 #endif
     typedef ElasticBoundary<heart_pump_spring_system_type,fluid_solver_type,SDCIntegrator> heart_pump_boundary_type;
     typedef ElasticBoundary<swarm_spring_system_type,fluid_solver_type,SISDCIntegrator> swarm_boundary_type;

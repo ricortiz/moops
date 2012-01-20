@@ -1,5 +1,5 @@
-#ifndef META_HPP
-#define META_HPP
+#ifndef FMM_META_HPP
+#define FMM_META_HPP
 
 #include "bits.hpp"
 

@@ -28,15 +28,15 @@ class CudaStokesSolver
     private:
 
         value_type m_delta;
-        enum
-        {
-            num_particles = particle_system_type::num_particles
-        };
+        value_type m_num_particles;
 
     public:
+
+        CudaStokesSolver(value_type num_particles) : m_num_particles(num_particles) {}
+        
         inline void operator()(value_type *x, value_type *v, value_type *f)
         {
-            operator()(x,v,x,f,num_particles,num_particles);
+            operator()(x,v,x,f,m_num_particles,m_num_particles);
         }
 
         inline void operator()(value_type *x, value_type *v, value_type *y, value_type *f, size_t num_sources, size_t num_targets)

@@ -7078,7 +7078,7 @@ struct SDC9MR9
     }
 };
 
-struct Assert {};
+struct StaticAssert {};
 
 
 

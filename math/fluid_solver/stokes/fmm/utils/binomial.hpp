@@ -1,5 +1,5 @@
-#ifndef BINOMIAL_HPP
-#define BINOMIAL_HPP
+#ifndef FMM_BINOMIAL_HPP
+#define FMM_BINOMIAL_HPP
 
 #include<sstream>
 #include<cmath>

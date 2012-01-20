@@ -96,32 +96,22 @@ void GuiBase::reset(QAction* color)
 
 void GuiBase::popup(vtkObject * obj, unsigned long,void * client_data, void *,vtkCommand * command)
 {
-    // get interactor
-    vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(obj);
-    // consume event so the interactor style doesn't get it
-    command->AbortFlagOn();
-    // get popup menu
-    QMenu* popupMenu = static_cast<QMenu*>(client_data);
-    // get event location
-    int* sz = interactor->GetSize();
-    int* position = interactor->GetEventPosition();
-    // remember to flip y
-    QPoint pt = QPoint(position[0], sz[1]-position[1]);
-    // map to global
-    QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);
-    // show popup menu at global point
-    popupMenu->popup(global_pt);
+    vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(obj); // get interactor
+    command->AbortFlagOn();								  // consume event so the interactor style doesn't get it
+    QMenu* popupMenu = static_cast<QMenu*>(client_data); 				  // get popup menu
+    int* sz = interactor->GetSize(); 							  
+    int* position = interactor->GetEventPosition();					  // get event location
+    QPoint pt = QPoint(position[0], sz[1]-position[1]);					  // remember to flip y     
+    QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);			  // map to global
+    popupMenu->popup(global_pt);							  // show popup menu at global point
 }
 
 void GuiBase::updateCoords(vtkObject* obj)
-{
-    // get interactor
-    vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(obj);
-    // get event position
+{    
+    vtkRenderWindowInteractor* interactor = vtkRenderWindowInteractor::SafeDownCast(obj); // get interactor
     int event_pos[2];
-    interactor->GetEventPosition(event_pos);
-    // update label
+    interactor->GetEventPosition(event_pos);						  // get event position
     QString str;
     str.sprintf("x=%d : y=%d", event_pos[0], event_pos[1]);
-    coord->setText(str);
+    coord->setText(str);								  // update label
 }

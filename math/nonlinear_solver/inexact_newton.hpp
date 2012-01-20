@@ -34,7 +34,7 @@ class InexactNewtonMethod: public NewtonBase<InexactNewtonMethod<value_type,k_ma
 
         InexactNewtonMethod(size_t system_size) :
                 m_system_size(system_size),
-                m_maxitc(40),
+                m_maxitc(10),
                 m_storage(system_size),
                 m_gmres(system_size),
                 m_gamma ( value_type ( .9 ) ),
@@ -85,28 +85,21 @@ class InexactNewtonMethod: public NewtonBase<InexactNewtonMethod<value_type,k_ma
 
             unsigned int itc = 0;
 
-            /// Main iteration loop
-            while ( fnrm > stop_tol && itc < m_maxitc )
+            
+            while ( fnrm > stop_tol && itc < m_maxitc )                         // Main iteration loop
             {
-                /// Compute ratio of succesive residual norms and iteration counter
-                itc++;
-                value_type rat = fnrm / fnrmo;
-                fnrmo = fnrm;
-
-                /// Set initial iterate to zero
-                std::fill ( dx(),dx() +m_system_size,value_type ( 0 ) );
-
-                value_type k_err = std::numeric_limits<value_type>::infinity();
-
-                /// Solve for descend direction using GMRES
+                itc++;                                                          // Newton iteration counter
+                value_type rat = fnrm / fnrmo;                                  // Compute ratio of succesive residual norms and iteration counter
+                fnrmo = fnrm;                                                   // Store old function norm
+                std::fill ( dx(),dx() +m_system_size,value_type ( 0 ) );        // Set initial Krylov iterate to zero
+                value_type k_err = std::numeric_limits<value_type>::infinity(); // Define initial error to infinity                
                 unsigned int k_it = 0;
-                while ( k_err > gmres_tol*fnrm && k_it++ < k_restart && fnrm != 0 )
+                while ( k_err > gmres_tol*fnrm && k_it++ < k_restart && fnrm != 0 ) // Solve for descend direction using GMRES
                     k_err = m_gmres ( jacobian, f(), dx(), gmres_tol, stats );
 
-                std::transform(x, x + m_system_size,dx(),x,std::minus<value_type>());
-                
-                ///< Start Armijo line search
-                value_type lambda[3]    = {1., 1., 1.};
+                std::transform(x, x + m_system_size,dx(),x,std::minus<value_type>()); // Update x: x = x + -dx.  dx = steppest descent direction
+                                
+                value_type lambda[3]    = {1., 1., 1.};                               // Start Armijo line search
                 value_type fnorm[2]     = {0., 0.};
                 value_type fnorm_sqr[3] = {0., 0., 0.};
                 

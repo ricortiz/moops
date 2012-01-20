@@ -7,8 +7,9 @@
  * NSF Focused Research Group - Advanced Algorithms and Software for Problems in Computational Bio-Fluid Dynamics
  * $Id:
 **/
-
+#include<numeric>
 #include<cassert>
+#include<stdexcept>
 #include "math/nonlinear_solver/inexact_newton.hpp"
 #include "sdc_storage.hpp"
 
@@ -58,12 +59,12 @@ class SDCBase
             m_sdc_corrections = sdc_traits<Derived>::sdc_corrections,
             /**< The number of SDC corrections sweps at compile-time. This is just a copy of the value provided
             * by the \a Derived type. **/
-        };        
+        };
+
+        value_type m_residuals[m_sdc_corrections][m_sdc_nodes - 1];
 
     public:
 
-        SDCBase() {}
-        
         /**
          * @brief This function returns an instance of the sdc_method type.
          *
@@ -71,7 +72,7 @@ class SDCBase
          **/
         Derived &sdc_method()
         {
-            return *static_cast<Derived*> ( this );
+            return *static_cast<Derived *>(this);
         }
 
         /**
@@ -79,15 +80,16 @@ class SDCBase
          *
          * \param t Global time
          **/
-        inline void predictor (value_type t, value_type Dt )
+        inline void predictor(value_type t, value_type Dt)
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
             value_type time = t;
 
-            for ( size_t k = 0; k < m_sdc_nodes - 1; ++k )
+            for(size_t k = 0; k < m_sdc_nodes - 1; ++k)
             {
-                value_type dt = Dt*sdc_method().dt ( k );
-                sdc_method().predictor_step ( k, time, dt );
+                value_type dt = Dt * sdc_method().dt(k);
+                sdc_method().predictor_step(k, time, dt);
+                check_convergence(0, k);
             }
         }
 
@@ -96,49 +98,86 @@ class SDCBase
         *
         * \param t Global time
         **/
-        inline void corrector ( value_type t, value_type Dt )
+        inline void corrector(value_type t, value_type Dt)
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
-	    size_t ode_size = sdc_method().ode_size();
-            std::vector<value_type> fdiff(ode_size,0.0);
-            for ( size_t i = 0; i < m_sdc_corrections-1; ++i )
+            size_t ode_size = sdc_method().ode_size();
+            std::vector<value_type> fdiff(ode_size, 0.0);
+
+            for(size_t i = 0; i < m_sdc_corrections - 1; ++i)
             {
-                sdc_method().integrate();
+                sdc_method().integrate(Dt);
                 value_type time = t;
-                for ( size_t k = 0; k < m_sdc_nodes - 1; ++k )
+                for(size_t k = 0; k < m_sdc_nodes - 1; ++k)
                 {
-                    value_type dt = Dt*sdc_method().dt ( k );
+                    value_type dt = Dt * sdc_method().dt(k);
                     for(size_t j = 0; j < ode_size; ++j)
-                        fdiff[j] += sdc_method().Immk( k,j ) / sdc_method().dt ( k );
-                    sdc_method().corrector_predictor_step ( k, &fdiff[0], time, dt );
+                        fdiff[j] += sdc_method().Immk(k, j) / dt;
+                    sdc_method().corrector_predictor_step(k, &fdiff[0], time, dt);
+                    check_convergence(i+1, k);
                 }
-                std::fill ( fdiff.begin(),fdiff.end(),value_type ( 0 ) );
+//                 if(m_residuals[i][m_sdc_nodes - 2] < 1e-13)
+//                 {
+//                     sdc_method().update();
+//                     return;
+//                 }
+                std::fill(fdiff.begin(), fdiff.end(), value_type(0));
             }
-            sdc_method().update();
+//             sdc_method().update();
+            for ( size_t i = 0; i < m_sdc_corrections; ++i )
+            {
+                for ( size_t k = 0; k < m_sdc_nodes - 1; ++k )
+                    std::cout << m_residuals[i][k] << " ";
+                std::cout << std::endl;
+            }
+            std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
         }
 
         inline void operator()(value_type t, value_type *x, const value_type *f, value_type dt)
         {
-            operator()(t,x,x,f,f,dt);
+            operator()(t, x, x, f, f, dt);
         }
-        
+
         inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *f, const value_type *fold, value_type dt)
         {
-            std::copy(xold,xold+sdc_method().ode_size(),x);
-            std::copy(fold,fold+sdc_method().ode_size(),f);
-            sdc_method().init(x,f);
-            predictor(t,dt);
-            corrector(t,dt);
+            size_t ode_size = sdc_method().ode_size();
+            std::copy(xold, xold + ode_size, x);
+            std::copy(fold, fold + ode_size, f);
+            sdc_method().init(x, f);
+            predictor(t, dt);
+            corrector(t, dt);
+            sdc_method().update();
         }
 
         inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *f1, const value_type *f1old, value_type *f2, const value_type *f2old, value_type dt)
         {
-            std::copy(xold,xold+sdc_method().ode_size(),x);
-            std::copy(f1old,f1old+sdc_method().ode_size(),f1);
-            std::copy(f2old,f2old+sdc_method().ode_size(),f2);
-            sdc_method().init(x,f1,f2);
-            predictor(t,dt);
-            corrector(t,dt);
+            std::copy(xold, xold + sdc_method().ode_size(), x);
+            std::copy(f1old, f1old + sdc_method().ode_size(), f1);
+            std::copy(f2old, f2old + sdc_method().ode_size(), f2);
+            sdc_method().init(x, f1, f2);
+            predictor(t, dt);
+            corrector(t, dt);
+            sdc_method().update();            
+        }
+
+        void check_convergence(int i, int k)
+        {
+            size_t ode_size = sdc_method().ode_size();
+            std::vector<value_type> tmp(ode_size, 0.0);
+            std::transform(sdc_method().X(k), sdc_method().X(k) + ode_size, &sdc_method().Immk(k, 0), tmp.begin(), std::plus<value_type>());
+            std::transform(sdc_method().X(k + 1), sdc_method().X(k + 1) + ode_size, tmp.begin(), tmp.begin(), std::minus<value_type>());
+            m_residuals[i][k] = std::sqrt(std::inner_product(tmp.begin(), tmp.end(), tmp.begin(), 0.0));
+            if(m_residuals[i][k] > 5)
+            {
+                std::cout << "correction = " << i << ", iteration = " << k << std::endl;
+                for(size_t j = 0; j <= i; ++j)
+                {
+                    for(size_t l = 0; l <= k; ++l)
+                        std::cout << m_residuals[j][l] << " ";
+                    std::cout << std::endl;
+                }
+                throw std::out_of_range("sdc residual is out of bound: SDC_BASE::CHECK_CONVERGENCE");
+            }
         }
 
 };

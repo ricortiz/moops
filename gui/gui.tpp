@@ -54,10 +54,9 @@
 #include <QVTKInteractor.h>
 #include <QVTKWidget.h>
 
-template<typename app>
-Gui<app>::Gui() : GuiBase()
+template<typename app_type>
+Gui<app_type>::Gui() : GuiBase()
 {
-  
     m_vtk_widget = new QVTKWidget(centralwidget);
     m_vtk_widget->setObjectName(QString::fromUtf8("m_vtk_widget"));
     hboxLayout->addWidget(m_vtk_widget);
@@ -101,16 +100,16 @@ Gui<app>::Gui() : GuiBase()
     m_connections->PrintSelf(cout, vtkIndent());
 }
 
-template<typename app>
-Gui<app>::~Gui()
+template<typename app_type>
+Gui<app_type>::~Gui()
 {
     m_vtk_renderer->Delete();
     m_connections->Delete();
 }
 
 
-template<typename app>
-void Gui<app>::setActor(vtkPolyData *poly_data)
+template<typename app_type>
+void Gui<app_type>::setActor(vtkPolyData *poly_data)
 {
     vtkSmartPointer<vtkSmoothPolyDataFilter> smoother = vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
     smoother->SetInput(poly_data);

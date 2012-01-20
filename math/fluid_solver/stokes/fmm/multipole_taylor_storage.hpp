@@ -1,9 +1,9 @@
 #ifndef MULTIPOLE_TAYLOR_STORAGE_HPP
 #define MULTIPOLE_TAYLOR_STORAGE_HPP
 
-#include "utils/meta.hpp"
-#include "utils/factorial.hpp"
-#include "utils/binomial.hpp"
+#include "math/fluid_solver/stokes/fmm/utils/meta.hpp"
+#include "math/fluid_solver/stokes/fmm/utils/factorial.hpp"
+#include "math/fluid_solver/stokes/fmm/utils/binomial.hpp"
 
 template<typename T, int precision, int num_coefficients  >
 struct multipole_taylor_arrays

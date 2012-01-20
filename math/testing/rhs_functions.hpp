@@ -1,6 +1,7 @@
 #ifndef RHS_FUNCTIONS_HPP
 #define RHS_FUNCTIONS_HPP
 
+#include<vector>
 #include<algorithm> // for std::copy()
 
 ///

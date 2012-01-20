@@ -24,22 +24,18 @@ template<typename> class integration_policy >
 class ParticleMarkers : public particle_system_type, public integration_policy<ParticleMarkers<particle_system_type, immersed_surface_type, integration_policy> >
 {
     public:
-        typedef typename immersed_structure_traits<immersed_surface_type>::fluid_solver_type fluid_solver_type;
+        typedef typename immersed_structure_traits<immersed_surface_type>::ode_rhs_type ode_rhs_type;
         typedef typename particle_system_type::value_type    value_type;
         typedef typename particle_system_type::particle_type particle_type;
         typedef integration_policy<ParticleMarkers<particle_system_type,immersed_surface_type,integration_policy> > time_integrator_type;
 
     private:
         immersed_surface_type            &m_surface;
-        fluid_solver_type                &m_fluid_solver;
 
     public:
 
-        ParticleMarkers(immersed_surface_type &surface, size_t ode_size) : particle_system_type(ode_size), time_integrator_type(ode_size), m_surface(surface), m_fluid_solver(surface.fluid_solver()) {  }
+        ParticleMarkers(immersed_surface_type &surface, size_t ode_size) : particle_system_type(ode_size), time_integrator_type(ode_size), m_surface(surface) {  }
         ~ParticleMarkers() {}
-
-        inline fluid_solver_type &fluid_solver() { return m_fluid_solver; }
-        inline fluid_solver_type const &fluid_solver() const { return m_fluid_solver; }
 
         void run(value_type timestep)
         {
@@ -53,14 +49,14 @@ class ParticleMarkers : public particle_system_type, public integration_policy<P
             value_type *y = m_surface.positions();
             size_t num_targets = this->particles_size();
             size_t num_sources = m_surface.particles_size();
-            m_fluid_solver(x, v, y, f, num_sources, num_targets);
+            this->ode_rhs()(x, v, y, f, num_sources, num_targets);
         }
 };
 
 template< typename _particle_system_type, typename _immersed_surface_type, template<typename> class _integration_policy>
 struct immersed_structure_traits<ParticleMarkers<_particle_system_type, _immersed_surface_type, _integration_policy> >
 {
-    typedef typename immersed_structure_traits<_immersed_surface_type>::fluid_solver_type fluid_solver_type;
+    typedef typename immersed_structure_traits<_immersed_surface_type>::ode_rhs_type ode_rhs_type;
     typedef typename _particle_system_type::value_type                  value_type;
 };
 

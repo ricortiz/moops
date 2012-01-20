@@ -11,7 +11,7 @@ class vtkCommand;
 class QVTKWidget;
 class GuiBase;
 
-template<typename app>
+template<typename app_type>
 class Gui : public GuiBase
 {
 public:
@@ -23,8 +23,8 @@ public slots:
     void updateCoords(vtkObject* obj);
     
 protected:
-    app *derived() {
-        return static_cast<app*>(this);
+    app_type *app() {
+        return static_cast<app_type*>(this);
     }
 
 private:

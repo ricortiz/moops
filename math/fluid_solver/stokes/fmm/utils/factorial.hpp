@@ -1,5 +1,5 @@
-#ifndef FACTORIAL_HPP
-#define FACTORIAL_HPP
+#ifndef FMM_FACTORIAL_HPP
+#define FMM_FACTORIAL_HPP
 
 template<typename T>
 T factorial(unsigned int);

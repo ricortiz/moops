@@ -43,13 +43,13 @@ namespace IO
                 m_writer->SetInput(data);
             }
             
-            void write(double timestep)
+            void write(double timestep, bool print = true)
             {
                 std::string file_name = m_data_path + "data_" + file_number(m_file_counter++,10) + "." + m_writer->GetDefaultFileExtension();
                 m_writer->SetFileName(file_name.c_str());
-                std::cout << "Saving " << file_name << " ... ";
+                if(print) std::cout << "Saving " << file_name << " ... ";
                 m_writer->WriteNextTime(timestep);
-                std::cout << "done." << std::endl;
+                if(print) std::cout << "done." << std::endl;
             }
 
             inline std::string file_number(size_t counter, int total_digits = 6)
