@@ -40,7 +40,9 @@ class ParticleSystem
 
     public:
 
-        ParticleSystem(size_t data_size) : m_time(0.0), m_storage(data_size), m_data_size(data_size), m_num_particles(data_size/3) {}
+        ParticleSystem(size_t data_size) : m_time(0.0), m_storage(data_size), m_data_size(data_size), m_num_particles(data_size/3)
+        {
+        }
         ~ParticleSystem() { };
 
     public:

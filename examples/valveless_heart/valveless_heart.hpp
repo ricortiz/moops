@@ -14,7 +14,6 @@ template<typename value_type>
 class HeartPump : public Surface<HeartPump<value_type> >
 {
     public:
-        typedef TorusGeometry<value_type> torus_type;
         typedef OvalGeometry<value_type> oval_type;
 
     private:

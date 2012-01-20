@@ -27,16 +27,17 @@ class ElasticBoundary :
             public integration_policy<ElasticBoundary<spring_system_type, ode_rhs_type, integration_policy> >
 {
     public:
+        typedef ElasticBoundary<spring_system_type, ode_rhs_type, integration_policy> self_type;
         typedef typename spring_system_type::value_type    value_type;
         typedef typename spring_system_type::spring_type   spring_type;
         typedef typename spring_system_type::particle_type particle_type;
-        typedef integration_policy<ElasticBoundary<spring_system_type, ode_rhs_type, integration_policy> > time_integrator_type;
+        typedef integration_policy<self_type>              time_integrator_type;
 	
     private:
         size_t    m_ode_size;
 
     public:
-        ElasticBoundary(size_t ode_size) : m_ode_size(ode_size), spring_system_type(ode_size), time_integrator_type(ode_size) {  }
+        ElasticBoundary(size_t ode_size) : m_ode_size(ode_size), spring_system_type(ode_size) {  }
         ~ElasticBoundary() {}
 
         void run(value_type timestep)

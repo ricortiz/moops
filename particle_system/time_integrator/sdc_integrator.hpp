@@ -26,22 +26,22 @@ template<typename boundary_type>
 class SDCIntegrator
 {
     protected:
-        typedef SDCIntegrator<boundary_type>                       self_type;
-        typedef typename immersed_structure_traits<boundary_type>::value_type              value_type;
-        typedef typename immersed_structure_traits<boundary_type>::ode_rhs_type       ode_rhs_type;
-        typedef Integrator<value_type>                  spectral_integrator_type;
-        typedef ExplicitSDC<value_type, boundary_type,spectral_integrator_type,9>  explicit_sdc_type;
+        typedef SDCIntegrator<boundary_type>                                      self_type;
+        typedef typename immersed_structure_traits<boundary_type>::value_type     value_type;
+        typedef typename immersed_structure_traits<boundary_type>::ode_rhs_type   ode_rhs_type;
+        typedef Integrator<value_type,gauss_lobatto>                              spectral_integrator_type;
+        typedef ExplicitSDC<value_type,boundary_type,spectral_integrator_type,9> explicit_sdc_type;
 
     private:
-        size_t    m_ode_size;
         explicit_sdc_type  m_sdc;
         ode_rhs_type m_rhs;
 
     public:
 
-        SDCIntegrator(size_t ode_size) : m_ode_size(ode_size), m_sdc(derived()), m_rhs(ode_size/3)
+        SDCIntegrator() : m_sdc(derived())
         {
             m_sdc.init(derived().positions(), derived().velocities());
+            m_rhs.init(ode_size()/3);
         }
 
         inline boundary_type &derived()
@@ -68,9 +68,8 @@ class SDCIntegrator
             logger.stopTimer("odeRHSeval");
         }
 
-        size_t ode_size() { return m_ode_size; }
-        
-        ode_rhs_type &ode_rhs() { return m_rhs; }
+        inline size_t ode_size() { return derived().data_size(); }        
+        inline ode_rhs_type &ode_rhs() { return m_rhs; }
 };
 
 

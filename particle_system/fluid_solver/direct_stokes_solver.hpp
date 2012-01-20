@@ -37,6 +37,8 @@ class DirectStokesSolver
         DirectStokesSolver() : m_num_particles ( 0 ) {}
         DirectStokesSolver ( size_t num_particles ) : m_num_particles ( num_particles ) {}
 
+        void init(size_t num_particles) { m_num_particles = num_particles; }
+        
         inline void operator() ( const value_type *x, value_type *v, const  value_type *f )
         {
             operator() ( x, v, x, f, m_num_particles, m_num_particles );

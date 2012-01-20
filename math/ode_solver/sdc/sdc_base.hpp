@@ -52,16 +52,16 @@ class SDCBase
 
         enum
         {
-            m_sdc_nodes = sdc_traits<Derived>::sdc_nodes,
+            sdc_nodes = sdc_traits<Derived>::sdc_nodes,
             /**< The number of SDC nodes at compile-time. This is just a copy of the value provided
             * by the \a Derived type. **/
 
-            m_sdc_corrections = sdc_traits<Derived>::sdc_corrections,
+            sdc_corrections = sdc_traits<Derived>::sdc_corrections,
             /**< The number of SDC corrections sweps at compile-time. This is just a copy of the value provided
             * by the \a Derived type. **/
         };
 
-        value_type m_residuals[m_sdc_corrections][m_sdc_nodes - 1];
+        value_type m_residuals[sdc_corrections][sdc_nodes - 1];
 
     public:
 
@@ -85,7 +85,7 @@ class SDCBase
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
             value_type time = t;
 
-            for(size_t k = 0; k < m_sdc_nodes - 1; ++k)
+            for(size_t k = 0; k < sdc_nodes - 1; ++k)
             {
                 value_type dt = Dt * sdc_method().dt(k);
                 sdc_method().predictor_step(k, time, dt);
@@ -104,11 +104,11 @@ class SDCBase
             size_t ode_size = sdc_method().ode_size();
             std::vector<value_type> fdiff(ode_size, 0.0);
 
-            for(size_t i = 0; i < m_sdc_corrections - 1; ++i)
+            for(size_t i = 0; i < sdc_corrections - 1; ++i)
             {
                 sdc_method().integrate(Dt);
                 value_type time = t;
-                for(size_t k = 0; k < m_sdc_nodes - 1; ++k)
+                for(size_t k = 0; k < sdc_nodes - 1; ++k)
                 {
                     value_type dt = Dt * sdc_method().dt(k);
                     for(size_t j = 0; j < ode_size; ++j)
@@ -116,7 +116,7 @@ class SDCBase
                     sdc_method().corrector_predictor_step(k, &fdiff[0], time, dt);
                     check_convergence(i+1, k);
                 }
-//                 if(m_residuals[i][m_sdc_nodes - 2] < 1e-13)
+//                 if(m_residuals[i][sdc_nodes - 2] < 1e-13)
 //                 {
 //                     sdc_method().update();
 //                     return;
@@ -124,9 +124,9 @@ class SDCBase
                 std::fill(fdiff.begin(), fdiff.end(), value_type(0));
             }
 //             sdc_method().update();
-            for ( size_t i = 0; i < m_sdc_corrections; ++i )
+            for ( size_t i = 0; i < sdc_corrections; ++i )
             {
-                for ( size_t k = 0; k < m_sdc_nodes - 1; ++k )
+                for ( size_t k = 0; k < sdc_nodes - 1; ++k )
                     std::cout << m_residuals[i][k] << " ";
                 std::cout << std::endl;
             }

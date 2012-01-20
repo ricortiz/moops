@@ -19,6 +19,8 @@
 /// 			storage model that is easy to swap when needing.
 /// 			
 
+#include<vector>
+
 namespace PSYS
 {
     enum { SURFACE, VOLUME };
@@ -28,10 +30,10 @@ namespace PSYS
 template<typename T, typename particle_type>
 struct particle_system_arrays
 {
-    T *positions;
-    T *velocities;
-    T *forces;
-    particle_type *particles;
+    T positions;
+    T velocities;
+    T forces;
+    particle_type particles;
 };
 
 template<typename T, typename particle_type, int immerse_structure_type>
@@ -42,7 +44,7 @@ template<typename T, typename particle_type>
 class ParticleSystemStorage<T,particle_type,PSYS::SURFACE>
 {
     private:
-        particle_system_arrays<T,particle_type> m_data;
+        particle_system_arrays<T*,particle_type*> m_data;
 
     public:
         inline explicit ParticleSystemStorage(size_t data_size)
@@ -98,7 +100,7 @@ template<typename T, typename particle_type>
 class ParticleSystemStorage<T,particle_type,PSYS::VOLUME>
 {
     private:
-        particle_system_arrays<T,particle_type> m_data;
+        particle_system_arrays<T*,particle_type*> m_data;
 
     public:
         inline explicit ParticleSystemStorage(size_t data_size)
@@ -147,7 +149,6 @@ class ParticleSystemStorage<T,particle_type,PSYS::VOLUME>
         inline const particle_type *particles() const { return m_data.particles; }
         inline particle_type *particles()             { return m_data.particles; }
 };
-
 
 #endif
 

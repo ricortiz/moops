@@ -15,8 +15,15 @@ int main()
     {
         function_type<1> F;
         value_type time = 0, dt = .1;
+        enum
+        {
+            sdc_nodes = 5,
+            sdc_corrections = 8
+        };
+        const quadrature_type quad_type = gauss_lobatto;
         
-        ExplicitSDC<value_type,function_type<1>,Integrator<value_type>,8> sdc(F);
+        typedef Integrator<value_type,quad_type> spectral_integrator;
+        ExplicitSDC<value_type,function_type<1>,spectral_integrator,sdc_corrections> sdc(F,1);
         
         const int size = 10;
         value_type error[size] = {0};

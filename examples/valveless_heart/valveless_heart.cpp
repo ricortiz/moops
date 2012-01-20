@@ -61,7 +61,7 @@ class ValvelessPump
 //         std::cout << "];\n";
             m_heart_pump.initVolume(m_oval_geometry, m_volume.particles());
             m_heart_pump.setSprings(m_boundary);
-            m_boundary.set_surface(m_heart_pump);
+            m_boundary.setSurface(m_heart_pump);
             m_boundary.ode_rhs().delta() = .5*M_PI/N;
 
             m_oval_geometry.setCells();

@@ -47,8 +47,7 @@ class SpringSystem : public particle_system_type
         SpringSystem(size_t data_size) : m_surface(0), particle_system_type(data_size) {}
         ~SpringSystem() {}
 
-        inline surface_type *surface()                  { return m_surface; }
-        inline surface_type const *surface() const      { return m_surface; }
+        
         spring_lut_type const &springs_map() const      { return m_spring_lut; }
         spring_container const &get_springs() const     { return m_springs; }
         spring_lut_type &springs_map()                  { return m_spring_lut; }
@@ -56,8 +55,9 @@ class SpringSystem : public particle_system_type
         spring_iterator springs_begin()                 { return m_springs.begin(); }
         spring_iterator springs_end()                   { return m_springs.end(); }
         size_t springs_size()                           { return m_springs.size(); }
-        void set_surface(surface_type &surface)         { m_surface = &surface; }
-
+        void setSurface(surface_type &surface)          { m_surface = &surface; }
+        void getSurface(surface_type &surface)          { surface = *m_surface; }
+        
         inline void computeForces()
         {
             this->clear_forces();
@@ -101,7 +101,7 @@ class SpringSystem : public particle_system_type
         }
 
         inline void updateForces(value_type time, const value_type *x)
-        {	  
+        {
             if(m_surface)
                 m_surface->updateSprings(*this, time);
             computeForces(x);

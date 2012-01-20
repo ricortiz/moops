@@ -16,7 +16,7 @@ struct QuadratureRule<value_type, quadrature, sdc_nodes, 0>
 {
     typedef IFP < quadrature == gauss_lobatto, GaussLobatto<value_type, sdc_nodes>,
             IFP < quadrature == gauss_radau, GaussRadau<value_type, sdc_nodes>,
-            IFP < quadrature == clenshaw_curtis, ClenshawCurtis<value_type, sdc_nodes>, GaussLobatto<value_type, sdc_nodes> > > > type;
+            IFP < quadrature == clenshaw_curtis, ClenshawCurtis<value_type, sdc_nodes>, StaticAssert<true> > > > type;
 };
 
 #endif

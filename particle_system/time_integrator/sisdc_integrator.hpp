@@ -30,7 +30,7 @@ class SISDCIntegrator
         typedef SISDCIntegrator<boundary_type>               self_type;
         typedef typename immersed_structure_traits<boundary_type>::value_type              value_type;
         typedef typename immersed_structure_traits<boundary_type>::ode_rhs_type       ode_rhs_type;
-        typedef Integrator<value_type>                  spectral_integrator_type;
+        typedef Integrator<value_type,gauss_lobatto>                  spectral_integrator_type;
 	typedef SemiImplicitSDC<value_type, boundary_type, spectral_integrator_type, 9> semi_implicit_sdc_type;
 	
     private:

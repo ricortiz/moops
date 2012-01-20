@@ -20,7 +20,7 @@
  *
  **/
 template<typename value_type, typename function_type, typename integrator_type, int sdc_corrections>
-class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,function_type,integrator_type,sdc_corrections> >
+class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integrator_type, sdc_corrections> >
 {
 
     protected:
@@ -28,7 +28,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,function_type,integrat
 
     private:
 
-        sdc_storage<value_type, integrator_type::sdc_nodes, 0, SDC::EXPLICIT> m_storage;
+        sdc_storage<value_type,integrator_type::sdc_nodes,0,SDC::EXPLICIT> m_storage;
         integrator_type m_integrator;
         function_type &m_F;
         forward_euler_type m_euler_solver;
@@ -36,14 +36,20 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,function_type,integrat
 
     public:
 
-        ExplicitSDC(function_type &Rhs)
-                :
-                m_storage(Rhs.ode_size()),
-                m_F(Rhs),
-                m_euler_solver(Rhs)
-                {
-                    m_integrator.init(m_storage.m_ode_size);
-                }
+        ExplicitSDC(size_t ode_size) : m_storage(ode_size)
+        {
+            m_integrator.init(ode_size);
+        }
+        
+        ExplicitSDC(function_type &rhs) : m_storage(rhs.ode_size()), m_F(rhs), m_euler_solver(rhs)
+        {
+            m_integrator.init(rhs.ode_size());
+        }
+        
+        ExplicitSDC(function_type &rhs, size_t ode_size) : m_storage(ode_size), m_F(rhs), m_euler_solver(rhs)
+        {
+            m_integrator.init(ode_size);
+        }
 
         inline void update()                     { m_storage.update(); }
         inline const value_type *F(int i) const  { return m_storage.F()[i]; }
@@ -56,7 +62,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,function_type,integrat
         inline value_type **X()                  { return m_storage.X(); }
         inline value_type dt(int i)              { return m_integrator.dt(i); }
         inline value_type &Immk(int i, int j)    { return m_integrator.Immk[i][j]; }
-        inline void integrate(value_type Dt)     { m_integrator.integrate(F(),Dt); }
+        inline void integrate(value_type Dt)     { m_integrator.integrate(F(), Dt); }
         inline size_t ode_size()                 { return m_storage.m_ode_size; }
 
         inline void init(value_type *x, value_type *Fx) { m_storage.init(x, Fx); }
@@ -100,11 +106,11 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,function_type,integrat
         inline int corrector_predictor_step(const int k, value_type *fdiff, value_type &t, const value_type &dt)
         {
             assert( k < integrator_type::sdc_nodes );
-            std::vector<value_type> Fold(m_storage.m_ode_size,0.0);
+            std::vector<value_type> Fold(m_storage.m_ode_size, 0.0);
             std::copy(F(k + 1), F(k + 1) + m_storage.m_ode_size, Fold.begin());
             t += dt;
             m_euler_solver(X(k + 1), X(k), fdiff, dt);
-            m_F(t, X(k + 1), F(k + 1));            
+            m_F(t, X(k + 1), F(k + 1));
             std::transform(F(k + 1), F(k + 1) + m_storage.m_ode_size, Fold.begin(), fdiff, std::minus<value_type>());
         }
 

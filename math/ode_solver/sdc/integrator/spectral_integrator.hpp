@@ -6,7 +6,7 @@
 
 template<typename value_type, quadrature_type quadrature, int _sdc_nodes, int _multirate_nodes, int _total_nodes>
 struct SpectralIntegrator
-: public QuadratureRule<value_type, quadrature, _sdc_nodes, _multirate_nodes>::type
+        : public QuadratureRule<value_type, quadrature, _sdc_nodes, _multirate_nodes>::type
 {
     enum
     {
@@ -42,9 +42,8 @@ struct SpectralIntegrator
 
 template<typename value_type, quadrature_type quadrature, int _sdc_nodes>
 struct SpectralIntegrator<value_type, quadrature, _sdc_nodes, 2, _sdc_nodes>
-: public QuadratureRule<value_type, quadrature, _sdc_nodes, 0>::type
+        : public QuadratureRule<value_type, quadrature, _sdc_nodes, 0>::type
 {
-
     enum
     {
         sdc_nodes = _sdc_nodes
@@ -52,14 +51,14 @@ struct SpectralIntegrator<value_type, quadrature, _sdc_nodes, 2, _sdc_nodes>
 
     std::vector<value_type> Immk[sdc_nodes - 1];
     size_t ode_size;
-    
+
     void init(size_t _ode_size)
     {
         for(int i = 0; i < sdc_nodes; ++i)
             Immk[i].resize(_ode_size,0.0);
         ode_size = _ode_size;
     }
-    
+
     inline void integrate(value_type **F, value_type Dt)
     {
         for(int i = 0; i < sdc_nodes - 1; ++i)
@@ -121,6 +120,6 @@ struct SpectralIntegrator<value_type, quadrature, _sdc_nodes, 2, _sdc_nodes>
 
 template < typename value_type, quadrature_type quadrature = other, int sdc_nodes = 5, int multirate_nodes = 2, int total_nodes = (sdc_nodes - 1) * (multirate_nodes - 1) + 1 >
 struct Integrator : public SpectralIntegrator<value_type,quadrature,sdc_nodes,multirate_nodes,total_nodes>
-{};
+    {};
 
 #endif

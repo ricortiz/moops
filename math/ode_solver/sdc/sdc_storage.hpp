@@ -15,8 +15,8 @@ namespace SDC
 template<typename T, int sdc_nodes, int function_size>
 struct sdc_arrays
 {
-    T *X[sdc_nodes];
-    T *F[function_size];
+    T X[sdc_nodes];
+    T F[function_size];
 };
 
 /** \internal
@@ -34,10 +34,10 @@ class sdc_storage;
 template<typename T, int sdc_nodes, int multirate_nodes, SDC::sdc_type sdc>
 class sdc_storage
 {
-        sdc_arrays<T, sdc_nodes, sdc_nodes> m_data;
+        sdc_arrays<T*, sdc_nodes, sdc_nodes> m_data;
 
     public:
-        const size_t m_ode_size;
+        size_t m_ode_size;
         inline explicit sdc_storage(size_t ode_size) : m_ode_size(ode_size)
         {
             for(int i = 1; i < sdc_nodes; ++i)
@@ -85,9 +85,9 @@ class sdc_storage
 template<typename T, int sdc_nodes>
 class sdc_storage<T, sdc_nodes, 0, SDC::EXPLICIT>
 {
-        sdc_arrays<T, sdc_nodes, sdc_nodes> m_data;
+        sdc_arrays<T*, sdc_nodes, sdc_nodes> m_data;
     public:
-        const size_t m_ode_size;
+        size_t m_ode_size;
         inline explicit sdc_storage(size_t ode_size) : m_ode_size(ode_size)
         {
             for(int i = 1; i < sdc_nodes; ++i)
@@ -135,9 +135,9 @@ class sdc_storage<T, sdc_nodes, 0, SDC::EXPLICIT>
 template<typename T, int sdc_nodes>
 class sdc_storage<T, sdc_nodes, 0, SDC::SEMI_IMPLICIT>
 {
-        sdc_arrays<T, sdc_nodes, 2 * sdc_nodes> m_data;
+        sdc_arrays<T*, sdc_nodes, 2 * sdc_nodes> m_data;
     public:
-        const size_t m_ode_size;
+        size_t m_ode_size;
         inline explicit sdc_storage(size_t ode_size) : m_ode_size(ode_size)
         {
             for(int i = 1; i < sdc_nodes; ++i)
@@ -187,7 +187,7 @@ class sdc_storage<T, sdc_nodes, 0, SDC::SEMI_IMPLICIT>
 // template<typename T, int sdc_nodes, int multirate_nodes>
 // class sdc_storage<T,sdc_nodes,multirate_nodes,SDC::MULTIRATE>
 // {
-//         sdc_arrays<T,sdc_nodes, ( sdc_nodes-1 ) * ( multirate_nodes-1 ) + 1> m_data;
+//         sdc_arrays<T*,sdc_nodes, ( sdc_nodes-1 ) * ( multirate_nodes-1 ) + 1> m_data;
 //     public:
 //         inline explicit sdc_storage() {}
 //

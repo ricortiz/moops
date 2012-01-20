@@ -1,5 +1,5 @@
-#ifndef META_HPP
-#define META_HPP
+#ifndef SDC_META_HPP
+#define SDC_META_HPP
 
 template<bool conditional, typename Then, typename Else>
 struct IF
