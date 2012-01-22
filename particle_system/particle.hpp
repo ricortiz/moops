@@ -20,9 +20,10 @@
 /// @section See Also 
 /// 	ParticleSystem particle_system_storage
 
-template<typename value_type>
+template<typename _value_type>
 struct Particle
 {
+  typedef _value_type value_type;
     value_type *position;
     value_type *velocity;
     value_type *force;

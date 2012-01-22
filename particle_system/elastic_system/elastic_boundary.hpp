@@ -17,41 +17,39 @@
 /// @section See also
 
 #include <vector>
-#include "geometry/surface.hpp"
+#include "spring_system.hpp"
 
-template < typename spring_system_type,
-typename ode_rhs_type,
-template<typename> class integration_policy >
-class ElasticBoundary :
-            public spring_system_type,
-            public integration_policy<ElasticBoundary<spring_system_type, ode_rhs_type, integration_policy> >
+template <typename Derived>
+class ElasticBoundary : public SpringSystem<Derived>
 {
     public:
-        typedef ElasticBoundary<spring_system_type, ode_rhs_type, integration_policy> self_type;
-        typedef typename spring_system_type::value_type    value_type;
-        typedef typename spring_system_type::spring_type   spring_type;
-        typedef typename spring_system_type::particle_type particle_type;
-        typedef integration_policy<self_type>              time_integrator_type;
-	
-    private:
-        size_t    m_ode_size;
+        typedef surface_traits<Derived>::value_type    value_type;
+        typedef surface_traits<Derived>::particle_type particle_type;
+        typedef surface_traits<Derived>::storage_type  storage_type;
+        typedef SpringSystem<Derived>    	       spring_system_type;
+        typedef typename spring_system_type::spring_type       spring_type;
+        typedef typename spring_system_type::spring_iterator   spring_iterator;
 
     public:
-        ElasticBoundary(size_t ode_size) : m_ode_size(ode_size), spring_system_type(ode_size) {  }
+        ElasticBoundary() {}
         ~ElasticBoundary() {}
-
-        void run(value_type timestep)
+        
+        template<typename int_vector_type, typename real_vector_type>
+        inline void setSprings(int_vector_type &col_ptr, int_vector_type &col_idx, real_vector_type &strength)
         {
-            this->integrate(timestep);
-            this->time() += timestep;
+            logger.startTimer("setSprings");
+            particle_type *particles = this->particles();
+            for(size_t p = 0; p < col_ptr.size() - 1; ++p)
+                for(size_t i = col_ptr[p], end = col_ptr[p + 1]; i < end; ++i)
+                    if(!this->existSpring(&particles[p], &particles[col_idx[i]]))
+                    {
+                        spring_iterator s = this->addSpring(&particles[p], &particles[col_idx[i]], strength[i]);
+                        s->getAidx() = 3 * p;
+                        s->getBidx() = 3 * col_idx[i];
+                    }
+            logger.stopTimer("setSprings");                   	    
         }
 };
 
-template< typename _spring_system_type, typename _ode_rhs_type, template<typename> class _integration_policy>
-struct immersed_structure_traits<ElasticBoundary<_spring_system_type, _ode_rhs_type, _integration_policy> >
-{
-    typedef _ode_rhs_type ode_rhs_type;
-    typedef typename _spring_system_type::value_type    value_type;
-};
 
 #endif

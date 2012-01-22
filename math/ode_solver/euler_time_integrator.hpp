@@ -1,5 +1,5 @@
-#ifndef EULER_INTEGRATOR_HPP
-#define EULER_INTEGRATOR_HPP
+#ifndef EULER_TIME_INTEGRATOR_HPP
+#define EULER_TIME_INTEGRATOR_HPP
 //=========================================================================
 //
 //  Program:   Modular Object Oriented Particle Simulator
@@ -17,10 +17,10 @@
 ///                      It contains the main method that drives the simulation: void integrate()
 /// @section See also ForwardEuler
 
-#include "math/ode_solver/euler/forward_euler.hpp"
+#include "euler/forward_euler.hpp"
 
 template<typename boundary_type>
-class EulerIntegrator
+class EulerTimeIntegrator
 {
     protected:
         typedef EulerIntegrator<boundary_type>                                         self_type;
@@ -34,7 +34,7 @@ class EulerIntegrator
 
     public:
         
-        EulerIntegrator(size_t ode_size) : m_ode_size(ode_size), m_euler_integrator(derived()), m_rhs(ode_size/3) {}
+        EulerTimeIntegrator(size_t ode_size) : m_ode_size(ode_size), m_euler_integrator(derived()), m_rhs(ode_size/3) {}
         
         inline boundary_type &derived()
         {

@@ -1,5 +1,5 @@
 #ifndef DIRECT_STOKES_SOLVER_HPP
-#define DIRECT_STOKES_SOLVER_HPP
+#define CPU_STOKES_SOLVER_HPP
 //=========================================================================
 //
 //  Program:   Modular Object Oriented Particle Simulator
@@ -18,10 +18,10 @@
 /// @section See also
 
 #include <map>
-#include "math/fluid_solver/stokes/nbody_cpu/cpu_compute_velocity.hpp"
+#include "nbody_cpu/cpu_compute_velocity.hpp"
 
 template<typename value_type>
-class DirectStokesSolver
+class CpuStokesSolver
 {
     protected:
         typedef std::vector<std::vector<size_t> > map_type;
@@ -34,8 +34,8 @@ class DirectStokesSolver
         map_type m_map_implicit;
 
     public:
-        DirectStokesSolver() : m_num_particles ( 0 ) {}
-        DirectStokesSolver ( size_t num_particles ) : m_num_particles ( num_particles ) {}
+        CpuStokesSolver() : m_num_particles ( 0 ) {}
+        CpuStokesSolver ( size_t num_particles ) : m_num_particles ( num_particles ) {}
 
         void init(size_t num_particles) { m_num_particles = num_particles; }
         
@@ -111,7 +111,7 @@ class DirectStokesSolver
                         m_map_explicit[i].push_back(yidx);
             logger.stopTimer("initMap");
         }
-        
+        size_t ode_size() { return m_num_particles*3; } 
         value_type const &delta() const { return m_delta; }
         value_type &delta() { return m_delta; }
 };

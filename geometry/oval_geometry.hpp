@@ -24,12 +24,13 @@ protected:
         size_t           m_hi;
         size_t           m_lo;
         std::vector<value_type> m_radius_scale;
+	size_t 		 m_num_particles;
 
     public:
 
-        OvalGeometry() : m_speed(1), m_size(0), m_inner_radius(.05), m_outer_radius(.5), m_lo(250), m_hi(750) {}
+        OvalGeometry() : m_speed(1), m_size(0), m_inner_radius(.05), m_outer_radius(.5), m_lo(250), m_hi(750), m_num_particles(0) {}
         OvalGeometry(value_type x0[3], size_t M = 6, size_t N = 100, value_type speed = .05, value_type inner_radius = .05, value_type outer_radius = .5)
-                : m_speed(speed), m_size(M*N), m_inner_radius(inner_radius), m_outer_radius(outer_radius), m_hi(500), m_lo(1000)
+                : m_speed(speed), m_size(M*N), m_inner_radius(inner_radius), m_outer_radius(outer_radius), m_hi(500), m_lo(1000), m_num_particles(M*N)
         {
             m_dims[0] = M;
             m_dims[1] = N;
@@ -40,7 +41,7 @@ protected:
             m_radius_scale.resize(m_hi-m_lo,0.0);
         }
 
-        void getDimensions(size_t &M, size_t &N) { M = m_dims[0]; N = m_dims[1]; }
+        void getDimensions(size_t &M, size_t &N) { M = m_dims[0]; N = m_dims[1]; m_num_particles = M*N; }
         void getInnerRadius(value_type &radius) { radius = m_inner_radius; }
         void getOuterRadius(value_type &radius) { radius = m_outer_radius; }
         void getForcingRange(size_t &lo, size_t &hi) { hi = m_hi; lo = m_lo; }
@@ -61,7 +62,7 @@ protected:
             m_x0[2] = z;
         }
         
-        size_t const &size() const { return m_size; }
+        size_t const &numParticles() const { return m_num_particles; }
         void getLocalFrame(value_type s, value_type x[3],value_type normal[3])
         {
             value_type Dx[3] = {0};

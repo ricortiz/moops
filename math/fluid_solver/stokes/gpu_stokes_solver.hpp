@@ -1,5 +1,5 @@
-#ifndef CUDA_STOKES_SOLVER
-#define CUDA_STOKES_SOLVER
+#ifndef GPU_STOKES_SOLVER
+#define GPU_STOKES_SOLVER
 //=========================================================================
 //
 //  Program:   Modular Object Oriented Particle Simulator
@@ -20,7 +20,7 @@
 #include "math/fluid_solver/stokes/nbody_gpu/gpu_compute_velocity.hpp"
 
 template<typename particle_system_type>
-class CudaStokesSolver
+class GpuStokesSolver
 {
     protected:
         typedef typename particle_system_type::value_type value_type;
@@ -32,7 +32,7 @@ class CudaStokesSolver
 
     public:
 
-        CudaStokesSolver(value_type num_particles) : m_num_particles(num_particles) {}
+        GpuStokesSolver(value_type num_particles) : m_num_particles(num_particles) {}
         
         inline void operator()(value_type *x, value_type *v, value_type *f)
         {

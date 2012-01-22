@@ -18,8 +18,8 @@
 /// @section See also ExplicitSDC SemiImplicitSDC
 
 #include<iterator>
-#include "math/ode_solver/sdc/integrator/spectral_integrator.hpp"
-#include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
+#include "sdc/integrator/spectral_integrator.hpp"
+#include "sdc/semi_implicit_sdc.hpp"
 
 template<typename T> struct immersed_structure_traits;
 

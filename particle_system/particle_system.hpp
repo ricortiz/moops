@@ -18,19 +18,18 @@
 
 #include<limits>
 #include<algorithm>
-#include "particle_system/particle_system_storage.hpp"
-#include "particle_system/vtk_particle_system_storage.hpp"
-#include "particle_system/particle.hpp"
 
-template<typename _value_type,
-         int immersed_structure_type = PSYS::SURFACE,
-         typename storage_type = vtkParticleSystemStorage<_value_type,Particle<_value_type>,immersed_structure_type>
-         >
+template<class T >
+class surface_traits;
+
+template<typename Derived>
 class ParticleSystem
 {
     public:
-        typedef Particle<_value_type> particle_type;
-        typedef _value_type          value_type;
+        typedef surface_traits<Derived>::value_type value_type;
+        typedef surface_traits<Derived>::particle_type particle_type;
+        typedef surface_traits<Derived>::storage_type storage_type;
+	
 
     private:
         storage_type          m_storage;

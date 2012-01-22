@@ -11,6 +11,8 @@
 #include "sdc_base.hpp"
 #include "math/ode_solver/euler/forward_euler.hpp"
 
+template<class T >
+class surface_traits;
 /**
  * \brief This class implements a fully explicit SDC method.
  *
@@ -19,11 +21,14 @@
  * \param sdc_corrections Number of corrections to do.
  *
  **/
-template<typename value_type, typename function_type, typename integrator_type, int sdc_corrections>
-class ExplicitSDC : public SDCBase<ExplicitSDC<value_type, function_type, integrator_type, sdc_corrections> >
+template<typename Derived, typename integrator_type, int sdc_corrections>
+class ExplicitSDC : public SDCBase<ExplicitSDC<Derived, integrator_type, sdc_corrections> >
 {
 
     protected:
+      surface_traits<Derived>::value_type value_type;
+      
+      surface_traits<Derived>::function_type function_type;
         typedef ForwardEuler<value_type, function_type> forward_euler_type;
 
     private:

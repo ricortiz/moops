@@ -1,20 +1,21 @@
 #ifndef SURFACE_HPP
 #define SURFACE_HPP
 
-#include <map>
-#include "particle_system/particle.hpp"
+#include "particle_system/elastic_system/elastic_boundary.hpp"
+#include "particle_system/particle_system.hpp"
 
 template<typename T> struct surface_traits;
 
 template<typename Derived>
-class Surface
+class Surface : ElasticBoundary<Derived>, ParticleSystem<Derived>
 {
     protected:
-        typedef typename surface_traits<Derived>::geometry_type geometry_type;
+        typedef typename surface_traits<Derived>::fluid_solver_type fluid_solver_type;
         typedef typename surface_traits<Derived>::value_type value_type;
 
     protected:
-
+	fluid_solver_type m_fluid_solver;
+	
     public:
         Surface() {}
         ~Surface() {}
@@ -24,17 +25,13 @@ class Surface
             return static_cast<Derived*>(this);
         }
 
-        template<typename spring_system_type>
-        inline void set_springs(spring_system_type &spring_system)
-        {
-            derived()->set_springs(spring_system);
-        }
-
-        template<typename boundary_type>
-        inline void update(boundary_type &boundary, value_type time)
-        {
-            derived()->update(boundary,time);
-        }
+	void eval(value_type t, value_type *x, value_type *v)
+	{
+            logger.startTimer("odeRHSeval");
+            derived().updateForces(time);
+            m_fluid_solver(x, v, derived().forces());
+            logger.stopTimer("odeRHSeval");        
+	}
 
 };
 

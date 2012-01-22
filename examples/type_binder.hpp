@@ -12,6 +12,11 @@
 #include <vtkFloatArray.h>
 #include <vtkXMLPolyDataWriter.h>
 
+
+#include "utils/logger.hpp"
+
+Logger logger;
+
 #include "particle_system/time_integrator/sdc_integrator.hpp"
 #include "particle_system/time_integrator/sisdc_integrator.hpp"
 #include "particle_system/time_integrator/euler_integrator.hpp"
@@ -32,10 +37,10 @@
 #include "swarm/swarm.hpp"
 #include "valveless_heart/valveless_heart.hpp"
 
-template<typename _value_type, int sdc_nodes = 5, int fmm_max_particles = 0, int fmm_order = 0>
+template<typename _value_type>
 struct TypeBinder
 {
-    typedef TypeBinder<_value_type,sdc_nodes,fmm_max_particles,fmm_order> Types;
+    typedef TypeBinder<_value_type> Types;
     typedef _value_type value_type;
     typedef Particle<value_type>                                                particle_type;
 #ifdef USE_CUDA_FLUID_SOLVER

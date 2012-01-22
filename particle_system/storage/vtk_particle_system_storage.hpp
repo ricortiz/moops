@@ -63,7 +63,6 @@ class vtkParticleSystemStorage<T,particle_type,PSYS::SURFACE,vtk_data_array_type
     public:
         inline explicit vtkParticleSystemStorage(size_t data_size) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
         {
-            std::cout << "ParticleSystem" << std::endl;
             size_t num_particles = data_size/3;
             m_data.positions = new T[data_size];
             m_data.velocities = new T[data_size];
