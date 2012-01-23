@@ -17,37 +17,34 @@
 ///                      It contains the main method that drives the simulation: void integrate()
 /// @section See also ExplicitSDC SemiImplicitSDC
 
-template<class T >
-class surface_traits;
+
 template<typename Derived>
 class TimeIntegrator
 {
     protected:
-        typedef surface_traits<Derived>::time_integrator time_integrator;
-        typedef surface_traits<Derived>::value_type value_type;
+        typedef surface_traits<Derived>::value_type      value_type;
 
     public:
-      
-      TimeIntegrator() {}
-
-        void integrate(value_type time, value_type timestep)
+        inline Derived &derived()
+        {
+            return *static_cast<Derived*>(this);
+        }
+        
+        inline void integrate(value_type time, value_type timestep)
         {
             logger.startTimer("sdcTimeStep");
-            m_sdc.predictor(time, timestep);
-            m_sdc.corrector(time, timestep);
-            m_sdc.update();
+	    Derived().eval(time,timestep);
             logger.stopTimer("sdcTimeStep");
         }
 
-        void operator()(value_type time, const value_type *x, value_type *v)
+        inline void operator()(value_type time, const value_type *x, value_type *v)
         {
             logger.startTimer("odeRHSeval");
-            derived().updateForces(time);
-            m_rhs(x, v, derived().forces());
+	    Derived().eval(time,x,v);
             logger.stopTimer("odeRHSeval");
         }
 
-//         inline size_t ode_size() { return derived().data_size(); }     
+//         inline size_t ode_size() { return derived().data_size(); }
 };
 
 

@@ -11,8 +11,6 @@
 #include "sdc_base.hpp"
 #include "math/ode_solver/euler/forward_euler.hpp"
 
-template<class T >
-class surface_traits;
 /**
  * \brief This class implements a fully explicit SDC method.
  *
@@ -21,19 +19,20 @@ class surface_traits;
  * \param sdc_corrections Number of corrections to do.
  *
  **/
-template<typename Derived, typename integrator_type, int sdc_corrections>
-class ExplicitSDC : public SDCBase<ExplicitSDC<Derived, integrator_type, sdc_corrections> >
+template<typename Derived>
+class ExplicitSDC : public SDCBase<ExplicitSDC<Derived> >
 {
 
     protected:
-      surface_traits<Derived>::value_type value_type;
-      
-      surface_traits<Derived>::function_type function_type;
-        typedef ForwardEuler<value_type, function_type> forward_euler_type;
+        surface_traits<Derived>::value_type value_type;
+        surface_traits<Derived>::function_type function_type;
+        surface_traits<Derived>::spectral_intgrator integrator_type;
+        enum { sdc_corrections = surface_traits<Derived>::sdc_corrections };
+        typedef ForwardEuler<Derived> forward_euler_type;
 
     private:
 
-        sdc_storage<value_type,integrator_type::sdc_nodes,0,SDC::EXPLICIT> m_storage;
+        sdc_storage<value_type, integrator_type::sdc_nodes, 0, SDC::EXPLICIT> m_storage;
         integrator_type m_integrator;
         function_type &m_F;
         forward_euler_type m_euler_solver;
@@ -45,12 +44,12 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<Derived, integrator_type, sdc_cor
         {
             m_integrator.init(ode_size);
         }
-        
+
         ExplicitSDC(function_type &rhs) : m_storage(rhs.ode_size()), m_F(rhs), m_euler_solver(rhs)
         {
             m_integrator.init(rhs.ode_size());
         }
-        
+
         ExplicitSDC(function_type &rhs, size_t ode_size) : m_storage(ode_size), m_F(rhs), m_euler_solver(rhs)
         {
             m_integrator.init(ode_size);
@@ -89,7 +88,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<Derived, integrator_type, sdc_cor
         **/
         inline void predictor_step(const int k, value_type &t, const value_type &dt)
         {
-            assert( k < integrator_type::sdc_nodes );
+            assert(k < integrator_type::sdc_nodes);
             t += dt;
             m_euler_solver(X(k + 1), X(k), F(k), dt);
             m_F(t, X(k + 1), F(k + 1));
@@ -110,7 +109,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<Derived, integrator_type, sdc_cor
          **/
         inline int corrector_predictor_step(const int k, value_type *fdiff, value_type &t, const value_type &dt)
         {
-            assert( k < integrator_type::sdc_nodes );
+            assert(k < integrator_type::sdc_nodes);
             std::vector<value_type> Fold(m_storage.m_ode_size, 0.0);
             std::copy(F(k + 1), F(k + 1) + m_storage.m_ode_size, Fold.begin());
             t += dt;
@@ -121,16 +120,16 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<Derived, integrator_type, sdc_cor
 
 };
 
-template<typename _value_type, typename _function_type, typename _integrator_type, int _sdc_corrections>
-struct sdc_traits<ExplicitSDC<_value_type, _function_type, _integrator_type, _sdc_corrections> >
+template<typename Derived>
+struct sdc_traits<ExplicitSDC<Derived> >
 {
-    typedef _value_type value_type;
-    typedef _integrator_type integrator_type;
-    typedef _function_type function_type;
+    surface_traits<Derived>::value_type value_type;
+    surface_traits<Derived>::function_type function_type;
+    surface_traits<Derived>::spectral_intgrator integrator_type;
     enum
     {
-        sdc_nodes = _integrator_type::sdc_nodes,
-        sdc_corrections = _sdc_corrections
+        sdc_nodes = integrator_type::sdc_nodes,
+        sdc_corrections = surface_traits<Derived>::sdc_corrections
     };
 };
 

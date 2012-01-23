@@ -3,11 +3,10 @@
 
 #include "geometry/oval_geometry.hpp"
 #include "particle_system/elastic_system/elastic_boundary.hpp"
+#include <geometry/surface.hpp>
 
-template<typename particle_system_type, 
-	 typename fluid_solver_type, 
-	 typename time_integrator_type>
-class HeartPump : 
+
+class HeartPump : Surface<HeartPump>
 {
     protected:
         typedef ElasticBoundary<typename particle_system_type::particle_type> base_type;
@@ -85,18 +84,18 @@ class HeartPump :
         {
             size_t lo, hi;
             m_geometry.getForcingRange(lo, hi);
-            spring_iterator p, end;
-            for (p = this->springs_begin(); p != this->springs_end(); ++p)
-                if (p->A()->i == lo || p->B()->i == lo)
+            spring_iterator s, f;
+            for (s = this->springs_begin(); s != this->springs_end(); ++s)
+                if (s->A()->i == lo || s->B()->i == lo)
                     break;
-            end = p;
-            for (; end != this->springs_end(); ++end)
-                if (end->A()->i == hi)
+            f = s;
+            for (; f != this->springs_end(); ++f)
+                if (f->A()->i == hi)
                 {
-                    do ++end; while (end->A()->i == hi);
+                    do ++f; while (f->A()->i == hi);
                     break;
                 }
-            return std::make_pair(p,end);
+            return std::make_pair(s,f);
         }
 
         inline void updateSprings(value_type time)
@@ -108,11 +107,7 @@ class HeartPump :
             logger.stopTimer("updateSprings");
         }
 
-        void run(value_type timestep)
-        {
-            time_integrator.integrate(particle_system.time(), timestep);
-            particle_system.time() += timestep;
-        }
+
 
         inline BaseGeometry<oval_type> &geometry()
         {

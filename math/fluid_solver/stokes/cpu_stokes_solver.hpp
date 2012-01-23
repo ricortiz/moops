@@ -20,10 +20,11 @@
 #include <map>
 #include "nbody_cpu/cpu_compute_velocity.hpp"
 
-template<typename value_type>
+template<typename Derived>
 class CpuStokesSolver
 {
     protected:
+      typedef surface_traits<Derived>::value_type value_type;
         typedef std::vector<std::vector<size_t> > map_type;
 
     private:

@@ -19,16 +19,16 @@
 #include <vector>
 #include "spring_system.hpp"
 
-template <typename Derived>
+template<typename Derived>
 class ElasticBoundary : public SpringSystem<Derived>
 {
     public:
         typedef surface_traits<Derived>::value_type    value_type;
         typedef surface_traits<Derived>::particle_type particle_type;
         typedef surface_traits<Derived>::storage_type  storage_type;
-        typedef SpringSystem<Derived>    	       spring_system_type;
-        typedef typename spring_system_type::spring_type       spring_type;
-        typedef typename spring_system_type::spring_iterator   spring_iterator;
+        typedef SpringSystem<Derived>    	       base_type;
+        typedef typename base_type::spring_type       spring_type;
+        typedef typename base_type::spring_iterator   spring_iterator;
 
     public:
         ElasticBoundary() {}
