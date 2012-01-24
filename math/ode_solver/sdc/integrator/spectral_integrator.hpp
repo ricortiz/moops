@@ -54,7 +54,7 @@ struct SpectralIntegrator<value_type, quadrature, _sdc_nodes, 2, _sdc_nodes>
 
     void init(size_t _ode_size)
     {
-        for(int i = 0; i < sdc_nodes; ++i)
+        for(int i = 0; i < sdc_nodes-1; ++i)
             Immk[i].resize(_ode_size,0.0);
         ode_size = _ode_size;
     }
