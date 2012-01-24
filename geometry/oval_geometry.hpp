@@ -149,7 +149,6 @@ protected:
                
         const std::vector<value_type> &setRadiusScaling(value_type t)
         {
-            logger.startTimer("radiusScale");
             size_t n = m_hi - m_lo;
             // Range of stretchy part
             value_type x_1 = 0.0;
@@ -187,7 +186,6 @@ protected:
                 m_radius_scale[k] *= filter[k] * scale;
                 m_radius_scale[k] = 1 - m_radius_scale[k];
             }
-            logger.stopTimer("radiusScale");
             return m_radius_scale;
         }
 

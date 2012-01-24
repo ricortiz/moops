@@ -22,14 +22,12 @@ template<typename Derived>
 class TimeIntegrator
 {
     protected:
-        typedef typename surface_traits<Derived>::value_type      value_type;
         typedef typename surface_traits<Derived>::time_integrator_type time_integrator_type;
 
     private:
         time_integrator_type time_integrator;
 
     public:
-
         TimeIntegrator(size_t ode_size) : time_integrator(ode_size) {}
         
         inline Derived &derived()
@@ -37,11 +35,12 @@ class TimeIntegrator
             return *static_cast<Derived*>(this);
         }
 
+        template<typename value_type>
         inline void integrate(value_type t, value_type timestep)
         {
             time_integrator(derived(),t,derived().positions(),derived().velocities(),timestep);
         }
-//         inline size_t ode_size() { return derived().data_size(); }
+        
 };
 
 

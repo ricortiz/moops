@@ -4,7 +4,7 @@
 #include<map>
 #include "utils/logger.hpp"
 
-Logger logger;
+// Logger logger;
 
 template<typename T>
 struct surface_traits;
@@ -13,6 +13,7 @@ struct surface_traits;
 #include "math/ode_solver/euler/forward_euler.hpp"
 #include "math/ode_solver/euler/backward_euler.hpp"
 #include "math/ode_solver/sdc/explicit_sdc.hpp"
+#include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
 #include "examples/valveless_heart/valveless_heart.hpp"
 #include "geometry/surface.hpp"
 
@@ -22,7 +23,8 @@ int main()
     typedef ForwardEuler fetime_integrator;
     typedef BackwardEuler<double> betime_integrator;
     typedef ExplicitSDC<double> esdc_integrator;
-    typedef HeartPump<double,fluid_solver,esdc_integrator> heart_pump;
+    typedef SemiImplicitSDC<double> sisdc_integrator;
+    typedef HeartPump<double,fluid_solver,sisdc_integrator> heart_pump;
     OvalGeometry<double> geometry;
     geometry.setDimensions(20,200);
     geometry.setX0(0,0,0);
@@ -31,6 +33,7 @@ int main()
 
     heart_pump pump(geometry);
     pump.fluid_solver().setDelta(.01);
+    pump.fluid_solver().initMaps(pump.elasticBoundary());
 
     pump.run(.01);
 

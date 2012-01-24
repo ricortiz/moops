@@ -20,15 +20,33 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
         std::pair<spring_iterator, spring_iterator> m_spring_range;
 
     public:
-
         HeartPump(oval_type &oval_geometry) : m_geometry(oval_geometry), base_type(oval_geometry.numParticles())
         {
             m_geometry.init(this->particles());
             setSprings();
+        }
+
+        void setSprings()
+        {
+            std::vector<size_t> col_ptr, col_idx;
+            std::vector<value_type> strenght;
+            col_ptr.push_back(0);
+
+            m_geometry.getConnections(col_ptr, col_idx);
+            getStrengths(col_ptr, col_idx, strenght);
+            base_type::setSprings(col_ptr, col_idx, strenght);
             m_spring_range = getIteratorRange();
         }
 
-        template<typename particle_type>
+        inline void computeForces(value_type time)
+        {
+            m_geometry.setRadiusScaling(time);
+            for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
+                m_geometry.resetRestingLength(s, time);
+            base_type::computeForces();
+        }
+
+    private:
         void initVolume(oval_type &oval_geometry, particle_type *particles, size_t num_sub_surfaces = 1)
         {
             oval_geometry.init(particles, num_sub_surfaces);
@@ -69,25 +87,6 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
                     break;
                 }
             return std::make_pair(s, f);
-        }
-        
-        inline void setSprings()
-        {
-            std::vector<size_t> col_ptr, col_idx;
-            std::vector<value_type> strenght;
-            col_ptr.push_back(0);
-
-            m_geometry.getConnections(col_ptr, col_idx);
-            getStrengths(col_ptr, col_idx, strenght);
-            base_type::setSprings(col_ptr, col_idx, strenght);
-        }
-
-        inline void computeForces(value_type time)
-        {
-            m_geometry.setRadiusScaling(time);
-            for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
-                m_geometry.resetRestingLength(s, time);
-            base_type::computeForces();
         }
 
 };

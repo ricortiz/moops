@@ -1,17 +1,6 @@
 #ifndef SPRING_SYSTEM_HPP
 #define SPRING_SYSTEM_HPP
-//=========================================================================
-//
-//  Program:   Modular Object Oriented Particle Simulator
-//  Module:    SpringSystem
-//
-//  Copyright (c) Ricardo Ortiz
-//  All rights reserved.
-//     This software is distributed WITHOUT ANY WARRANTY; without even
-//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-//     PURPOSE.
-//
-//=========================================================================
+
 /// @name SpringSystem
 /// @section Description
 /// @section See also
@@ -23,30 +12,26 @@ class SpringSystem
 {
     public:
         typedef typename surface_traits<Derived>::particle_type particle_type;
-        typedef typename surface_traits<Derived>::value_type value_type;
-        typedef Spring<particle_type>                               spring_type;
+        typedef typename surface_traits<Derived>::value_type    value_type;
+        typedef Spring<particle_type>                           spring_type;
         typedef typename std::list<spring_type>                 spring_container;
-        typedef typename spring_container::iterator                      spring_iterator;
-        typedef typename std::list<spring_type *>                spring_ptr_container;
-        typedef typename std::map<particle_type *, spring_ptr_container > spring_lut_type;
+        typedef typename spring_container::iterator             spring_iterator;
+        typedef typename std::list<spring_type *>               spring_ptr_container;
+        typedef typename std::map < particle_type *,
+                                    spring_ptr_container >      spring_lut_type;
 
     private:
         spring_container        m_springs;      ///< Internal data structure used to store all spring constraints.
         spring_lut_type         m_spring_lut;   ///< Internal datas tructure to record spring connections.
 
     public:
-
-        SpringSystem() {}
-        ~SpringSystem() {}
-
+        inline Derived &derived()
+        {
+            return *static_cast<Derived*>(this);
+        }
+        
         spring_iterator springs_begin()                 { return m_springs.begin(); }
         spring_iterator springs_end()                   { return m_springs.end(); }
-
-        void clear()
-        {
-            m_spring_lut.clear();
-            m_springs.clear();
-        }
 
         inline spring_iterator addSpring(particle_type *A, particle_type *B, value_type k = 1)
         {

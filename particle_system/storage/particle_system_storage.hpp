@@ -21,8 +21,6 @@
 
 enum storage_shape { SURFACE, VOLUME };
 
-
-
 template<typename T, typename particle_type>
 struct particle_system_arrays
 {
@@ -41,14 +39,15 @@ class ParticleSystemStorage<T,particle_type,SURFACE>
 {
     private:
         particle_system_arrays<T*,particle_type*> m_data;
-
+        size_t m_data_size;
+        
     public:
-        inline explicit ParticleSystemStorage(size_t data_size)
+        inline explicit ParticleSystemStorage(size_t num_particles)
         {
-            size_t num_particles = data_size/3;
-            m_data.positions = new T[data_size];
-            m_data.velocities = new T[data_size];
-            m_data.forces = new T[data_size];
+            m_data_size = num_particles*3;
+            m_data.positions = new T[m_data_size];
+            m_data.velocities = new T[m_data_size];
+            m_data.forces = new T[m_data_size];
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
             {
@@ -97,13 +96,14 @@ class ParticleSystemStorage<T,particle_type,VOLUME>
 {
     private:
         particle_system_arrays<T*,particle_type*> m_data;
-
+        size_t m_data_size;
+        
     public:
-        inline explicit ParticleSystemStorage(size_t data_size)
+        inline explicit ParticleSystemStorage(size_t num_particles)
         {
-            size_t num_particles = data_size/3;
-            m_data.positions = new T[data_size];
-            m_data.velocities = new T[data_size];
+            m_data_size = num_particles*3;
+            m_data.positions = new T[m_data_size];
+            m_data.velocities = new T[m_data_size];
             m_data.forces = 0;
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)

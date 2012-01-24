@@ -27,7 +27,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,spectral_integrator_ty
 
     private:
 
-        sdc_storage<value_type, spectral_integrator_type::sdc_nodes, 0, SDC::EXPLICIT> m_storage;
+        internal::sdc_storage<value_type, spectral_integrator_type::sdc_nodes> m_storage;
         spectral_integrator_type m_integrator;
         ForwardEuler m_euler_solver;
         /**< This is the integrator used to compute the spectral integrals of the right hand sides F. **/
