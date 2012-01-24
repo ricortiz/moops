@@ -102,8 +102,8 @@ class SDCBase
         inline void corrector(function_type &F, value_type t, value_type Dt)
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
-size_t ode_size = sdc_method().ode_size();
-std::vector<value_type> fdiff(ode_size, 0.0);
+            size_t ode_size = sdc_method().ode_size();
+            std::vector<value_type> fdiff(ode_size, 0.0);
 
             for(size_t i = 0; i < sdc_corrections - 1; ++i)
             {
@@ -115,7 +115,7 @@ std::vector<value_type> fdiff(ode_size, 0.0);
                     for(size_t j = 0; j < ode_size; ++j)
                         fdiff[j] += sdc_method().Immk(k, j) / dt;
                     sdc_method().corrector_predictor_step(F, k, &fdiff[0], time, dt);
-                    check_convergence(i+1, k);
+                    check_convergence(i + 1, k);
                 }
 //                 if(m_residuals[i][sdc_nodes - 2] < 1e-13)
 //                 {
