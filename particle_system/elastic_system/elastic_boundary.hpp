@@ -16,29 +16,29 @@
 /// @section Description
 /// @section See also
 
-#include <vector>
-#include "spring_system.hpp"
+#include "particle_system/elastic_system/spring_system.hpp"
 
 template<typename Derived>
 class ElasticBoundary : public SpringSystem<Derived>
 {
     public:
-        typedef surface_traits<Derived>::value_type    value_type;
-        typedef surface_traits<Derived>::particle_type particle_type;
-        typedef surface_traits<Derived>::storage_type  storage_type;
+        typedef typename surface_traits<Derived>::value_type    value_type;
+        typedef typename surface_traits<Derived>::particle_type particle_type;
         typedef SpringSystem<Derived>    	       base_type;
         typedef typename base_type::spring_type       spring_type;
         typedef typename base_type::spring_iterator   spring_iterator;
 
     public:
-        ElasticBoundary() {}
-        ~ElasticBoundary() {}
+
+        inline Derived &derived()
+        {
+            return *static_cast<Derived*>(this);
+        }
         
-        template<typename int_vector_type, typename real_vector_type>
-        inline void setSprings(int_vector_type &col_ptr, int_vector_type &col_idx, real_vector_type &strength)
+        inline void setSprings(std::vector<size_t> &col_ptr, std::vector<size_t> &col_idx, std::vector<value_type> &strength)
         {
             logger.startTimer("setSprings");
-            particle_type *particles = this->particles();
+            particle_type *particles = derived().particles();
             for(size_t p = 0; p < col_ptr.size() - 1; ++p)
                 for(size_t i = col_ptr[p], end = col_ptr[p + 1]; i < end; ++i)
                     if(!this->existSpring(&particles[p], &particles[col_idx[i]]))

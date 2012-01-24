@@ -1,5 +1,5 @@
-#ifndef INEXACT_NEWTON_RAW_HPP
-#define INEXACT_NEWTON_RAW_HPP
+#ifndef INEXACT_NEWTON_HPP
+#define INEXACT_NEWTON_HPP
 
 #include<cmath>
 #include<limits>

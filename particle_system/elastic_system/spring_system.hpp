@@ -15,16 +15,15 @@
 /// @name SpringSystem
 /// @section Description
 /// @section See also
-#include<list>
-#include<map>
+
 #include "particle_system/forces/spring.hpp"
 
 template <typename Derived>
 class SpringSystem
 {
     public:
-        surface_traits<Derived>::particle_type particle_type;
-        surface_traits<Derived>::value_type value_type;
+        typedef typename surface_traits<Derived>::particle_type particle_type;
+        typedef typename surface_traits<Derived>::value_type value_type;
         typedef Spring<particle_type>                               spring_type;
         typedef typename std::list<spring_type>                 spring_container;
         typedef typename spring_container::iterator                      spring_iterator;

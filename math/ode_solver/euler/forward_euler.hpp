@@ -13,32 +13,33 @@
 //
 //=========================================================================
 
-template<typename value_type, typename function_type>
 class ForwardEuler
 {
-        function_type &m_F;
-        size_t m_ode_size;
 
+    size_t ode_size;
     public:
-        ForwardEuler(function_type &F) : m_F(F), m_ode_size(F.ode_size()) {}
-
-        inline void operator()(value_type t, value_type *x, value_type *v, value_type dt)
+        ForwardEuler(size_t _ode_size) : ode_size(_ode_size) {}
+        
+        template<typename function_type, typename value_type>
+        inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
         {
-            m_F(t, x, v);
-            for(size_t i = 0; i < m_ode_size; ++i)
+            F(t, x, v);
+            for(size_t i = 0; i < ode_size; ++i)
                 x[i] += dt * v[i];
         }
-
+        
+        template<typename value_type>
         inline void operator()(value_type *x, const value_type *v, value_type dt)
         {
-            for(size_t i = 0; i < m_ode_size; ++i)
+            for(size_t i = 0; i < ode_size; ++i)
                 x[i] += dt * v[i];
         }
 
-        inline void operator()(value_type *x, const value_type *xold, const value_type *v, value_type dt)
+        template<typename value_type>
+        inline void operator()(value_type *xnew, value_type *xold, const value_type *v, value_type dt)
         {
-            for(size_t i = 0; i < m_ode_size; ++i)
-                x[i] = xold[i] + dt * v[i];
+            for(size_t i = 0; i < ode_size; ++i)
+                xnew[i] = xold[i] + dt * v[i];
         }
 
 };

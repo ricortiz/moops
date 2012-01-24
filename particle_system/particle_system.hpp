@@ -19,27 +19,23 @@
 #include<limits>
 #include<algorithm>
 
-template<class T >
-class surface_traits;
-
 template<typename Derived>
 class ParticleSystem
 {
     public:
-        typedef surface_traits<Derived>::value_type value_type;
-        typedef surface_traits<Derived>::particle_type particle_type;
-        typedef surface_traits<Derived>::storage_type storage_type;
+        typedef typename surface_traits<Derived>::value_type value_type;
+        typedef typename surface_traits<Derived>::particle_type particle_type;
+        typedef typename surface_traits<Derived>::storage_type storage_type;
 	
 
     private:
         storage_type          m_storage;
         value_type            m_time;         ///< Current time.
-        size_t 		      m_data_size;
 	size_t 		      m_num_particles;
 
     public:
 
-        ParticleSystem(size_t data_size) : m_time(0.0), m_storage(data_size), m_data_size(data_size), m_num_particles(data_size/3)
+        ParticleSystem(size_t num_particles) : m_time(0.0), m_storage(num_particles), m_num_particles(num_particles)
         {
         }
         ~ParticleSystem() { };
@@ -58,7 +54,7 @@ class ParticleSystem
         inline particle_type *particles()             { return m_storage.particles(); }
 
 
-        inline void get_dimensions(value_type center[], value_type extent[])
+        inline void getDimensions(value_type center[], value_type extent[])
         {
             value_type highest = std::numeric_limits<value_type>::infinity();
             value_type lowest = std::numeric_limits<value_type>::min();
@@ -91,27 +87,21 @@ class ParticleSystem
         void clear() { m_time = 0.; }
         void clear_forces()
         {
-            size_t size = 3*m_num_particles;
             value_type *f = forces();
-            std::fill(f,f+size,0.0);
+            std::fill(forces(),forces()+data_size(),0.0);
         }
         void clear_velocities()
         {
-            size_t size = 3*m_num_particles;
-            value_type *v = velocities();
-            std::fill(v,v+size,0.0);
+            std::fill(velocities(),velocities()+data_size(),0.0);
         }
-
-        std::size_t particles_size() const
+        inline std::size_t particles_size()
         {
             return m_num_particles;
-        }
-        
-        std::size_t data_size() const
+        }      
+        inline std::size_t data_size()
         {
-            return m_data_size;
+            return m_storage.data_size();
         }
-        
         storage_type *storage() { return &m_storage; }
 };
 

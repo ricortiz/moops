@@ -10,8 +10,7 @@
 #include<numeric>
 #include<cassert>
 #include<stdexcept>
-#include "math/nonlinear_solver/inexact_newton.hpp"
-#include "sdc_storage.hpp"
+
 
 template<typename T> struct sdc_traits;
 
@@ -80,7 +79,8 @@ class SDCBase
          *
          * \param t Global time
          **/
-        inline void predictor(value_type t, value_type Dt)
+        template<typename function_type>
+        inline void predictor(function_type &F, value_type t, value_type Dt)
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
             value_type time = t;
@@ -88,7 +88,7 @@ class SDCBase
             for(size_t k = 0; k < sdc_nodes - 1; ++k)
             {
                 value_type dt = Dt * sdc_method().dt(k);
-                sdc_method().predictor_step(k, time, dt);
+                sdc_method().predictor_step(F, k, time, dt);
                 check_convergence(0, k);
             }
         }
@@ -98,11 +98,12 @@ class SDCBase
         *
         * \param t Global time
         **/
-        inline void corrector(value_type t, value_type Dt)
+        template<typename function_type>
+        inline void corrector(function_type &F, value_type t, value_type Dt)
         {
 //             assert ( sdc_method().X() != 0 && sdc_method().F() != 0 && "sdc_base::corrector(): You can not use this method with uninitialized arguments." );
-            size_t ode_size = sdc_method().ode_size();
-            std::vector<value_type> fdiff(ode_size, 0.0);
+size_t ode_size = sdc_method().ode_size();
+std::vector<value_type> fdiff(ode_size, 0.0);
 
             for(size_t i = 0; i < sdc_corrections - 1; ++i)
             {
@@ -113,7 +114,7 @@ class SDCBase
                     value_type dt = Dt * sdc_method().dt(k);
                     for(size_t j = 0; j < ode_size; ++j)
                         fdiff[j] += sdc_method().Immk(k, j) / dt;
-                    sdc_method().corrector_predictor_step(k, &fdiff[0], time, dt);
+                    sdc_method().corrector_predictor_step(F, k, &fdiff[0], time, dt);
                     check_convergence(i+1, k);
                 }
 //                 if(m_residuals[i][sdc_nodes - 2] < 1e-13)
@@ -131,33 +132,6 @@ class SDCBase
                 std::cout << std::endl;
             }
             std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-        }
-
-        inline void operator()(value_type t, value_type *x, const value_type *f, value_type dt)
-        {
-            operator()(t, x, x, f, f, dt);
-        }
-
-        inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *f, const value_type *fold, value_type dt)
-        {
-            size_t ode_size = sdc_method().ode_size();
-            std::copy(xold, xold + ode_size, x);
-            std::copy(fold, fold + ode_size, f);
-            sdc_method().init(x, f);
-            predictor(t, dt);
-            corrector(t, dt);
-            sdc_method().update();
-        }
-
-        inline void operator()(value_type t, value_type *x, const value_type *xold, value_type *f1, const value_type *f1old, value_type *f2, const value_type *f2old, value_type dt)
-        {
-            std::copy(xold, xold + sdc_method().ode_size(), x);
-            std::copy(f1old, f1old + sdc_method().ode_size(), f1);
-            std::copy(f2old, f2old + sdc_method().ode_size(), f2);
-            sdc_method().init(x, f1, f2);
-            predictor(t, dt);
-            corrector(t, dt);
-            sdc_method().update();            
         }
 
         void check_convergence(int i, int k)

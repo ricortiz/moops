@@ -31,64 +31,13 @@ struct sdc_arrays
 template<typename T, int sdc_nodes, int multirate_nodes, SDC::sdc_type sdc>
 class sdc_storage;
 
-template<typename T, int sdc_nodes, int multirate_nodes, SDC::sdc_type sdc>
-class sdc_storage
-{
-        sdc_arrays<T*, sdc_nodes, sdc_nodes> m_data;
-
-    public:
-        size_t m_ode_size;
-        inline explicit sdc_storage(size_t ode_size) : m_ode_size(ode_size)
-        {
-            for(int i = 1; i < sdc_nodes; ++i)
-            {
-                m_data.X[i] = new T[ode_size];
-                m_data.F[i] = new T[ode_size];
-            }
-        }
-
-        ~sdc_storage()
-        {
-            for(int i = 1; i < sdc_nodes; ++i)
-            {
-                delete [] m_data.X[i];
-                delete [] m_data.F[i];
-            }
-        }
-        inline void swap(sdc_storage &other) { std::swap(m_data, other.m_data); }
-        inline void update()
-        {
-            std::copy(m_data.F[sdc_nodes - 1], m_data.F[sdc_nodes - 1] + m_ode_size, m_data.F[0]);
-            std::copy(m_data.X[sdc_nodes - 1], m_data.X[sdc_nodes - 1] + m_ode_size, m_data.X[0]);
-        }
-
-        inline void init(T *x, T *Fx)
-        {
-            setX(x);
-            setF(Fx);
-        }
-        inline void setX(T *x)
-        {
-            m_data.X[0] = x;
-        }
-        inline void setF(T *Fx)
-        {
-            m_data.F[0] = Fx;
-        }
-
-        inline const T **F() const { return m_data.F; }
-        inline T **F() { return m_data.F; }
-        inline const T **X() const { return m_data.X; }
-        inline T **X() { return m_data.X; }
-};
-
 template<typename T, int sdc_nodes>
 class sdc_storage<T, sdc_nodes, 0, SDC::EXPLICIT>
 {
         sdc_arrays<T*, sdc_nodes, sdc_nodes> m_data;
     public:
-        size_t m_ode_size;
-        inline explicit sdc_storage(size_t ode_size) : m_ode_size(ode_size)
+        size_t ode_size;
+        inline explicit sdc_storage(size_t _ode_size) : ode_size(_ode_size)
         {
             for(int i = 1; i < sdc_nodes; ++i)
             {
@@ -108,8 +57,8 @@ class sdc_storage<T, sdc_nodes, 0, SDC::EXPLICIT>
         inline void swap(sdc_storage &other) { std::swap(m_data, other.m_data); }
         inline void update()
         {
-            std::copy(m_data.F[sdc_nodes - 1], m_data.F[sdc_nodes - 1] + m_ode_size, m_data.F[0]);
-            std::copy(m_data.X[sdc_nodes - 1], m_data.X[sdc_nodes - 1] + m_ode_size, m_data.X[0]);
+            std::copy(m_data.F[sdc_nodes - 1], m_data.F[sdc_nodes - 1] + ode_size, m_data.F[0]);
+            std::copy(m_data.X[sdc_nodes - 1], m_data.X[sdc_nodes - 1] + ode_size, m_data.X[0]);
         }
 
         inline void init(T *x, T *Fx)
@@ -137,8 +86,8 @@ class sdc_storage<T, sdc_nodes, 0, SDC::SEMI_IMPLICIT>
 {
         sdc_arrays<T*, sdc_nodes, 2 * sdc_nodes> m_data;
     public:
-        size_t m_ode_size;
-        inline explicit sdc_storage(size_t ode_size) : m_ode_size(ode_size)
+        size_t ode_size;
+        inline explicit sdc_storage(size_t _ode_size) : ode_size(_ode_size)
         {
             for(int i = 1; i < sdc_nodes; ++i)
             {
@@ -162,9 +111,9 @@ class sdc_storage<T, sdc_nodes, 0, SDC::SEMI_IMPLICIT>
 
         inline void update()
         {
-            std::copy(m_data.F[sdc_nodes - 1], m_data.F[sdc_nodes - 1] + m_ode_size, m_data.F[0]);
-            std::copy(m_data.F[2 * sdc_nodes - 1], m_data.F[2 * sdc_nodes - 1] + m_ode_size, m_data.F[sdc_nodes]);
-            std::copy(m_data.X[sdc_nodes - 1], m_data.X[sdc_nodes - 1] + m_ode_size, m_data.X[0]);
+            std::copy(m_data.F[sdc_nodes - 1], m_data.F[sdc_nodes - 1] + ode_size, m_data.F[0]);
+            std::copy(m_data.F[2 * sdc_nodes - 1], m_data.F[2 * sdc_nodes - 1] + ode_size, m_data.F[sdc_nodes]);
+            std::copy(m_data.X[sdc_nodes - 1], m_data.X[sdc_nodes - 1] + ode_size, m_data.X[0]);
         }
 
         inline void init(T *x, T *Fx_i, T *Fx_e)

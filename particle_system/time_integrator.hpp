@@ -22,28 +22,25 @@ template<typename Derived>
 class TimeIntegrator
 {
     protected:
-        typedef surface_traits<Derived>::value_type      value_type;
+        typedef typename surface_traits<Derived>::value_type      value_type;
+        typedef typename surface_traits<Derived>::time_integrator_type time_integrator_type;
+
+    private:
+        time_integrator_type time_integrator;
 
     public:
+
+        TimeIntegrator(size_t ode_size) : time_integrator(ode_size) {}
+        
         inline Derived &derived()
         {
             return *static_cast<Derived*>(this);
         }
-        
-        inline void integrate(value_type time, value_type timestep)
-        {
-            logger.startTimer("sdcTimeStep");
-	    Derived().eval(time,timestep);
-            logger.stopTimer("sdcTimeStep");
-        }
 
-        inline void operator()(value_type time, const value_type *x, value_type *v)
+        inline void integrate(value_type t, value_type timestep)
         {
-            logger.startTimer("odeRHSeval");
-	    Derived().eval(time,x,v);
-            logger.stopTimer("odeRHSeval");
+            time_integrator(derived(),t,derived().positions(),derived().velocities(),timestep);
         }
-
 //         inline size_t ode_size() { return derived().data_size(); }
 };
 

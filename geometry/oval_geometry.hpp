@@ -41,15 +41,15 @@ protected:
             m_radius_scale.resize(m_hi-m_lo,0.0);
         }
 
-        void getDimensions(size_t &M, size_t &N) { M = m_dims[0]; N = m_dims[1]; m_num_particles = M*N; }
+        void getDimensions(size_t &M, size_t &N) { M = m_dims[0]; N = m_dims[1]; }
         void getInnerRadius(value_type &radius) { radius = m_inner_radius; }
         void getOuterRadius(value_type &radius) { radius = m_outer_radius; }
         void getForcingRange(size_t &lo, size_t &hi) { hi = m_hi; lo = m_lo; }
         void getWaveSpeed(value_type &speed) { speed = m_speed; }
         
         void getX0(value_type *x0) { x0 = m_x0; }
-        void setDimensions(size_t dims[2]) { m_dims[0] = dims[0]; m_dims[1] = dims[1]; }
-        void setDimensions(size_t M, size_t N) { m_dims[0] = M; m_dims[1] = N; }
+        void setDimensions(size_t dims[2]) { m_dims[0] = dims[0]; m_dims[1] = dims[1]; m_num_particles = dims[0]*dims[1]; }
+        void setDimensions(size_t M, size_t N) { m_dims[0] = M; m_dims[1] = N; m_num_particles = M*N; }
         void setInnerRadius(value_type radius) { m_inner_radius = radius; }
         void setOuterRadius(value_type radius) { radius = m_outer_radius; }
         void setForcingRange(size_t lo, size_t hi) { m_hi = hi; m_lo = lo; m_radius_scale.resize(m_hi-m_lo,0.0); }

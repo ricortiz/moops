@@ -18,23 +18,18 @@
 
 #include "math/fluid_solver/stokes/fmm/octree/octree.hpp"
 #include "math/fluid_solver/stokes/fmm/multipole_taylor.hpp"
+#include "particle_system/particle.hpp"
 
-template<typename particle_system_type, size_t max_particles, size_t precision>
+template<typename value_type, size_t max_particles, size_t precision>
 class FMMStokesSolver
 {
     protected:
-        typedef typename particle_system_type::value_type value_type;
-        typedef typename particle_system_type::particle_type particle_type;
+        typedef Particle<value_type> particle_type;
         typedef Octree<value_type,max_particles,particle_type> tree_type;
         typedef MultipoleTaylor<value_type,precision> fmm_type;
         
     private:
         value_type m_delta;
-        enum
-        {
-            num_particles = particle_system_type::num_particles
-        };
-
 
     public:
         void operator()(value_type *x, value_type *v, value_type *f)
@@ -54,9 +49,8 @@ class FMMStokesSolver
 //             std::copy(v,v+3*num_particles,std::ostream_iterator<value_type>(std::cout," "));
 //             std::cout << "];" <<  std::endl;
         }
-
-        value_type const &delta() const { return m_delta; }
-        value_type &delta() { return m_delta; }
+        
+        value_type const &setDelta(value_type delta) const { return m_delta = delta; }
 };
 
 

@@ -21,10 +21,8 @@
 
 #include<vector>
 
-namespace PSYS
-{
-    enum { SURFACE, VOLUME };
-}
+enum storage_shape { SURFACE, VOLUME };
+
 
 
 template<typename T, typename particle_type>
@@ -36,12 +34,12 @@ struct particle_system_arrays
     particle_type particles;
 };
 
-template<typename T, typename particle_type, int immerse_structure_type>
+template<typename T, typename particle_type, storage_shape immerse_structure_type>
 class ParticleSystemStorage;
 
 
 template<typename T, typename particle_type>
-class ParticleSystemStorage<T,particle_type,PSYS::SURFACE>
+class ParticleSystemStorage<T,particle_type,SURFACE>
 {
     private:
         particle_system_arrays<T*,particle_type*> m_data;
@@ -97,7 +95,7 @@ class ParticleSystemStorage<T,particle_type,PSYS::SURFACE>
 };
 
 template<typename T, typename particle_type>
-class ParticleSystemStorage<T,particle_type,PSYS::VOLUME>
+class ParticleSystemStorage<T,particle_type,VOLUME>
 {
     private:
         particle_system_arrays<T*,particle_type*> m_data;

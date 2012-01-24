@@ -35,10 +35,12 @@ INCLUDE(CTest)
 IF(BUILD_TESTING)
     ENABLE_TESTING()
     ADD_SUBDIRECTORY(testing)
+    ADD_SUBDIRECTORY(particle_system/testing)
+    ADD_SUBDIRECTORY(math/testing)
 ENDIF(BUILD_TESTING)
 
-ADD_SUBDIRECTORY(examples)
+# ADD_SUBDIRECTORY(examples)
 
-add_subdirectory(particle_system/testing)
+# 
 
-add_subdirectory(math/testing)
+# 
