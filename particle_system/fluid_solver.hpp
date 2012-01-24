@@ -19,10 +19,8 @@ class FluidSolver
         template<typename value_type>
         inline void operator()(value_type t, value_type *x, value_type *v)
         {
-            logger.startTimer("TimeStep");
-            derived().updateForces(t);
+            derived().computeForces(t);
             m_fluid_solver(t,x,v,derived().forces(),derived().particles_size());
-            logger.stopTimer("TimeStep");
         }
 
         fluid_solver_type &fluid_solver() { return m_fluid_solver; }

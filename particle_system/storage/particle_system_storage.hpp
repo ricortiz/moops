@@ -19,8 +19,6 @@
 /// 			storage model that is easy to swap when needing.
 /// 			
 
-#include<vector>
-
 enum storage_shape { SURFACE, VOLUME };
 
 

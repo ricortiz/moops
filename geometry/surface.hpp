@@ -12,10 +12,7 @@ class Surface : public ParticleSystem<Derived>,
                 public TimeIntegrator<Derived>,
                 public FluidSolver<Derived>
 {
-    protected:
-        typedef typename surface_traits<Derived>::value_type value_type;
-        typename ElasticBoundary<Derived>::spring_iterator spring_iterator;
-
+    
     public:
         Surface(size_t num_particles) : ParticleSystem<Derived>(num_particles), TimeIntegrator<Derived>(3*num_particles) {}
         ~Surface() {}
@@ -25,6 +22,7 @@ class Surface : public ParticleSystem<Derived>,
             return *static_cast<Derived*>(this);
         }
 
+        template<typename value_type>
         inline void run(value_type timestep)
         {
             integrate(this->time(),timestep);

@@ -39,45 +39,8 @@ class SpringSystem
         SpringSystem() {}
         ~SpringSystem() {}
 
-        spring_lut_type const &springs_map() const      { return m_spring_lut; }
-        spring_container const &get_springs() const     { return m_springs; }
-        spring_lut_type &springs_map()                  { return m_spring_lut; }
-        spring_container &get_springs()                 { return m_springs; }
         spring_iterator springs_begin()                 { return m_springs.begin(); }
         spring_iterator springs_end()                   { return m_springs.end(); }
-        size_t springs_size()                           { return m_springs.size(); }
-
-        inline void computeForces()
-        {
-            for (spring_iterator s = m_springs.begin(), end = m_springs.end(); s != end; ++s)
-                s->apply();
-        }
-
-        inline void computeForces(const value_type *x)
-        {
-            for (spring_iterator s = m_springs.begin(), end = m_springs.end(); s != end; ++s)
-            {
-                size_t i = s->getAidx();
-                size_t j = s->getBidx();
-                const value_type *x1 = &x[i];
-                const value_type *x2 = &x[j];
-                s->apply(x1, x2);
-            }
-        }
-
-        inline void computeForces(const value_type *x, value_type *f)
-        {
-            for (spring_iterator s = m_springs.begin(), end = m_springs.end(); s != end; ++s)
-            {
-                size_t i = s->getAidx();
-                size_t j = s->getBidx();
-                value_type *x1 = &x[i];
-                value_type *x2 = &x[j];
-                value_type *f1 = &f[i];
-                value_type *f2 = &f[j];
-                s->apply(x1, x2, f1, f2);
-            }
-        }
 
         void clear()
         {

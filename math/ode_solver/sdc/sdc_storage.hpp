@@ -123,7 +123,15 @@ class sdc_storage<T, sdc_nodes, 0, SDC::SEMI_IMPLICIT>
             m_data.F[0] = Fx_i;
             m_data.F[sdc_nodes] = Fx_e;
         }
-
+        inline void setX0(T *x)
+        {
+            m_data.X[0] = x;
+        }
+        inline void setF0(T *Fi, T *Fe)
+        {
+            m_data.F[0] = Fi;
+	    m_data.F[sdc_nodes] = Fe;
+        }
         inline const T **Fi() const { return m_data.F; }
         inline T **Fi() { return m_data.F; }
         inline const T **Fe() const { return &m_data.F[sdc_nodes]; }

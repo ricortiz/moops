@@ -3,7 +3,7 @@
 
 #include "geometry/oval_geometry.hpp"
 #include "particle_system/elastic_system/elastic_boundary.hpp"
-#include "particle_system/storage/vtk_particle_system_storage.hpp"
+#include "particle_system/storage/particle_system_storage.hpp"
 #include "geometry/surface.hpp"
 
 template<typename value_type, typename fluid_solver, typename time_integrator>
@@ -24,7 +24,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
         HeartPump(oval_type &oval_geometry) : m_geometry(oval_geometry), base_type(oval_geometry.numParticles())
         {
             m_geometry.init(this->particles());
-            initSprings();
+            setSprings();
             m_spring_range = getIteratorRange();
         }
 
@@ -48,20 +48,10 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
                         strengths.push_back(1.0);
                 else
                     for (size_t i = col_ptr[p], end = col_ptr[p + 1]; i < end; ++i)
-                        strengths.push_back(10.0);
+                        strengths.push_back(1.0);
             }
         }
 
-        void initSprings()
-        {
-            std::vector<size_t> col_ptr, col_idx;
-            std::vector<value_type> strenght;
-            col_ptr.push_back(0);
-
-            m_geometry.getConnections(col_ptr, col_idx);
-            getStrengths(col_ptr, col_idx, strenght);
-            this->setSprings(col_ptr, col_idx, strenght);
-        }
 
         std::pair<spring_iterator, spring_iterator> getIteratorRange()
         {
@@ -80,15 +70,24 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
                 }
             return std::make_pair(s, f);
         }
-
-        inline void updateForces(value_type time)
+        
+        inline void setSprings()
         {
-            logger.startTimer("updateSprings");
+            std::vector<size_t> col_ptr, col_idx;
+            std::vector<value_type> strenght;
+            col_ptr.push_back(0);
+
+            m_geometry.getConnections(col_ptr, col_idx);
+            getStrengths(col_ptr, col_idx, strenght);
+            base_type::setSprings(col_ptr, col_idx, strenght);
+        }
+
+        inline void computeForces(value_type time)
+        {
             m_geometry.setRadiusScaling(time);
             for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
                 m_geometry.resetRestingLength(s, time);
-            this->computeForces();
-            logger.stopTimer("updateSprings");
+            base_type::computeForces();
         }
 
 };
@@ -100,7 +99,7 @@ struct surface_traits<HeartPump<_value_type, _fluid_solver, _time_integrator> >
     typedef _fluid_solver fluid_solver_type;
     typedef _time_integrator time_integrator_type;
     typedef Particle<value_type> particle_type;
-    typedef vtkParticleSystemStorage<value_type, particle_type, SURFACE> storage_type;
+    typedef ParticleSystemStorage<value_type, particle_type, SURFACE> storage_type;
 };
 
 

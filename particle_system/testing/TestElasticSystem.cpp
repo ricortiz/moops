@@ -32,7 +32,7 @@ int main()
     heart_pump pump(geometry);
     pump.fluid_solver().setDelta(.01);
 
-    pump.run(.1);
+    pump.run(.01);
 
 }
 

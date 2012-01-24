@@ -33,8 +33,8 @@ struct implicit_function
  * \param integrator_type The integrator method used in the correction step.
  * \param sdc_corrections Number of corrections to do.
  **/
-template<typename value_type, typename function_type, typename integrator_type, int sdc_corrections>
-class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type, integrator_type, sdc_corrections> >
+template<typename value_type, typename integrator_type, int sdc_corrections>
+class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, integrator_type, sdc_corrections> >
 {
     protected:
 	typedef implicit_function<function_type> 	 implicit_function_type;
@@ -43,19 +43,13 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
     protected:
         sdc_storage<value_type, integrator_type::sdc_nodes, 0, SDC::SEMI_IMPLICIT> m_storage;
         integrator_type m_integrator;
-        function_type   &m_F;
 	implicit_function_type m_Fimplicit;
         backward_euler_type m_backward_euler;
 
     public:
-        SemiImplicitSDC ( function_type &Rhs )
-            :
-            m_storage ( Rhs.ode_size() ),
-            m_F ( Rhs ),
-            m_Fimplicit(Rhs),
-            m_backward_euler ( m_Fimplicit )
+        SemiImplicitSDC ( size_t ode_size) : m_storage(ode_size), m_backward_euler (ode_size)
             {
-                m_integrator.init(Rhs.ode_size());
+                m_integrator.init(ode_size);
             }
 
         inline const value_type* Fi ( int i ) const { return m_storage.Fi() [i]; }
@@ -78,7 +72,16 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, function_type
         inline size_t ode_size() { return m_storage.m_ode_size; }
 
         inline void init ( value_type *x, value_type *F_i, value_type *F_e ) { m_storage.init ( x, F_i, F_e ); }
-
+        
+        template<typename function_type>
+        inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
+        {
+            setX0(x);
+            setF0(v);
+            predictor(F,t,dt);
+            corrector(F,t,dt);
+            update();
+        }
 
         /**
         * \brief The predictor steps updates xnew and and Fnew by applying forward Euler's method

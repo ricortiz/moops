@@ -63,7 +63,6 @@ class BackwardEuler
         template<typename function_type>
         inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
         {
-//             forward_euler(F,t,x,v,dt,ode_size);
             m_rhs.resize(ode_size, 0.0);
             forward_euler(F, t, &m_rhs[0], v, dt);
             BackwardEulerFunction<value_type, function_type> G(F, m_rhs, t, dt, ode_size);
@@ -71,7 +70,7 @@ class BackwardEuler
             newton_solver(G, x, 1e-14, 1e-3);
             value_type inv_dt = 1.0 / dt;
             for (size_t i = 0; i < ode_size; ++i)
-                v[i] = inv_dt * (x[i] - m_rhs[i]);
+                v[i] = inv_dt * (x[i] - m_rhs[i])-newton_solver.f()[i];
         }
 
 
