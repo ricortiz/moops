@@ -1,2 +1,3 @@
 
 ADD_SUBDIRECTORY(nbody_gpu)
+ADD_SUBDIRECTORY(fmm/hybrid)

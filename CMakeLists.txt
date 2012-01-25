@@ -39,7 +39,7 @@ IF(BUILD_TESTING)
     ADD_SUBDIRECTORY(math/testing)
 ENDIF(BUILD_TESTING)
 
-# ADD_SUBDIRECTORY(examples)
+ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/)
 
 # 
 
