@@ -31,6 +31,7 @@ int main()
     pump.fluid_solver().initMaps(pump.elasticBoundary());
 
     pump.run(.01);
+    pump.run(.01);
 
 }
 

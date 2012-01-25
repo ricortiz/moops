@@ -1,4 +1,4 @@
-#include "driver.h"
+#include "hybridfmm.h"
 #include <assert.h>
 
 int nextInfo,threadId, maxDepth;

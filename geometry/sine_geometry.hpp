@@ -14,17 +14,27 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         value_type       m_speed;
         value_type       m_amplitude;
         value_type       m_pitch;
-        value_type       m_radius;
+        value_type       m_tail_radius;
+        value_type       m_head_radius;
         size_t           m_dims[4];
-        size_t           m_size;
+        size_t           m_num_particles;
         value_type       m_x0[3];
 
     public:
-
         SineGeometry()
-            : m_length(4.0), m_speed(.001), m_amplitude(.25), m_pitch(4.1), m_radius(.05), m_size(0) {}
+            :       m_length(4.0),
+                    m_speed(.001),
+                    m_amplitude(.25),
+                    m_pitch(4.1),
+                    m_tail_radius(.05),
+                    m_num_particles(0) {}
         SineGeometry(value_type x0[3], size_t M = 6, size_t N = 100, value_type length = 4.0, value_type speed = .001, value_type amplitude = .25, value_type pitch = 4.1, value_type radius = .05)
-            : m_length(length), m_speed(speed), m_amplitude(amplitude), m_pitch(pitch), m_radius(radius), m_size(0)
+            :       m_length(length),
+                    m_speed(speed),
+                    m_amplitude(amplitude),
+                    m_pitch(pitch),
+                    m_tail_radius(radius),
+                    m_num_particles(0)
         {
             m_dims[0] = M;
             m_dims[1] = N;
@@ -33,38 +43,63 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             m_x0[0] = x0[0];
             m_x0[1] = x0[1];
             m_x0[2] = x0[2];
+            m_num_particles = m_dims[0] * m_dims[1] + m_dims[2] * (m_dims[3] - 1) + 1;
         }
 
-        value_type &length()                    { return m_length; }
-        value_type const &length() const        { return m_length; }
-        value_type &speed()                     { return m_speed; }
-        value_type const &speed() const         { return m_speed; }
-        value_type &amplitude()                 { return m_amplitude; }
-        value_type const &amplitude() const     { return m_amplitude; }
-        value_type &pitch()                     { return m_pitch; }
-        value_type const &pitch() const         { return m_pitch; }
-        value_type &radius()                    { return m_radius; }
-        value_type const &radius() const        { return m_radius; }
-
-        size_t *get_dimensions() { return m_dims; }
-        size_t const *get_dimensions() const { return m_dims; }
-        size_t size() { return m_size; }
-        value_type *getX0() { return m_x0; }
-
+        void getDimensions(size_t &Mt, size_t &Nt, size_t &Mh, size_t &Nh)
+        {
+            Mt = m_dims[0];
+            Nt = m_dims[1];
+            Mh = m_dims[2];
+            Nh = m_dims[3];
+        }
+        void getHeadRadius(value_type &radius) { radius = m_head_radius; }
+        void getTailRadius(value_type &radius) { radius = m_tail_radius; }
+        void getWaveSpeed(value_type &speed) { speed = m_speed; }
+        void getX0(value_type *x0) { x0 = m_x0; }
+        void getLength(value_type &length) { length = m_length; }
+        void getTailAmplitude(value_type &amplitude) { amplitude = m_amplitude; }
+        void getTailPitch(value_type &pitch) { pitch = m_pitch; }
+        void setDimensions(size_t dims[4])
+        {
+            m_dims[0] = dims[0];
+            m_dims[1] = dims[1];
+            m_dims[2] = dims[2];
+            m_dims[3] = dims[3];
+            m_num_particles = dims[0] * dims[1] + dims[2] * (dims[3] - 1) + 1;
+        }
+        void setDimensions(size_t Mt, size_t Nt, size_t Mh, size_t Nh)
+        {
+            m_dims[0] = Mt;
+            m_dims[1] = Nt;
+            m_dims[2] = Mh;
+            m_dims[3] = Nh;
+            m_num_particles = Mt * Nt + Mh * (Nh - 1) + 1;
+        }
+        void setHeadRadius(value_type radius) { m_head_radius = radius; }
+        void setTailRadius(value_type radius) { m_tail_radius = radius; }
+        void setWaveSpeed(value_type speed) { m_speed = speed; }
+        void setX0(value_type x[3]) { m_x0[0] = x[0]; m_x0[1] = x[1]; m_x0[2] = x[2]; }
         void setX0(value_type x, value_type y, value_type z)
         {
             m_x0[0] = x;
             m_x0[1] = y;
             m_x0[2] = z;
         }
+        void setLength(value_type length) { m_length = length; }
+        void setTailAmplitude(value_type amplitude) { m_amplitude = amplitude; }
+        void setTailPitch(value_type pitch) { m_pitch = pitch; }
+
+        size_t const &numParticles() const { return m_num_particles; }
+
         /**
          * @brief Initialize the given particle array in to the geometry shape
          *
          * @param particles array of particles
          * @param grid grid map, maps particle to a grid point
          **/
-        template<typename particle_type, typename grid_type>
-        void init(particle_type *particles, grid_type &grid)
+        template<typename particle_type/*, typename grid_type*/>
+        void init(particle_type *particles/*, grid_type &grid*/)
         {
             value_type dtheta = 2 * M_PI / m_dims[2];
             value_type dalpha = m_length / 4.0 / m_dims[3];
@@ -72,7 +107,6 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             particles[0].position[0] = particles[0].position[1] = particles[0].position[2] = 0;
             particles[0].i = 0;
             particles[0].j = 0;
-            m_size++;
 //             grid[particles] = std::make_pair(0, 0);
             for(size_t i = 1; i < m_dims[3]; ++i)
                 for(size_t j = 0; j < m_dims[2]; ++j, ++idx)
@@ -81,7 +115,6 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                     particles[idx].i = i;
                     particles[idx].j = j;
 //                     grid[particles+idx] = std::make_pair(i, j);
-                    m_size++;
                 }
             value_type tail_translation_factor = m_length / 4.0 - .5 * dalpha;
             dtheta = 2 * M_PI / m_dims[0];
@@ -93,8 +126,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                     particles[idx].position[1] += tail_translation_factor;
                     particles[idx].i = i;
                     particles[idx].j = j;
-                    grid[particles + idx] = std::make_pair(i, j);
-                    m_size++;
+//                     grid[particles + idx] = std::make_pair(i, j);
                 }
             for(size_t i = 0; i < idx; ++i)
             {
@@ -111,22 +143,23 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             value_type x[2] = {0}, normal[2] = {0};
             get_tail_frame(s, t, x, normal);
             value_type theta = j * dtheta;
-            position[0] = m_radius * normal[0] * std::cos(theta) + x[0];
-            position[1] = m_radius * normal[1] * std::cos(theta) + x[1];
-            position[2] = m_radius * std::sin(theta)                   ;
+            position[0] = m_tail_radius * normal[0] * std::cos(theta) + x[0];
+            position[1] = m_tail_radius * normal[1] * std::cos(theta) + x[1];
+            position[2] = m_tail_radius * std::sin(theta)                   ;
         }
+
         template<typename particle_type>
         void surface_point(size_t i, size_t j, value_type t, particle_type &particle, value_type dtheta, value_type dalpha)
         {
             surface_point(i, j, t, particle.position, dtheta, dalpha);
         }
+
         template<typename particle_type>
         void head_point(size_t i, size_t j, value_type t, particle_type &particle, value_type dtheta, value_type dalpha)
         {
-            value_type scale = 5.0 * m_radius;
-            value_type R = i < 7 ? scale * (std::cos((7 - i) * .5 * M_PI / 7)) : i > 13 ? scale * (std::cos((i - 13) * .5 * M_PI / 6)) : scale;
+            value_type R = i < 7 ? m_head_radius * (std::cos((7 - i) * .5 * M_PI / 7)) : i > 13 ? m_head_radius * (std::cos((i - 13) * .5 * M_PI / 6)) : m_head_radius;
             if(i == m_dims[3] - 2 || i == m_dims[3] - 1)
-                R = m_radius;
+                R = m_tail_radius;
             value_type s = (i - .8) * dalpha;
             /*centerline and tangent*/
 
@@ -139,19 +172,19 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         }
 
         template<typename array_type>
-        void get_tail_connections(array_type &col_ptr, array_type &col_idx)
+        void getTailConnections(array_type &col_ptr, array_type &col_idx, int offset = 0)
         {
             for(size_t j = 0; j < m_dims[1]; ++j)
                 for(size_t i = 0; i < m_dims[0]; ++i)
                 {
-                    this->add_plane_connections(i, j, m_dims[0], m_dims[1], col_idx);
-                    this->add_cylinder_connections(i, j, m_dims[0], m_dims[1], col_idx);
+                    this->add_plane_connections(i, j, m_dims[0], m_dims[1], col_idx, offset);
+                    this->add_cylinder_connections(i, j, m_dims[0], m_dims[1], col_idx, offset);
                     col_ptr.push_back(col_idx.size());
                 }
         }
 
         template<typename array_type>
-        void get_head_connections(array_type &col_ptr, array_type &col_idx)
+        void getHeadConnections(array_type &col_ptr, array_type &col_idx)
         {
             for(size_t i = 0; i < m_dims[2]; ++i)
                 col_idx.push_back(i + 1);
@@ -163,38 +196,46 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                     this->add_cylinder_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1);
                     if(j == m_dims[3] - 2)
                     {
-                        size_t head_offset = m_dims[2]*(m_dims[3]-1)+1;
+                        size_t head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
                         for(size_t k = head_offset; k < head_offset + m_dims[0]; ++k)
                             col_idx.push_back(k);
                     }
                     col_ptr.push_back(col_idx.size());
-                }            
+                }
         }
-
+        
+        template<typename array_type>
+        void getConnections(array_type &col_ptr, array_type &col_idx, int offset)
+        {
+            int head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
+            getHeadConnections(array_type &col_ptr, array_type &col_idx);
+            getTailConnections(array_type &col_ptr, array_type &col_idx, head_offset+offset);
+        }
+        
         void setCells(size_t offset)
         {
             // Set cells for the nose of the head
             {
                 for(size_t i = 1; i < m_dims[2]; ++i)
                 {
-                    vtkIdType cell[3] = {0+offset, i + 1+offset, i+offset};
+                    vtkIdType cell[3] = {0 + offset, i + 1 + offset, i + offset};
                     this->getCells()->InsertNextCell(3, cell);
                 }
-                vtkIdType cell[3] = {0+offset, 1+offset, m_dims[2]+offset};
+                vtkIdType cell[3] = {0 + offset, 1 + offset, m_dims[2] + offset};
                 this->getCells()->InsertNextCell(3, cell);
             }
             for(size_t j = 0; j < m_dims[3] - 1; ++j)
                 for(size_t i = 0; i < m_dims[2]; ++i)
                 {
-                    this->set_corner_cells(i, j,  m_dims[2], m_dims[3] - 1, 1+offset);
-                    this->set_plane_cells(i, j, m_dims[2], m_dims[3] - 1, 1+offset);
+                    this->set_corner_cells(i, j,  m_dims[2], m_dims[3] - 1, 1 + offset);
+                    this->set_plane_cells(i, j, m_dims[2], m_dims[3] - 1, 1 + offset);
                 }
             size_t head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
             for(size_t j = 0; j < m_dims[1]; ++j)
                 for(size_t i = 0; i < m_dims[0]; ++i)
                 {
-                    this->set_corner_cells(i, j, m_dims[0], m_dims[1], head_offset+offset);
-                    this->set_plane_cells(i, j, m_dims[0], m_dims[1], head_offset+offset);
+                    this->set_corner_cells(i, j, m_dims[0], m_dims[1], head_offset + offset);
+                    this->set_plane_cells(i, j, m_dims[0], m_dims[1], head_offset + offset);
                 }
             setJunctionCells(offset);
         }
@@ -208,9 +249,9 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             int head_points = head_offset - m_dims[2];
             for(size_t i = 0; i < m_dims[0]; ++i)
             {
-                vtkIdType cells[3][3] = {{i + head_offset+offset, head_points + i *factor + 1+offset, head_points + i *factor+offset},
-                {i + head_offset+offset, (i + 1) % m_dims[0] + head_offset+offset, head_points + i *factor + 1+offset},
-                {(i + 1) % m_dims[0] + head_offset+offset, head_points + (i *factor + 2) % m_dims[2]+offset, head_points + i *factor + 1+offset}
+                vtkIdType cells[3][3] = {{i + head_offset + offset, head_points + i *factor + 1 + offset, head_points + i *factor + offset},
+                    {i + head_offset + offset, (i + 1) % m_dims[0] + head_offset + offset, head_points + i *factor + 1 + offset},
+                    {(i + 1) % m_dims[0] + head_offset + offset, head_points + (i *factor + 2) % m_dims[2] + offset, head_points + i *factor + 1 + offset}
                 };
                 for(int k = 0; k < 3; ++k)
                     this->getCells()->InsertNextCell(3, cells[k]);

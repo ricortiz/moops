@@ -29,7 +29,7 @@ class BaseGeometry
         }
 
         template<typename array_type>
-        inline void add_plane_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
+        inline void add_plane_connections(int i, int j, int M, int N, array_type &col_idx, size_t offset = 0)
         {
             int connections[8][2] = {{i - 1, j - 1},
                 {i, j - 1},
@@ -47,7 +47,7 @@ class BaseGeometry
         }
 
         template<typename array_type>
-        inline void add_cylinder_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
+        inline void add_cylinder_connections(int i, int j, int M, int N, array_type &col_idx, size_t offset = 0)
         {
             int connections[6][2] = {{i + 1, j - 1},
                 {i + 1, j},
@@ -69,7 +69,7 @@ class BaseGeometry
         }
 
         template<typename array_type>
-        inline void add_closed_connections(size_t i, size_t j, size_t M, size_t N, array_type &col_idx, size_t offset = 0)
+        inline void add_closed_connections(int i, int j, int M, int N, array_type &col_idx, size_t offset = 0)
         {
 
             int connections[8][2] = {{i - 1, j - 1},
@@ -87,7 +87,7 @@ class BaseGeometry
 
         }
 
-        void set_plane_cells(size_t i, size_t j, size_t M, size_t N, size_t offset = 0)
+        void set_plane_cells(int i, int j, int M, int N, size_t offset = 0)
         {
             if(i < M - 1 && j < N - 1)
             {
@@ -96,7 +96,7 @@ class BaseGeometry
             }
         }
 
-        void set_corner_cells(size_t i, size_t j, size_t M, size_t N, size_t offset = 0)
+        void set_corner_cells(int i, int j, int M, int N, size_t offset = 0)
         {
             if(i == M - 1 && j < N - 1)
             {
@@ -105,7 +105,7 @@ class BaseGeometry
             }
         }
 
-        void set_top_cells(size_t i, size_t j, size_t M, size_t N, size_t offset = 0)
+        void set_top_cells(int i, int j, int M, int N, size_t offset = 0)
         {
 
             if(i < M - 1 && j == N - 1)

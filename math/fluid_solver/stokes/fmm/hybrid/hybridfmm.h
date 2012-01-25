@@ -237,6 +237,6 @@ typedef struct _Octree
                         unsigned int * interaction_pairs);
 
     void gpuGetVelocities();
-     
+
 
 #endif

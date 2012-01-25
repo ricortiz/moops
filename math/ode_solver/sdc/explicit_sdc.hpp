@@ -105,7 +105,7 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,spectral_integrator_ty
          * \sa predictor(), corrector()
          **/
         template<typename function_type>
-        inline int corrector_predictor_step(function_type &G, const int k, value_type *fdiff, value_type &t, const value_type &dt)
+        inline void corrector_predictor_step(function_type &G, const int k, value_type *fdiff, value_type &t, const value_type &dt)
         {
             assert(k < spectral_integrator_type::sdc_nodes);
             std::vector<value_type> Fold(m_storage.ode_size, 0.0);

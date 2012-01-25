@@ -51,7 +51,7 @@ protected:
         void setDimensions(size_t dims[2]) { m_dims[0] = dims[0]; m_dims[1] = dims[1]; m_num_particles = dims[0]*dims[1]; }
         void setDimensions(size_t M, size_t N) { m_dims[0] = M; m_dims[1] = N; m_num_particles = M*N; }
         void setInnerRadius(value_type radius) { m_inner_radius = radius; }
-        void setOuterRadius(value_type radius) { radius = m_outer_radius; }
+        void setOuterRadius(value_type radius) { m_outer_radius = radius; }
         void setForcingRange(size_t lo, size_t hi) { m_hi = hi; m_lo = lo; m_radius_scale.resize(m_hi-m_lo,0.0); }
         void setWaveSpeed(value_type speed) { m_speed = speed; }
         void setX0(value_type x[3]) { m_x0[0] = x[0]; m_x0[1] = x[1]; m_x0[2] = x[2]; }
