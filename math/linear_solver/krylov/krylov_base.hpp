@@ -39,10 +39,10 @@ class KrylovBase
             size_t system_size = derived().system_size();
             /// Apply Arnoldi's method with modified Gram-Schmidt orthogonalization to v(k+1)
 
-            for ( unsigned int i = 0; i <= k; ++i )
+            for ( int i = 0; i <= k; ++i )
             {
                 derived().H ( i,k ) = dot ( derived().v ( i ),derived().v ( k+1 ) );
-                for ( int j = 0; j < system_size; ++j )
+                for ( size_t  j = 0; j < system_size; ++j )
                     derived().v ( k+1 ) [j] -= derived().H ( i,k ) *derived().v ( i ) [j];
                 
             }
@@ -50,11 +50,11 @@ class KrylovBase
             /// Re-orthogonalize if necessary
             if ( normv + value_type ( .001 ) *Hip == normv )
             {
-                for ( unsigned int i = 0, nzeros = 0; i <= k; ++i, nzeros+=i )
+                for ( int i = 0, nzeros = 0; i <= k; ++i, nzeros+=i )
                 {
                     value_type hr = dot ( derived().v ( i ),derived().v ( k+1 ) );
                     derived().H ( i,k ) += hr;
-                    for ( int j = 0; j < system_size; ++j )
+                    for ( size_t  j = 0; j < system_size; ++j )
                         derived().v ( k+1 ) [j] -= hr*derived().v ( i ) [j];
                 }
 
@@ -62,7 +62,7 @@ class KrylovBase
             }
             /// Normalize
             if ( Hip != value_type ( 0 ) )
-                for ( int j = 0; j < system_size; ++j )
+                for ( size_t  j = 0; j < system_size; ++j )
                     derived().v ( k+1 ) [j] /= Hip;
 
             return Hip;

@@ -21,8 +21,8 @@ protected:
         size_t           m_size;
         value_type       m_inner_radius;
         value_type       m_outer_radius;
-        size_t           m_hi;
         size_t           m_lo;
+        size_t           m_hi;
         std::vector<value_type> m_radius_scale;
 	size_t 		 m_num_particles;
 
@@ -140,10 +140,9 @@ protected:
         }
 
         template<typename spring_type>
-        inline void resetRestingLength(spring_type &spring, value_type time)
+        inline void resetRestingLength(spring_type &spring)
         {            
-            int idx = std::max(std::min(spring->A()->i,m_hi-1),m_lo) - m_lo;
-            assert( idx >= 0 && idx < m_radius_scale.size() );
+            size_t idx = std::max(std::min(spring->A()->i,m_hi-1),m_lo) - m_lo;
             base_type::resetRestingLength(spring,m_radius_scale[idx]);
         }
                

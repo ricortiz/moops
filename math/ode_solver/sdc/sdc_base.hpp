@@ -55,7 +55,7 @@ class SDCBase
             /**< The number of SDC nodes at compile-time. This is just a copy of the value provided
             * by the \a Derived type. **/
 
-            sdc_corrections = sdc_traits<Derived>::sdc_corrections,
+            sdc_corrections = sdc_traits<Derived>::sdc_corrections
             /**< The number of SDC corrections sweps at compile-time. This is just a copy of the value provided
             * by the \a Derived type. **/
         };
@@ -144,9 +144,9 @@ class SDCBase
             if(m_residuals[i][k] > 5)
             {
                 std::cout << "correction = " << i << ", iteration = " << k << std::endl;
-                for(size_t j = 0; j <= i; ++j)
+                for(int j = 0; j <= i; ++j)
                 {
-                    for(size_t l = 0; l <= k; ++l)
+                    for(int l = 0; l <= k; ++l)
                         std::cout << m_residuals[j][l] << " ";
                     std::cout << std::endl;
                 }

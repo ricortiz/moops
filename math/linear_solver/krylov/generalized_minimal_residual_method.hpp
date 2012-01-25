@@ -21,7 +21,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
 
     public:
 
-        GeneralizedMinimalResidualMethod(size_t system_size) : m_system_size(system_size), m_storage(system_size) {}
+        GeneralizedMinimalResidualMethod(size_t system_size) : m_storage(system_size), m_system_size(system_size){}
         inline value_type &H(size_t i, size_t j) { return m_storage.H(i, j); }
         inline value_type *H() { return m_storage.H(); }
         inline value_type *residual() { return m_storage.residual(); }
@@ -74,7 +74,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
             for(size_t i = 0 ; i < m_system_size; ++i)
                 v(0)[i] = residual(i) / rho;
             /// Start GMRES iteration
-            size_t k;
+            int k;
             for(k = 0; k < k_max && rho > errtol; ++k)
             {
                 /// Evaluate linear operator
@@ -85,7 +85,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
 
                 /// Perform Givens rotations in order to eliminate the H(k+1,k) entry from the
                 /// Hessenberg matrix.
-                for(size_t i = 0; i < k; ++i)
+                for(int i = 0; i < k; ++i)
                     this->apply_rotation(H(i, k), H(i + 1, k), c(i), s(i));
                 this->get_rotation(H(k, k), ld, c(k), s(k));
                 this->apply_rotation(H(k, k), ld, c(k), s(k));

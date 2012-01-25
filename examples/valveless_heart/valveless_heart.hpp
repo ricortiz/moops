@@ -16,12 +16,16 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
         typedef Particle<value_type> particle_type;
 
     private:
-        oval_type &m_geometry;
+        oval_type m_geometry;
         std::pair<spring_iterator, spring_iterator> m_spring_range;
 
     public:
-        HeartPump(oval_type &oval_geometry) : m_geometry(oval_geometry), base_type(oval_geometry.numParticles())
+        HeartPump(size_t M, size_t N) : base_type(M*N)
         {
+            m_geometry.setDimensions(M,N);
+            m_geometry.setX0(0,0,0);
+            m_geometry.setForcingRange(10,50);
+            m_geometry.setWaveSpeed(.001);
             m_geometry.init(this->particles());
             setSprings();
         }
@@ -31,18 +35,22 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             std::vector<size_t> col_ptr, col_idx;
             std::vector<value_type> strenght;
             col_ptr.push_back(0);
-
+            
+            size_t lo, hi, M, N;
+            m_geometry.getForcingRange(lo, hi);
+            m_geometry.getDimensions(M, N);
             m_geometry.getConnections(col_ptr, col_idx);
-            getStrengths(col_ptr, col_idx, strenght);
+            
+            getStrengths(col_ptr, col_idx, strenght, lo*M, hi*M);
             base_type::setSprings(col_ptr, col_idx, strenght);
-            m_spring_range = getIteratorRange();
+            m_spring_range = getIteratorRange(lo,hi);
         }
 
         inline void computeForces(value_type time)
         {
             m_geometry.setRadiusScaling(time);
             for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
-                m_geometry.resetRestingLength(s, time);
+                m_geometry.resetRestingLength(s);
             base_type::computeForces();
         }
 
@@ -52,29 +60,17 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             oval_geometry.init(particles, num_sub_surfaces);
         }
 
-        void getStrengths(const std::vector<size_t> &col_ptr, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
+        void getStrengths(const std::vector<size_t> &col_ptr, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths, size_t lo, size_t hi)
         {
-            size_t lo, hi, M, N;
-            m_geometry.getForcingRange(lo, hi);
-            m_geometry.getDimensions(M, N);
-            lo *= M;
-            hi *= M;
-            for (size_t p = 0; p < col_ptr.size() - 1; ++p)
-            {
-                if (p > lo && p < hi)
-                    for (size_t i = col_ptr[p], end = col_ptr[p + 1]; i < end; ++i)
-                        strengths.push_back(1.0);
-                else
-                    for (size_t i = col_ptr[p], end = col_ptr[p + 1]; i < end; ++i)
-                        strengths.push_back(1.0);
-            }
+            strengths.resize(col_idx.size(),1.0);
+            for (size_t p = 0, p_end = col_ptr.size() - 1; p < p_end; ++p)
+                if (p >= lo && p <= hi)
+                    for (size_t i = col_ptr[p], i_end = col_ptr[p + 1]; i < i_end; ++i)
+                        strengths[i] = 1.0;            
         }
 
-
-        std::pair<spring_iterator, spring_iterator> getIteratorRange()
+        std::pair<spring_iterator, spring_iterator> getIteratorRange(size_t lo, size_t hi)
         {
-            size_t lo, hi;
-            m_geometry.getForcingRange(lo, hi);
             spring_iterator s = this->springs_begin(), f;
             for (spring_iterator s_end = this->springs_end(); s != s_end; ++s)
                 if (s->A()->i == lo || s->B()->i == lo)

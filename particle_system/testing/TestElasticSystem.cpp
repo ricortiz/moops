@@ -24,14 +24,9 @@ int main()
     typedef BackwardEuler<double> betime_integrator;
     typedef ExplicitSDC<double> esdc_integrator;
     typedef SemiImplicitSDC<double> sisdc_integrator;
-    typedef HeartPump<double,fluid_solver,sisdc_integrator> heart_pump;
-    OvalGeometry<double> geometry;
-    geometry.setDimensions(20,200);
-    geometry.setX0(0,0,0);
-    geometry.setForcingRange(10,50);
-    geometry.setWaveSpeed(.001);
+    typedef HeartPump<double,fluid_solver,esdc_integrator> heart_pump;
 
-    heart_pump pump(geometry);
+    heart_pump pump(20,200);
     pump.fluid_solver().setDelta(.01);
     pump.fluid_solver().initMaps(pump.elasticBoundary());
 

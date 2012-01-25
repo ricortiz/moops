@@ -117,7 +117,7 @@ class BaseGeometry
 
         inline value_type getDistance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type scale)
         {
-            value_type points[2][3] = {0};
+            value_type points[2][3] = {{0}};
             size_t M,N;
             derived()->getDimensions(M,N);
             value_type dtheta = 2 * M_PI / M;

@@ -29,8 +29,8 @@ class ParticleSystem
 	
 
     private:
-        storage_type          m_storage;
         value_type            m_time;         ///< Current time.
+        storage_type          m_storage;
 	size_t 		      m_num_particles;
 
     public:

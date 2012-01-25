@@ -21,9 +21,35 @@ if(USE_QT_GUI)
     ADD_SUBDIRECTORY(gui)
 endif(USE_QT_GUI)
 
-
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/testing)
+
+include(CheckCXXCompilerFlag)
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fexceptions -fno-check-new -fno-common -fstrict-aliasing")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g3")
+    set(CMAKE_CXX_FLAGS_RELEASE "-g0 -O2")
+    check_cxx_compiler_flag("-Wno-variadic-macros" COMPILER_SUPPORT_WNOVARIADICMACRO)
+    if(COMPILER_SUPPORT_WNOVARIADICMACRO)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
+    endif()
+
+    check_cxx_compiler_flag("-Wextra" COMPILER_SUPPORT_WEXTRA)
+    if(COMPILER_SUPPORT_WEXTRA)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+
+    check_cxx_compiler_flag("-fopenmp" COMPILER_SUPPORT_OPENMP)
+    if(COMPILER_SUPPORT_OPENMP)
+        option(EIGEN_TEST_OPENMP "Enable/Disable OpenMP in tests/examples" OFF)
+        if(EIGEN_TEST_OPENMP)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+            message(STATUS "Enabling OpenMP in examples")
+        endif()
+    endif()
+endif(CMAKE_COMPILER_IS_GNUCXX)
 
 IF(USE_CUDA_FLUID_SOLVER)
   ADD_SUBDIRECTORY(math)
@@ -38,6 +64,9 @@ IF(BUILD_TESTING)
     ADD_SUBDIRECTORY(particle_system/testing)
     ADD_SUBDIRECTORY(math/testing)
 ENDIF(BUILD_TESTING)
+
+
+
 
 ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/)
 

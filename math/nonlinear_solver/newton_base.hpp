@@ -171,11 +171,11 @@ struct directional_derivative
         /// Scale the difference increment
         eps /= wnorm;
 
-        value_type f1[m_system_size];
-        value_type x1[m_system_size];
+        std::vector<value_type> f1(m_system_size);
+        std::vector<value_type> x1(m_system_size);
         for ( size_t i = 0; i < m_system_size; ++i )
             x1[i] = m_x[i] + eps * w[i];
-        m_F ( x1, f1 );
+        m_F ( &x1[0], &f1[0] );
         value_type h = value_type ( 1 ) / eps;
         for ( size_t i = 0; i < m_system_size; ++i )
             DF[i] = ( f1[i] - m_f0[i] ) * h;
