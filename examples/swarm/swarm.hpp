@@ -49,12 +49,12 @@ class Swarm : public Surface<Swarm<value_type,fluid_solver,time_integrator> >
             base_type::setSprings(col_ptr, col_idx, strenght);
         }
 
-        void setIteratorRanges(int num_geometries)
+        void setIteratorRanges(int num_geometries, int head_offset, int tail_offset)
         {
             spring_iterator s = this->springs_begin(), f;
             
             for (spring_iterator s_end = this->springs_end(); s != s_end; ++s)
-                if (s->A()->i == lo || s->B()->i == lo)
+                if (s->A()->i % head_offset == 0)
                     break;
                 f = s;
             for (spring_iterator s_end = this->springs_end(); f != s_end; ++f)
