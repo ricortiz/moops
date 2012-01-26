@@ -3,8 +3,8 @@
 
 #include <map>
 #include <cmath>
-#include <vtkCellArray.h>
-#include <vtkSmartPointer.h>
+// #include <vtkCellArray.h>
+// #include <vtkSmartPointer.h>
 
 template<typename T> struct geometry_traits;
 
@@ -15,11 +15,11 @@ class BaseGeometry
         typedef typename geometry_traits<Derived>::value_type value_type;
 
     protected:
-        vtkSmartPointer<vtkCellArray> m_cells;
+//         vtkSmartPointer<vtkCellArray> m_cells;
     
 
     public:
-        BaseGeometry() : m_cells(vtkSmartPointer<vtkCellArray>::New()) {}
+        BaseGeometry() /*: m_cells(vtkSmartPointer<vtkCellArray>::New())*/ {}
         ~BaseGeometry() {}
 
         inline Derived *derived()
@@ -85,7 +85,7 @@ class BaseGeometry
                     col_idx.push_back((connections[k][1] + N) % N * M + (connections[k][0]+M)%M + offset);
 
         }
-
+/*
         void set_plane_cells(int i, int j, int M, int N, size_t offset = 0)
         {
             if(i < M - 1 && j < N - 1)
@@ -112,7 +112,7 @@ class BaseGeometry
                 vtkIdType cell[4] = {j *M + i + offset, j *M + i + 1 + offset, i + 1 + offset, i + offset};
                 m_cells->InsertNextCell(4, cell);
             }
-        }
+        }*/
 
         inline value_type getDistance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type scale)
         {
@@ -191,10 +191,10 @@ class BaseGeometry
             derived()->setCells();
         }
 
-        vtkSmartPointer<vtkCellArray> &getCells()
-        {
-            return m_cells;
-        }
+//         vtkSmartPointer<vtkCellArray> &getCells()
+//         {
+//             return m_cells;
+//         }
 
 
 };

@@ -139,9 +139,9 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         }
 
         template<typename particle_type>
-        void surface_point(size_t i, size_t j, value_type t, particle_type &particle, value_type dtheta, value_type dalpha)
+        void surfacePoint(size_t i, size_t j, value_type t, particle_type &particle, value_type dtheta, value_type dalpha)
         {
-            surface_point(i, j, t, particle.position, dtheta, dalpha);
+            surfacePoint(i, j, t, particle.position, dtheta, dalpha);
         }
 
         template<typename particle_type>
@@ -198,10 +198,10 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         template<typename array_type>
         void getConnections(array_type &col_ptr, array_type &col_idx, int offset = 0)
         {
-            getHeadConnections(array_type & col_ptr, array_type & col_idx,offset);
-            getTailConnections(array_type & col_ptr, array_type & col_idx,offset);
+            getHeadConnections(col_ptr,col_idx,offset);
+            getTailConnections(col_ptr,col_idx,offset);
         }
-
+/*
         void setCells(size_t offset)
         {
             // Set cells for the nose of the head
@@ -228,10 +228,10 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                     this->set_plane_cells(i, j, m_dims[0], m_dims[1], head_offset + offset);
                 }
             setJunctionCells(offset);
-        }
+        }*/
 
     private:
-
+/*
         void setJunctionCells(size_t offset)
         {
             int factor = m_dims[2] / m_dims[0];
@@ -246,7 +246,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                 for(int k = 0; k < 3; ++k)
                     this->getCells()->InsertNextCell(3, cells[k]);
             }
-        }
+        }*/
 
         value_type amplitude_cubic(const value_type &s)
         {

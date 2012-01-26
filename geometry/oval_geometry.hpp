@@ -94,7 +94,7 @@ protected:
             normal[1] =-Dx[0];
         }
 
-        inline void surface_point(size_t i, size_t j, value_type scale, value_type *position, value_type dtheta, value_type dalpha)
+        inline void surfacePoint(size_t i, size_t j, value_type scale, value_type *position, value_type dtheta, value_type dalpha)
         {
 
             value_type s = i*dalpha;
@@ -110,9 +110,9 @@ protected:
             position[2] = R * std::sin(theta)                    + m_x0[2];
         }
         
-        void surface_point(size_t i, size_t j, value_type scale, particle_type &particle, value_type dtheta, value_type dalpha)
+        void surfacePoint(size_t i, size_t j, value_type scale, particle_type &particle, value_type dtheta, value_type dalpha)
         {
-           surface_point(i,j,scale,particle.position,dtheta,dalpha);
+           surfacePoint(i,j,scale,particle.position,dtheta,dalpha);
         }
         
         inline void setCells()

@@ -7,9 +7,11 @@ SET(USE_CUDA_FLUID_SOLVER OFF CACHE BOOL "Use the cuda-based Stokes solver.")
 SET(USE_QT_GUI OFF CACHE BOOL "Build the QT4 GUI framework.")
 
 #FindVTK
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
-SET(APP_LIBS ${APP_LIBS} vtkIO)
+FIND_PACKAGE(VTK)
+IF(VTK_FOUND)
+  INCLUDE(${VTK_USE_FILE})
+  SET(APP_LIBS ${APP_LIBS} vtkIO)
+ENDIF(VTK_FOUND)
 
 # FindQt4
 if(USE_QT_GUI)
@@ -68,7 +70,7 @@ ENDIF(BUILD_TESTING)
 
 
 
-ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/)
+# ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/)
 
 # 
 

@@ -16,6 +16,7 @@ struct surface_traits;
 #include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
 #include "examples/valveless_heart/valveless_heart.hpp"
 #include "geometry/surface.hpp"
+#include <examples/swarm/swarm.hpp>
 
 int main()
 {
@@ -25,13 +26,15 @@ int main()
     typedef ExplicitSDC<double> esdc_integrator;
     typedef SemiImplicitSDC<double> sisdc_integrator;
     typedef HeartPump<double,fluid_solver,esdc_integrator> heart_pump;
+    typedef Swarm<double,fluid_solver,esdc_integrator> swarm_type;
 
-    heart_pump pump(20,200);
-    pump.fluid_solver().setDelta(.01);
-    pump.fluid_solver().initMaps(pump.elasticBoundary());
-
-    pump.run(.01);
-    pump.run(.01);
+    swarm_type swarm(6,100,12,21);
+//     heart_pump pump(20,200);
+//     pump.fluid_solver().setDelta(.01);
+//     pump.fluid_solver().initMaps(pump.elasticBoundary());
+// 
+//     pump.run(.01);
+//     pump.run(.01);
 
 }
 
