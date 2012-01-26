@@ -26,18 +26,18 @@ class Swarm : public Surface<Swarm<value_type,fluid_solver,time_integrator> >
             : base_type(num_sperms * (Mt * Nt + Mh * (Nh - 1) + 1))
         {
             // Set geometry parameters
-            m_geometry.setDimensions(Mt, Nt, Mh, Nh);            
-            m_geometry.setWaveSpeed(.001);
-            m_geometry.setTailRadius(.05);
-            m_geometry.setHeadRadius(.05 * 5);
-            m_geometry.setLength(4.0);
-            m_geometry.setTailAmplitude(.25);
-            m_geometry.setTailPitch(4.1);
+            m_geometry.setDimensions(Mt, Nt, Mh, Nh);    // tail dims: MtxNt; head dims: MhxNh       
+            m_geometry.setWaveSpeed(.001);		 // speed of wave passed to tail
+            m_geometry.setTailRadius(.05);		 // radius of tail tube
+            m_geometry.setHeadRadius(.05 * 5);		 // radius of head
+            m_geometry.setLength(4.0);			 // length of the tail
+            m_geometry.setTailAmplitude(.25); 		 // initial amplitude of tail
+            m_geometry.setTailPitch(4.1);		 // pitch of tail
             // create a grid where to put the geometries
-            std::vector<value_type> mesh2d;
-            setGeometryGrid(mesh2d,num_sperms);
-            std::vector<size_t> col_ptr, col_idx;
-            std::vector<value_type> strenght;
+            std::vector<value_type> mesh2d;		 // coords of each geometry
+            setGeometryGrid(mesh2d,num_sperms);			
+            std::vector<size_t> col_ptr, col_idx;	 // sparse matrix (CRS) holding 
+            std::vector<value_type> strenght;		 // interactions between particles
             col_ptr.push_back(0);
             for(size_t i = 0, idx = 0; i < num_sperms; ++i, idx+=3)
             {
@@ -45,12 +45,13 @@ class Swarm : public Surface<Swarm<value_type,fluid_solver,time_integrator> >
                 m_geometry.init(&this->particles()[i]);
                 m_geometry.getConnections(col_ptr,col_idx,i*m_geometry.numParticles());
             }
-            getStrengths(col_ptr, col_idx, strenght);
+            getStrengths(col_ptr, col_idx,strenght);
             base_type::setSprings(col_ptr, col_idx, strenght);
         }
 
         void setIteratorRanges(int num_geometries, int head_offset, int tail_offset)
         {
+	  // TODO: Take in consideration springs in head and springs connecting head and tail.
             spring_iterator s = this->springs_begin(), f;
             
             for (spring_iterator s_end = this->springs_end(); s != s_end; ++s)
