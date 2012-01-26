@@ -37,17 +37,20 @@ class vtkStorageWrapper
     private:
         vtkArrays<array_type>         m_vtk_data;
         vtkSmartPointer<vtkPolyData>  m_poly_data;
+        vtkSmartPointer<vtkCellArray> m_cells;
+        vtkIdType                     m_id_buffer[4][2];
 
     public:
-        vtkStorageWrapper(particle_system_storage &m_data) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
+        vtkStorageWrapper(particle_system_storage &data) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
         {
             m_vtk_data.positions = vtkSmartPointer<vtk_data_array_type>::New();
             m_vtk_data.velocities = vtkSmartPointer<vtk_data_array_type>::New();
             m_vtk_data.forces = vtkSmartPointer<vtk_data_array_type>::New();
 
-            m_vtk_data.positions->SetArray(m_data.positions(), m_data.data_size(), 1);
-            m_vtk_data.velocities->SetArray(m_data.velocities(), m_data.data_size(), 1);
-            m_vtk_data.forces->SetArray(m_data.forces(), m_data.data_size(), 1);
+            size_t size = data.data_size();
+            m_vtk_data.positions->SetArray(data.positions(), size, 1);
+            m_vtk_data.velocities->SetArray(data.velocities(), size, 1);
+            m_vtk_data.forces->SetArray(data.forces(), size, 1);
             m_vtk_data.positions->SetNumberOfComponents(3);
             m_vtk_data.positions->SetName("positions");
             m_vtk_data.velocities->SetNumberOfComponents(3);
@@ -62,18 +65,73 @@ class vtkStorageWrapper
                 m_poly_data->GetPointData()->AddArray(m_vtk_data.velocities);
             if (m_vtk_data.forces->GetSize() > 0)
                 m_poly_data->GetPointData()->AddArray(m_vtk_data.forces);
+            m_poly_data->SetPolys(m_cells);
         }
 
-        inline const vtkSmartPointer<vtk_data_array_type> &positions() const { return m_vtk_data.positions; }
-        inline vtkSmartPointer<vtk_data_array_type> &positions()             { return m_vtk_data.positions; }
+        inline const vtkSmartPointer<vtk_data_array_type> &positions() const    { return m_vtk_data.positions; }
+        inline vtkSmartPointer<vtk_data_array_type> &positions()                { return m_vtk_data.positions; }
+        inline const vtkSmartPointer<vtk_data_array_type> &velocities() const   { return m_vtk_data.velocities; }
+        inline vtkSmartPointer<vtk_data_array_type> &velocities()               { return m_vtk_data.velocities; }
+        inline const vtkSmartPointer<vtk_data_array_type> &forces() const       { return m_vtk_data.forces; }
+        inline vtkSmartPointer<vtk_data_array_type> &forces()                   { return m_vtk_data.forces; }
+        inline vtkSmartPointer<vtkPolyData> &grid()                             { return m_poly_data; }
 
-        inline const vtkSmartPointer<vtk_data_array_type> &velocities() const { return m_vtk_data.velocities; }
-        inline vtkSmartPointer<vtk_data_array_type> &velocities()             { return m_vtk_data.velocities; }
+        inline void setInnerCells(int i, int j, int M, int N, size_t offset = 0)
+        {
+            if(i < M - 1 && j < N - 1)
+            {
+                setIdBuffer(i, j);
+                vtkIdType cell[4] =
+                {
+                    m_id_buffer[0][1]*M + m_id_buffer[0][0] + offset,
+                    m_id_buffer[1][1]*M + m_id_buffer[1][0] + offset,
+                    m_id_buffer[2][1]*M + m_id_buffer[2][0] + offset,
+                    m_id_buffer[3][1]*M + m_id_buffer[3][0] + offset
+                };
+                m_cells->InsertNextCell(4, cell);
+            }
+        }
 
-        inline const vtkSmartPointer<vtk_data_array_type> &forces() const { return m_vtk_data.forces; }
-        inline vtkSmartPointer<vtk_data_array_type> &forces()             { return m_vtk_data.forces; }
+        inline void setEdgeCells(int i, int j, int M, int N, size_t offset = 0)
+        {
+            if(i == M - 1 && j < N - 1)
+            {
+                setIdBuffer(i, j);
+                vtkIdType cell[4] =
+                {
+                    m_id_buffer[0][1]*M + m_id_buffer[0][0] + offset,
+                    m_id_buffer[1][1]*M + m_id_buffer[1][0]%M + offset,
+                    m_id_buffer[2][1]*M + m_id_buffer[2][0]%M + offset,
+                    m_id_buffer[3][1]*M + m_id_buffer[3][0] + offset
+                };
+                m_cells->InsertNextCell(4, cell);
+            }
+        }
 
-        inline vtkSmartPointer<vtkPolyData> &grid() { return m_poly_data; }
+        inline void setTopCells(int i, int j, int M, int N, size_t offset = 0)
+        {
+            if(i <= M - 1 && j == N - 1)
+            {
+                setIdBuffer(i, j);
+                vtkIdType cell[4] =
+                {
+                    m_id_buffer[0][1]*M + m_id_buffer[0][0] + offset,
+                    m_id_buffer[1][1]*M + m_id_buffer[1][0]%M + offset,
+                    m_id_buffer[2][1]%N*M + m_id_buffer[2][0]%M + offset,
+                    m_id_buffer[3][1]%N*M + m_id_buffer[3][0] + offset
+                };
+                m_cells->InsertNextCell(4, cell);
+            }
+        }
+
+    private:
+        inline setIdBuffer(int i, int j)
+        {
+            m_id_buffer[0][0] = i;   m_id_buffer[0][1] = j;
+            m_id_buffer[1][0] = i + 1; m_id_buffer[1][1] = j;
+            m_id_buffer[2][0] = i + 1; m_id_buffer[2][1] = j + 1;
+            m_id_buffer[3][0] = i;   m_id_buffer[3][1] = j + 1;
+        }
 
 };
 

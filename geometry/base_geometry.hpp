@@ -15,7 +15,6 @@ class BaseGeometry
         typedef typename geometry_traits<Derived>::value_type value_type;
 
     protected:
-
         vtkSmartPointer<vtkCellArray> m_cells;
     
 
@@ -122,8 +121,8 @@ class BaseGeometry
             derived()->getDimensions(M,N);
             value_type dtheta = 2 * M_PI / M;
             value_type dalpha = 2 * M_PI / N;
-            derived()->surface_point(Ai, Aj, scale, points[0], dtheta, dalpha);
-            derived()->surface_point(Bi, Bj, scale, points[1], dtheta, dalpha);
+            derived()->surfacePoint(Ai, Aj, scale, points[0], dtheta, dalpha);
+            derived()->surfacePoint(Bi, Bj, scale, points[1], dtheta, dalpha);
             value_type dx[3] = {points[0][0] - points[1][0],
                                 points[0][1] - points[1][1],
                                 points[0][2] - points[1][2]
@@ -154,7 +153,7 @@ class BaseGeometry
                 {
                     particles[idx].i = i;
                     particles[idx].j = j;                    
-                    derived()->surface_point(i, j, 1.0, particles[idx], dtheta, dalpha);
+                    derived()->surfacePoint(i, j, 1.0, particles[idx], dtheta, dalpha);
                 }
         }
 
@@ -171,7 +170,7 @@ class BaseGeometry
                     for(size_t j = 0; j < M; ++j, ++idx)
                     {
                         value_type scale = .1 * l + .1;
-                        derived()->surface_point(i, j, scale, particles[idx], dtheta, dalpha);
+                        derived()->surfacePoint(i, j, scale, particles[idx], dtheta, dalpha);
                     }
         }
 
@@ -184,7 +183,7 @@ class BaseGeometry
             value_type dalpha = 2 * M_PI / N;
             for(size_t i = 0, idx = 0; i < N; ++i)
                 for(size_t j = 0; j < M; ++j, ++idx)
-                    derived()->surface_point(i, j, time, particles[idx], dtheta, dalpha);
+                    derived()->surfacePoint(i, j, time, particles[idx], dtheta, dalpha);
         }
 
         void setCells()

@@ -98,8 +98,8 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
          * @param particles array of particles
          * @param grid grid map, maps particle to a grid point
          **/
-        template<typename particle_type/*, typename grid_type*/>
-        void init(particle_type *particles/*, grid_type &grid*/)
+        template < typename particle_type>
+        void init(particle_type *particles)
         {
             value_type dtheta = 2 * M_PI / m_dims[2];
             value_type dalpha = m_length / 4.0 / m_dims[3];
@@ -107,14 +107,12 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             particles[0].position[0] = particles[0].position[1] = particles[0].position[2] = 0;
             particles[0].i = 0;
             particles[0].j = 0;
-//             grid[particles] = std::make_pair(0, 0);
             for(size_t i = 1; i < m_dims[3]; ++i)
                 for(size_t j = 0; j < m_dims[2]; ++j, ++idx)
                 {
-                    head_point(i, j, 0.0, particles[idx], dtheta, dalpha);
+                    headPoint(i, j, 0.0, particles[idx], dtheta, dalpha);
                     particles[idx].i = i;
                     particles[idx].j = j;
-//                     grid[particles+idx] = std::make_pair(i, j);
                 }
             value_type tail_translation_factor = m_length / 4.0 - .5 * dalpha;
             dtheta = 2 * M_PI / m_dims[0];
@@ -122,11 +120,10 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             for(size_t i = 0; i < m_dims[1]; ++i)
                 for(size_t j = 0; j < m_dims[0]; ++j, ++idx)
                 {
-                    surface_point(i, j, 0.0, particles[idx], dtheta, dalpha);
+                    surfacePoint(i, j, 0.0, particles[idx], dtheta, dalpha);
                     particles[idx].position[1] += tail_translation_factor;
                     particles[idx].i = i;
                     particles[idx].j = j;
-//                     grid[particles + idx] = std::make_pair(i, j);
                 }
             for(size_t i = 0; i < idx; ++i)
             {
@@ -136,12 +133,11 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             }
         }
 
-        inline void surface_point(size_t i, size_t j, value_type t, value_type *position, value_type dtheta, value_type dalpha)
+        inline void surfacePoint(size_t i, size_t j, value_type t, value_type *position, value_type dtheta, value_type dalpha)
         {
             value_type s = i * dalpha;
-            /*centerline and tangent*/
             value_type x[2] = {0}, normal[2] = {0};
-            get_tail_frame(s, t, x, normal);
+            getTailFrame(s, t, x, normal);
             value_type theta = j * dtheta;
             position[0] = m_tail_radius * normal[0] * std::cos(theta) + x[0];
             position[1] = m_tail_radius * normal[1] * std::cos(theta) + x[1];
@@ -155,7 +151,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         }
 
         template<typename particle_type>
-        void head_point(size_t i, size_t j, value_type t, particle_type &particle, value_type dtheta, value_type dalpha)
+        void headPoint(size_t i, size_t j, value_type t, particle_type &particle, value_type dtheta, value_type dalpha)
         {
             value_type R = i < 7 ? m_head_radius * (std::cos((7 - i) * .5 * M_PI / 7)) : i > 13 ? m_head_radius * (std::cos((i - 13) * .5 * M_PI / 6)) : m_head_radius;
             if(i == m_dims[3] - 2 || i == m_dims[3] - 1)
@@ -174,44 +170,44 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         template<typename array_type>
         void getTailConnections(array_type &col_ptr, array_type &col_idx, int offset = 0)
         {
+            int head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
             for(size_t j = 0; j < m_dims[1]; ++j)
                 for(size_t i = 0; i < m_dims[0]; ++i)
                 {
-                    this->add_plane_connections(i, j, m_dims[0], m_dims[1], col_idx, offset);
-                    this->add_cylinder_connections(i, j, m_dims[0], m_dims[1], col_idx, offset);
+                    this->add_plane_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset);
+                    this->add_cylinder_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset);
                     col_ptr.push_back(col_idx.size());
                 }
         }
 
         template<typename array_type>
-        void getHeadConnections(array_type &col_ptr, array_type &col_idx)
+        void getHeadConnections(array_type &col_ptr, array_type &col_idx, int offset = 0)
         {
             for(size_t i = 0; i < m_dims[2]; ++i)
-                col_idx.push_back(i + 1);
+                col_idx.push_back(i + 1 + offset);
             col_ptr.push_back(col_idx.size());
             for(size_t j = 0; j < m_dims[3] - 1; ++j)
                 for(size_t i = 0; i < m_dims[2]; ++i)
                 {
-                    this->add_plane_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1);
-                    this->add_cylinder_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1);
+                    this->add_plane_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1 + offset);
+                    this->add_cylinder_connections(i, j, m_dims[2], m_dims[3] - 1, col_idx, 1 + offset);
                     if(j == m_dims[3] - 2)
                     {
                         size_t head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
                         for(size_t k = head_offset; k < head_offset + m_dims[0]; ++k)
-                            col_idx.push_back(k);
+                            col_idx.push_back(k + offset);
                     }
                     col_ptr.push_back(col_idx.size());
                 }
         }
-        
+
         template<typename array_type>
         void getConnections(array_type &col_ptr, array_type &col_idx, int offset)
         {
-            int head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
-            getHeadConnections(array_type &col_ptr, array_type &col_idx);
-            getTailConnections(array_type &col_ptr, array_type &col_idx, head_offset+offset);
+            getHeadConnections(array_type & col_ptr, array_type & col_idx,offset);
+            getTailConnections(array_type & col_ptr, array_type & col_idx,offset);
         }
-        
+
         void setCells(size_t offset)
         {
             // Set cells for the nose of the head
@@ -270,7 +266,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             return (s >= 2 || s <= 0) ? 0. : value;
         }
 
-        void get_tail_frame(value_type s, value_type t, value_type x[2], value_type normal[2])
+        void getTailFrame(value_type s, value_type t, value_type x[2], value_type normal[2])
         {
             value_type A = amplitude_cubic(s);
             value_type DA = damplitude_cubic(s);

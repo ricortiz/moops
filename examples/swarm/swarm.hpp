@@ -1,24 +1,24 @@
 #ifndef SWARM_HPP
 #define SWARM_HPP
 
-#include "particle_system/storage/particle_system_storage.hpp"
+
 #include "geometry/surface.hpp"
 #include "geometry/sine_geometry.hpp"
 
 template<typename value_type, typename fluid_solver, typename time_integrator>
-class Swarm : public Surface<Swarm<value_type,fluid_solver,time_integrator> >
+class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
 {
     public:
-        typedef Surface<Swarm<value_type,fluid_solver,time_integrator> > base_type;
-        typedef typename base_type::spring_iterator             spring_iterator;
-        typedef std::pair<spring_iterator, spring_iterator>     spring_iterator_pair;
-        typedef Particle<value_type>                            particle_type;
-        typedef SineGeometry<value_type>                        sperm_type;
-        typedef std::vector<spring_iterator_pair>               iterator_pair_array;
+        typedef Surface<Swarm<value_type, fluid_solver, time_integrator> >      base_type;
+        typedef typename base_type::spring_iterator                             spring_iterator;
+        typedef std::pair<spring_iterator, spring_iterator>                     spring_iterator_pair;
+        typedef Particle<value_type>                                            particle_type;
+        typedef SineGeometry<value_type>                                        sperm_type;
+        typedef std::vector<spring_iterator_pair>                               iterator_pair_array;
+
     private:
-        sperm_type m_geometry;
-        iterator_pair_array m_tail_iterator_pairs;
-        size_t m_num_geometries;
+        sperm_type              m_geometry;             //< Contains geometrical props of sperms
+        iterator_pair_array     m_tail_iterator_pairs;  //< Stores spring iterator range for tail
 
     public:
 
@@ -26,58 +26,69 @@ class Swarm : public Surface<Swarm<value_type,fluid_solver,time_integrator> >
             : base_type(num_sperms * (Mt * Nt + Mh * (Nh - 1) + 1))
         {
             // Set geometry parameters
-            m_geometry.setDimensions(Mt, Nt, Mh, Nh);    // tail dims: MtxNt; head dims: MhxNh       
-            m_geometry.setWaveSpeed(.001);		 // speed of wave passed to tail
-            m_geometry.setTailRadius(.05);		 // radius of tail tube
-            m_geometry.setHeadRadius(.05 * 5);		 // radius of head
-            m_geometry.setLength(4.0);			 // length of the tail
-            m_geometry.setTailAmplitude(.25); 		 // initial amplitude of tail
-            m_geometry.setTailPitch(4.1);		 // pitch of tail
-            // create a grid where to put the geometries
-            std::vector<value_type> mesh2d;		 // coords of each geometry
-            setGeometryGrid(mesh2d,num_sperms);			
-            std::vector<size_t> col_ptr, col_idx;	 // sparse matrix (CRS) holding 
-            std::vector<value_type> strenght;		 // interactions between particles
+            m_geometry.setDimensions(Mt, Nt, Mh, Nh);    // tail dims: MtxNt; head dims: MhxNh
+            m_geometry.setWaveSpeed(.001);               // speed of wave passed to tail
+            m_geometry.setTailRadius(.05);               // radius of tail tube
+            m_geometry.setHeadRadius(.05 * 5);           // radius of head
+            m_geometry.setLength(4.0);                   // length of the tail
+            m_geometry.setTailAmplitude(.25);            // initial amplitude of tail
+            m_geometry.setTailPitch(4.1);                // pitch of tail
+            std::vector<value_type> mesh2d;              // coords of each geometry
+            setGeometryGrid(mesh2d, num_sperms);         // create a grid where to put the geometries
+            std::vector<size_t> col_ptr, col_idx;        // sparse matrix (CSR-format) holding
+            std::vector<value_type> strenght;            // interactions between particles
+            size_t num_springs = this->particles_size()*9; // estimate total number of springs
+            col_ptr.reserve(this->particles_size()+1);   // Reserve
+            col_idx.reserve(num_springs);                // Reserve
+            strenght.reserve(num_springs);               // Reserve
             col_ptr.push_back(0);
-            for(size_t i = 0, idx = 0; i < num_sperms; ++i, idx+=3)
+            m_geometry.init(&this->particles()[0]);
+            for(size_t i = 1, idx = 3; i < num_sperms; ++i, idx += 3)
             {
-                m_geometry.setX0(mesh2d[idx],mesh2d[idx+1],mesh2d[idx+2]);
-                m_geometry.init(&this->particles()[i]);
-                m_geometry.getConnections(col_ptr,col_idx,i*m_geometry.numParticles());
+                particle_type *p_init = this->particles()[0];
+                particle_type *p = this->particles()[i*m_geometry.numParticles()];
+                for(size_t j = 0; j < m_geometry.numParticles(); ++j)
+                {
+                    p[j].position[0] = p_init[j].position[0] + mesh2d[idx];
+                    p[j].position[1] = p_init[j].position[1] + mesh2d[idx + 1];
+                    p[j].position[2] = p_init[j].position[2] + mesh2d[idx + 2];
+                }
+                m_geometry.getConnections(col_ptr, col_idx, i * m_geometry.numParticles());
             }
-            getStrengths(col_ptr, col_idx,strenght);
+            getStrengths(col_ptr, col_idx, strenght);
             base_type::setSprings(col_ptr, col_idx, strenght);
+            setIteratorRanges(num_sperms);
         }
 
         void setIteratorRanges(int num_geometries, int head_offset, int tail_offset)
         {
-	  // TODO: Take in consideration springs in head and springs connecting head and tail.
+            // TODO: Take in consideration springs in head and springs connecting head and tail.
             spring_iterator s = this->springs_begin(), f;
-            
+
             for (spring_iterator s_end = this->springs_end(); s != s_end; ++s)
                 if (s->A()->i % head_offset == 0)
                     break;
-                f = s;
+            f = s;
             for (spring_iterator s_end = this->springs_end(); f != s_end; ++f)
                 if (f->A()->i == hi)
                 {
                     do ++f; while (f->A()->i == hi);
                     break;
                 }
-                m_spring_range = std::make_pair(s, f);
+            m_tail_iterator_pairs.push_back(std::make_pair(s, f));
         }
-        
+
         void getStrengths(const std::vector<size_t> &col_ptr, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
         {
-            strengths.resize(col_idx.size(),10.0);
+            strengths.resize(col_idx.size(), 10.0);
             for (size_t p = 0, p_end = col_ptr.size() - 1; p < p_end; ++p)
                 if (p >= lo && p <= hi)
                     for (size_t i = col_ptr[p], i_end = col_ptr[p + 1]; i < i_end; ++i)
                         strengths[i] = 1.0;
         }
-        
+
         template<typename spring_system_type>
-        void set_springs(spring_system_type &spring_system)
+        void setSprings(spring_system_type &spring_system)
         {
             typedef typename spring_system_type::particle_type particle_type;
             particle_type *particles = spring_system.particles();
@@ -167,6 +178,7 @@ class Swarm : public Surface<Swarm<value_type,fluid_solver,time_integrator> >
             particles[0].force[2] += gradient[2];
         }
 
+        
 
         inline BaseGeometry<sperm_type> *geometry()
         {
@@ -175,12 +187,15 @@ class Swarm : public Surface<Swarm<value_type,fluid_solver,time_integrator> >
 
 };
 
-
-template<typename _value_type>
-struct surface_traits<Swarm<_value_type> >
+#include "particle_system/storage/particle_system_storage.hpp"
+template<typename _value_type, typename _fluid_solver, typename _time_integrator>
+struct surface_traits<Swarm<_value_type, _fluid_solver, _time_integrator> >
 {
     typedef _value_type value_type;
-    typedef SineGeometry<value_type> geometry_type;
+    typedef _fluid_solver fluid_solver_type;
+    typedef _time_integrator time_integrator_type;
+    typedef Particle<value_type> particle_type;
+    typedef ParticleSystemStorage<value_type, particle_type, SURFACE> storage_type;
 };
 
 #endif
