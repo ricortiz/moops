@@ -122,15 +122,9 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                 {
                     surfacePoint(i, j, 0.0, particles[idx], dtheta, dalpha);
                     particles[idx].position[1] += tail_translation_factor;
-                    particles[idx].i = i;
+                    particles[idx].i = i+m_dims[3];
                     particles[idx].j = j;
                 }
-            for(size_t i = 0; i < idx; ++i)
-            {
-                particles[i].position[0] += m_x0[0];
-                particles[i].position[1] += m_x0[1];
-                particles[i].position[2] += m_x0[2];
-            }
         }
 
         inline void surfacePoint(size_t i, size_t j, value_type t, value_type *position, value_type dtheta, value_type dalpha)
@@ -202,7 +196,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         }
 
         template<typename array_type>
-        void getConnections(array_type &col_ptr, array_type &col_idx, int offset)
+        void getConnections(array_type &col_ptr, array_type &col_idx, int offset = 0)
         {
             getHeadConnections(array_type & col_ptr, array_type & col_idx,offset);
             getTailConnections(array_type & col_ptr, array_type & col_idx,offset);

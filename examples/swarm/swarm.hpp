@@ -43,6 +43,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             strenght.reserve(num_springs);               // Reserve
             col_ptr.push_back(0);
             m_geometry.init(&this->particles()[0]);
+            m_geometry.getConnections(col_ptr, col_idx);
             for(size_t i = 1, idx = 3; i < num_sperms; ++i, idx += 3)
             {
                 particle_type *p_init = this->particles()[0];
@@ -52,39 +53,44 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                     p[j].position[0] = p_init[j].position[0] + mesh2d[idx];
                     p[j].position[1] = p_init[j].position[1] + mesh2d[idx + 1];
                     p[j].position[2] = p_init[j].position[2] + mesh2d[idx + 2];
+                    p[j].i = p_init[j].i;
+                    p[j].j = p_init[j].j;
                 }
                 m_geometry.getConnections(col_ptr, col_idx, i * m_geometry.numParticles());
             }
             getStrengths(col_ptr, col_idx, strenght);
             base_type::setSprings(col_ptr, col_idx, strenght);
-            setIteratorRanges(num_sperms);
+            setIteratorRanges(Mt*Nt, Mh*(Nh-1)+1);
         }
 
-        void setIteratorRanges(int num_geometries, int head_offset, int tail_offset)
+        void setIteratorRanges(int tail_offset, int head_offset)
         {
-            // TODO: Take in consideration springs in head and springs connecting head and tail.
-            spring_iterator s = this->springs_begin(), f;
-
-            for (spring_iterator s_end = this->springs_end(); s != s_end; ++s)
-                if (s->A()->i % head_offset == 0)
-                    break;
-            f = s;
-            for (spring_iterator s_end = this->springs_end(); f != s_end; ++f)
-                if (f->A()->i == hi)
-                {
-                    do ++f; while (f->A()->i == hi);
-                    break;
-                }
-            m_tail_iterator_pairs.push_back(std::make_pair(s, f));
+            spring_iterator s = this->springs_begin(), s_end = this->springs_end(), f;
+            while(s != s_end)
+            {
+                for (; s != s_end; ++s)
+                    if (s->A()->i == head_offset)
+                        break;
+                f = s;
+                for (; f != s_end; ++f)
+                    if (f->A()->i == head_offset+tail_offset)
+                    {
+                        do ++f; while (f->A()->i == head_offset+tail_offset);
+                        break;
+                    }
+                m_tail_iterator_pairs.push_back(std::make_pair(s, f));
+                s = f;
+            }
+            
         }
 
         void getStrengths(const std::vector<size_t> &col_ptr, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
         {
-            strengths.resize(col_idx.size(), 10.0);
-            for (size_t p = 0, p_end = col_ptr.size() - 1; p < p_end; ++p)
-                if (p >= lo && p <= hi)
-                    for (size_t i = col_ptr[p], i_end = col_ptr[p + 1]; i < i_end; ++i)
-                        strengths[i] = 1.0;
+            strengths.resize(col_idx.size(), 1.0);
+//             for (size_t p = 0, p_end = col_ptr.size() - 1; p < p_end; ++p)
+//                 if (p >= lo && p <= hi)
+//                     for (size_t i = col_ptr[p], i_end = col_ptr[p + 1]; i < i_end; ++i)
+//                         strengths[i] = 1.0;
         }
 
         template<typename spring_system_type>
