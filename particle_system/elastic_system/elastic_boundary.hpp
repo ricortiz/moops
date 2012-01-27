@@ -46,7 +46,7 @@ class ElasticBoundary : public SpringSystem<Derived>
                         spring_iterator s = this->addSpring(&particles[p], &particles[col_idx[i]], strength[i]);
                         s->getAidx() = 3 * p;
                         s->getBidx() = 3 * col_idx[i];
-                    }                 	    
+                    }
         }
                 
         inline void computeForces()

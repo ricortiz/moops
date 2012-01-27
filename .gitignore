@@ -3,3 +3,4 @@
 !.gitignore
 *.kate-swp
 build
+*.nfs*

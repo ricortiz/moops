@@ -16,8 +16,7 @@ struct surface_traits;
 #include "math/ode_solver/sdc/explicit_sdc.hpp"
 #include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
 #include "examples/valveless_heart/valveless_heart.hpp"
-#include "geometry/surface.hpp"
-#include <examples/swarm/swarm.hpp>
+#include "examples/swarm/swarm.hpp"
 
 int main()
 {

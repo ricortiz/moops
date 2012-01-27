@@ -58,7 +58,17 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,spectral_integrator_ty
         inline void setX0(value_type *x) { m_storage.setX0(x); }
         inline void setF0(value_type *Fx) { m_storage.setF0(Fx); }
 
-//         (function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
+        template<typename function_type>
+        inline void operator()(function_type &F, value_type t, value_type *x, value_type *xold, value_type *v, value_type *vold, value_type dt)
+        {
+            setX0(x);
+            setF0(v);
+            std::copy(xold, xold + m_storage.ode_size, x);
+            std::copy(vold, vold + m_storage.ode_size, v);
+            predictor(F,t,dt);
+            corrector(F,t,dt);
+            update();
+        }
 
         template<typename function_type>
         inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)

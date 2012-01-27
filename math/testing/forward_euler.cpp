@@ -13,17 +13,17 @@ int main()
     typedef double value_type;
     {
         function_type<1> F;
-        ForwardEuler<value_type, function_type<1> > forward_euler(F);
+        ForwardEuler forward_euler(F.ode_size());
 
         const int size = 10;
         value_type error[size] = {0};
 
         value_type x[size] = {1}, rhs[size];
-        value_type time = 0, dt = .01;
+        value_type time = 0, dt = .1;
         for (size_t i = 0; i < size - 1; ++i)
         {
             x[i+1] = x[i];
-            forward_euler(time, &x[i+1], &rhs[i], dt);
+            forward_euler(&x[i+1], &x[i], &rhs[i], dt);
             time += dt;
             error[i+1] = x[i+1] - std::exp(std::sin(time));
         }

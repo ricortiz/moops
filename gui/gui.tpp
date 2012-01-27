@@ -113,15 +113,15 @@ void Gui<app_type>::setActor(vtkPolyData *poly_data)
 {
     vtkSmartPointer<vtkSmoothPolyDataFilter> smoother = vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
     smoother->SetInput(poly_data);
-    smoother->SetNumberOfIterations(1);
+    smoother->SetNumberOfIterations(15);
     vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
     normals->SetInputConnection(smoother->GetOutputPort());
     normals->SetSplitting(1);
     normals->SetNonManifoldTraversal(1);
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-//     mapper->SetInputConnection(normals->GetOutputPort());
-    mapper->SetInput(poly_data);
+    mapper->SetInputConnection(normals->GetOutputPort());
+//     mapper->SetInput(poly_data);
     actor->SetMapper(mapper);
     m_vtk_renderer->AddViewProp(actor);
 }

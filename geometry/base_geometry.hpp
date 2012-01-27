@@ -12,14 +12,10 @@ template<typename Derived>
 class BaseGeometry
 {
     protected:
-        typedef typename geometry_traits<Derived>::value_type value_type;
-
-    protected:
-//         vtkSmartPointer<vtkCellArray> m_cells;
-    
+        typedef typename geometry_traits<Derived>::value_type value_type;   
 
     public:
-        BaseGeometry() /*: m_cells(vtkSmartPointer<vtkCellArray>::New())*/ {}
+        BaseGeometry(){}
         ~BaseGeometry() {}
 
         inline Derived *derived()
@@ -114,7 +110,7 @@ class BaseGeometry
             }
         }*/
 
-        inline value_type getDistance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type scale)
+        value_type getDistance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type scale)
         {
             value_type points[2][3] = {{0}};
             size_t M,N;
@@ -190,12 +186,6 @@ class BaseGeometry
         {
             derived()->setCells();
         }
-
-//         vtkSmartPointer<vtkCellArray> &getCells()
-//         {
-//             return m_cells;
-//         }
-
 
 };
 

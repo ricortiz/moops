@@ -65,6 +65,7 @@ IF(BUILD_TESTING)
     ADD_SUBDIRECTORY(testing)
     ADD_SUBDIRECTORY(particle_system/testing)
     ADD_SUBDIRECTORY(math/testing)
+    ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_TESTING)
 
 

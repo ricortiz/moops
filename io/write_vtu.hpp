@@ -13,34 +13,42 @@
 #include <vtkCellArray.h>
 #include <vtkDoubleArray.h>
 #include <vtkSmartPointer.h>
-
+#include <vtkXMLPolyDataWriter.h>
 #include <vtksys/SystemTools.hxx>
 
 namespace IO
 {
 
-    template<typename vtk_writer_type>
-    class VTKWriter
+    template<typename vtk_storage, typename vtk_writer_type>
+    class VtkWriter;
+
+    template<typename vtk_storage>
+    class VtkWriter<vtk_storage,vtkXMLPolyDataWriter>
     {
             size_t m_file_counter;
             std::string m_data_path;
-            vtkSmartPointer<vtk_writer_type> m_writer;
+            vtkSmartPointer<vtkXMLPolyDataWriter> m_writer;
+            bool m_write_binary;
 
         public:
-            VTKWriter() : m_file_counter(0){}
-            VTKWriter(const std::string &data_path) :
+            VtkWriter() : m_file_counter(0), m_write_binary(true){}
+            VtkWriter(const std::string &data_path, vtk_storage &storage, bool write_binary = true) :
                     m_file_counter(0),
                     m_data_path(data_path),
-                    m_writer(vtkSmartPointer<vtk_writer_type>::New())
+                    m_writer(vtkSmartPointer<vtkXMLPolyDataWriter>::New()),
+                    m_write_binary(write_binary)
             {
-//                 m_writer->SetDataModeToAscii();
-                m_writer->SetDataModeToBinary();
+                m_writer->SetInput(storage.grid());
+                if(m_write_binary)
+                    m_writer->SetDataModeToBinary();
+                else
+                    m_writer->SetDataModeToAscii();
             }    
 
             template<typename input_type>
-            void setInput(input_type &data)
+            void setInput(input_type &poly_data, int i = 0)
             {
-                m_writer->SetInput(data);
+                m_writer->SetInput(poly_data,i);
             }
             
             void write(double timestep, bool print = true)
@@ -52,7 +60,7 @@ namespace IO
                 if(print) std::cout << "done." << std::endl;
             }
 
-            inline std::string file_number(size_t counter, int total_digits = 6)
+            inline std::string file_number(size_t counter, size_t total_digits = 6)
             {
                 std::stringstream filename;
 

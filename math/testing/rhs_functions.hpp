@@ -40,7 +40,7 @@ struct function_type<1>
     {
         v[0] = .00001 * x[0] * std::cos(t);
     }
-    const size_t ode_size() {return 1;}
+    size_t ode_size() {return 1u;}
 };
 
 /// Robertson
@@ -78,7 +78,7 @@ struct function_type<3>
         y[1] = x[1];
         y[2] = x[2];
     }
-    const size_t ode_size() {return 3;}
+    size_t ode_size() {return 3;}
 };
 
 
@@ -87,9 +87,9 @@ template<typename value_type, size_t size>
 struct diffusion_type
 {
     value_type dx;
-    static const value_type alpha = 0.02;
-    static const value_type B = 3.0;
-    static const value_type A = 1.0;
+    static const value_type alpha;
+    static const value_type B;
+    static const value_type A;
 
     void operator()(value_type t, const value_type *y, value_type *v)
     {
@@ -150,10 +150,16 @@ struct diffusion_type
         v[j] = alpha * 1.0 / (dx * dx) * (y[j - 2] - 2 * y[j] + 3.0);
     }
 
-    const size_t ode_size()
-    {
-        return size;
-    }
+    size_t ode_size() { return size; }
 };
+
+template<typename value_type, size_t size>
+const value_type diffusion_type<value_type,size>::alpha = 0.02;
+
+template<typename value_type, size_t size>
+const value_type diffusion_type<value_type,size>::B = 3;
+
+template<typename value_type, size_t size>
+const value_type diffusion_type<value_type,size>::A = 1;
 
 #endif

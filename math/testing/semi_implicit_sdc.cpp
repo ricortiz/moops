@@ -68,30 +68,35 @@ int main()
 //     }
 // 
     {
-        const size_t size = 20;
-        const size_t spatial_size = 40;
-        const size_t ode_size = 2 * spatial_size;
+        const int size = 100;
+        const int spatial_size = 40;
+        const int ode_size = 2 * spatial_size;
 
         diffusion_type<value_type, ode_size> F;
-
-        SemiImplicitSDC<value_type, diffusion_type<value_type,ode_size>, Integrator<value_type>, 18 > sdc(F);
+        enum
+        {
+            sdc_nodes = 7,
+            sdc_corrections = 6
+        };
+        const quadrature_type quad_type = gauss_lobatto;
+        
+        typedef Integrator<value_type,quad_type,sdc_nodes> spectral_integrator;
+        SemiImplicitSDC<value_type, spectral_integrator,sdc_corrections > sdc(F.ode_size());
 
         value_type **x = new value_type*[size];
-        value_type **f1 = new value_type*[size];
-        value_type **f2 = new value_type*[size];
-        for(size_t i = 0; i < size; ++i)
+        value_type **f = new value_type*[size];
+        for(int i = 0; i < size; ++i)
         {
             x[i] = new value_type[ode_size];
-            f1[i] = new value_type[ode_size];
-            f2[i] = new value_type[ode_size];
+            f[i] = new value_type[ode_size];
         }
-        value_type time = 0, dt = .5;
+        value_type time = 0, dt = .1;
         F.init(0, 1, x[0]);
-        F.Explicit(time, x[0], f1[0]);
-        F.Implicit(time, x[0], f2[0]);
-        for(size_t i = 0; i < size - 1; ++i)
+        for(int i = 0; i < size - 1; ++i)
         {
-            sdc(time, x[i + 1], x[i], f1[i + 1], f1[i], f2[i + 1], f2[i], dt);
+            std::copy(x[i], x[i] + ode_size, x[i+1]);
+            std::copy(f[i], f[i] + ode_size, f[i + 1]);
+            sdc(F,time, x[i + 1], f[i + 1], dt);
             time += dt;
         }
 
@@ -109,14 +114,12 @@ int main()
         output << "[X Y] = meshgrid(linspace(0,1," << spatial_size << "),linspace(0," << size*dt << "," << size << "));\n";
         output << "mesh(X,Y,u)\n";
         output << "axis equal\n";
-        for(size_t i = 0; i < size; ++i)
+        for(int i = 0; i < size; ++i)
         {
             delete [] x[i];
-            delete [] f1[i];
-            delete [] f2[i];
+            delete [] f[i];
         }
         delete [] x;
-        delete [] f1;
-        delete [] f2;
+        delete [] f;
     }
 }

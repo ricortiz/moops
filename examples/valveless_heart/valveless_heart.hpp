@@ -3,7 +3,7 @@
 
 #include "geometry/oval_geometry.hpp"
 #include "particle_system/storage/particle_system_storage.hpp"
-#include "geometry/surface.hpp"
+#include "particle_system/surface.hpp"
 
 template<typename value_type, typename fluid_solver, typename time_integrator>
 class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integrator> >

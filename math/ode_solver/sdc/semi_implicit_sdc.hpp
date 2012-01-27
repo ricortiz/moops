@@ -82,8 +82,8 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, spectral_inte
             predictor(F,t,dt);
             corrector(F,t,dt);
 
-            std::transform(Fe(0),Fe(0)+m_storage.ode_size,Fi(0),v,std::plus<value_type>());
             update();
+            std::transform(Fe(0),Fe(0)+m_storage.ode_size,Fi(0),v,std::plus<value_type>());
         }
 
         /**

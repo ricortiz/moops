@@ -13,17 +13,17 @@ int main()
     typedef double value_type;
     {
         function_type<1> F;
-        BackwardEuler<value_type, function_type<1> > backward_euler(F);
+        BackwardEuler<value_type> backward_euler(F.ode_size());
 
         const int size = 10;
         value_type error[size] = {0};
 
         value_type x[size] = {1}, rhs[size] = {0};
-        value_type time = 0, dt = .001;
+        value_type time = 0, dt = .0001;
         for(size_t i = 0; i < size - 1; ++i)
         {
             x[i + 1] = x[i];
-            backward_euler(time, &x[i + 1], &rhs[i], dt);
+            backward_euler(F,time, &x[i + 1], &x[i], &rhs[i+1], &rhs[i], dt);
             time += dt;
 	    error[i+1] = x[i+1] - std::exp(std::sin(time));
         }

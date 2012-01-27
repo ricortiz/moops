@@ -53,6 +53,11 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             Mh = m_dims[2];
             Nh = m_dims[3];
         }
+        void getDimensions(size_t &Mt, size_t &Nt)
+        {
+            Mt = m_dims[0];
+            Nt = m_dims[1];
+        }
         void getHeadRadius(value_type &radius) { radius = m_head_radius; }
         void getTailRadius(value_type &radius) { radius = m_tail_radius; }
         void getWaveSpeed(value_type &speed) { speed = m_speed; }
@@ -110,7 +115,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             for(size_t i = 1; i < m_dims[3]; ++i)
                 for(size_t j = 0; j < m_dims[2]; ++j, ++idx)
                 {
-                    headPoint(i, j, 0.0, particles[idx], dtheta, dalpha);
+                    headPoint(i, j,particles[idx], dtheta, dalpha);
                     particles[idx].i = i;
                     particles[idx].j = j;
                 }
@@ -145,7 +150,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         }
 
         template<typename particle_type>
-        void headPoint(size_t i, size_t j, value_type t, particle_type &particle, value_type dtheta, value_type dalpha)
+        void headPoint(size_t i, size_t j,particle_type &particle, value_type dtheta, value_type dalpha)
         {
             value_type R = i < 7 ? m_head_radius * (std::cos((7 - i) * .5 * M_PI / 7)) : i > 13 ? m_head_radius * (std::cos((i - 13) * .5 * M_PI / 6)) : m_head_radius;
             if(i == m_dims[3] - 2 || i == m_dims[3] - 1)
@@ -201,62 +206,18 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             getHeadConnections(col_ptr,col_idx,offset);
             getTailConnections(col_ptr,col_idx,offset);
         }
-/*
-        void setCells(size_t offset)
-        {
-            // Set cells for the nose of the head
-            {
-                for(size_t i = 1; i < m_dims[2]; ++i)
-                {
-                    vtkIdType cell[3] = {0 + offset, i + 1 + offset, i + offset};
-                    this->getCells()->InsertNextCell(3, cell);
-                }
-                vtkIdType cell[3] = {0 + offset, 1 + offset, m_dims[2] + offset};
-                this->getCells()->InsertNextCell(3, cell);
-            }
-            for(size_t j = 0; j < m_dims[3] - 1; ++j)
-                for(size_t i = 0; i < m_dims[2]; ++i)
-                {
-                    this->set_corner_cells(i, j,  m_dims[2], m_dims[3] - 1, 1 + offset);
-                    this->set_plane_cells(i, j, m_dims[2], m_dims[3] - 1, 1 + offset);
-                }
-            size_t head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
-            for(size_t j = 0; j < m_dims[1]; ++j)
-                for(size_t i = 0; i < m_dims[0]; ++i)
-                {
-                    this->set_corner_cells(i, j, m_dims[0], m_dims[1], head_offset + offset);
-                    this->set_plane_cells(i, j, m_dims[0], m_dims[1], head_offset + offset);
-                }
-            setJunctionCells(offset);
-        }*/
+
 
     private:
-/*
-        void setJunctionCells(size_t offset)
-        {
-            int factor = m_dims[2] / m_dims[0];
-            int head_offset = m_dims[2] * (m_dims[3] - 1) + 1;
-            int head_points = head_offset - m_dims[2];
-            for(size_t i = 0; i < m_dims[0]; ++i)
-            {
-                vtkIdType cells[3][3] = {{i + head_offset + offset, head_points + i *factor + 1 + offset, head_points + i *factor + offset},
-                    {i + head_offset + offset, (i + 1) % m_dims[0] + head_offset + offset, head_points + i *factor + 1 + offset},
-                    {(i + 1) % m_dims[0] + head_offset + offset, head_points + (i *factor + 2) % m_dims[2] + offset, head_points + i *factor + 1 + offset}
-                };
-                for(int k = 0; k < 3; ++k)
-                    this->getCells()->InsertNextCell(3, cells[k]);
-            }
-        }*/
-
         value_type amplitude_cubic(const value_type &s)
         {
-            value_type value = -m_amplitude * 0.03125 * (-70 + 84 * s - 35 * std::pow(s, 2) + 5 * std::pow(s, 3)) * std::pow(s, 4);
+            value_type value = -m_amplitude * 0.03125 * (-70 + 84 * s - 35 * s*s + 5 * s*s*s) * s*s*s*s;
             return s >= 2 ? m_amplitude : s <= 0 ? 0. : value;
         }
 
         value_type damplitude_cubic(const value_type &s)
         {
-            value_type value = -m_amplitude * 0.03125 * 35 * std::pow(s, 3) * std::pow(s - 2, 3);;
+            value_type value = -m_amplitude * 0.03125 * 35 * s*s*s * (s - 2)*(s - 2)*(s - 2);
             return (s >= 2 || s <= 0) ? 0. : value;
         }
 
@@ -281,9 +242,6 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             normal[0] = Dx[1];
             normal[1] = -Dx[0];
         }
-
-
-
 };
 
 template<typename _value_type>

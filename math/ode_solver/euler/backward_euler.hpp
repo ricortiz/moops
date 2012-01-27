@@ -48,7 +48,7 @@ class BackwardEuler
 
     protected:
         forward_euler_solver_type forward_euler;
-//         newton_solver_type newton_solver;
+        newton_solver_type newton_solver;
 
     private:
         std::vector<value_type> m_rhs;
@@ -58,16 +58,16 @@ class BackwardEuler
         size_t ode_size;
 
     public:
-        BackwardEuler(size_t _ode_size) : forward_euler(_ode_size), ode_size(_ode_size)  {}
+        BackwardEuler(size_t _ode_size) : forward_euler(_ode_size), ode_size(_ode_size), newton_solver(_ode_size)  {}
         
         template<typename function_type>
         inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
         {
             m_rhs.resize(ode_size, 0.0);
-            forward_euler(F, t, &m_rhs[0], v, dt);
+            forward_euler(&m_rhs[0], x, v, dt);
             BackwardEulerFunction<value_type, function_type> G(F, m_rhs, t, dt, ode_size);
-            newton_solver_type newton_solver(ode_size);
-            newton_solver(G, x, 1e-14, 1e-3);
+//             newton_solver_type newton_solver(ode_size);
+            newton_solver(G, x, 1e-15, 1e-15);
             value_type inv_dt = 1.0 / dt;
             for (size_t i = 0; i < ode_size; ++i)
                 v[i] = inv_dt * (x[i] - m_rhs[i])-newton_solver.f()[i];
@@ -79,8 +79,8 @@ class BackwardEuler
             m_rhs.resize(ode_size, 0.0);
             forward_euler(&m_rhs[0],xold,vold, dt);
             BackwardEulerFunction<value_type, function_type> G(F, m_rhs, t, dt, ode_size);
-            newton_solver_type newton_solver(ode_size);
-            newton_solver(G, x, 1e-14, 1e-3);
+//             newton_solver_type newton_solver(ode_size);
+            newton_solver(G, x, 1e-15, 1e-15);
             value_type inv_dt = 1.0 / dt;
             for (size_t i = 0; i < ode_size; ++i)
                 v[i] = inv_dt * (x[i] - m_rhs[i])-newton_solver.f()[i];

@@ -13,10 +13,10 @@ class CpuStokesSolver
 
     private:
 
-        value_type m_delta;
-        map_type m_map_explicit;
-        map_type m_map_implicit;
-        size_t m_num_particles;
+        value_type      m_delta;
+        map_type        m_map_explicit;
+        map_type        m_map_implicit;
+        size_t          m_num_particles;
 
     public:
         CpuStokesSolver(size_t num_particles) : m_num_particles(num_particles) {}
@@ -30,6 +30,7 @@ class CpuStokesSolver
         {
             size_t size_targets = 3 * num_targets;
             size_t size_sources = 3 * num_sources;
+            std::fill(v,v+size_targets,0.0);
             #pragma omp parallel for shared(y,f)
             for ( size_t i = 0; i < size_targets; i += 3 )
                 for ( size_t j = 0; j < size_sources; j += 3 )
@@ -49,6 +50,7 @@ class CpuStokesSolver
         inline void Implicit ( value_type t, const value_type *x, value_type *v, const value_type *y, const value_type *f )
         {
             typedef std::vector<size_t>::iterator iterator;
+            std::fill(v,v+m_num_particles*3,0.0);
             #pragma omp parallel for shared(y,f)
             for ( size_t i = 0; i < m_num_particles; ++i )
                 for(iterator j = m_map_implicit[i].begin(), end = m_map_implicit[i].end(); j != end; ++j)
@@ -61,6 +63,7 @@ class CpuStokesSolver
         inline void Explicit ( value_type t, const value_type *x, value_type *v, const value_type *y, const value_type *f )
         {
             typedef std::vector<size_t>::iterator iterator;
+            std::fill(v,v+m_num_particles*3,0.0);
             #pragma omp parallel for shared(y,f)
             for ( size_t i = 0; i < m_num_particles; ++i)
                 for(iterator j = m_map_explicit[i].begin(), end = m_map_explicit[i].end(); j != end; ++j)
