@@ -102,7 +102,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         void init(particle_type *particles)
         {
             value_type dtheta = 2 * M_PI / m_dims[2];
-            value_type dalpha = m_length / 4.0 / m_dims[3];
+            value_type dalpha = 1.0 / m_dims[3];
             size_t idx = 1;
             particles[0].position[0] = particles[0].position[1] = particles[0].position[2] = 0;
             particles[0].i = 0;

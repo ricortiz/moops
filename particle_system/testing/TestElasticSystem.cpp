@@ -21,6 +21,7 @@ struct surface_traits;
 
 int main()
 {
+  
     typedef CpuStokesSolver<double> fluid_solver;
     typedef ForwardEuler fetime_integrator;
     typedef BackwardEuler<double> betime_integrator;
@@ -29,11 +30,11 @@ int main()
     typedef HeartPump<double,fluid_solver,esdc_integrator> heart_pump;
     typedef Swarm<double,fluid_solver,esdc_integrator> swarm_type;
 
-    swarm_type swarm(6,100,12,21,1);
+    swarm_type swarm(6,100,12,21,2);
     std::ofstream output("data.m");
-    swarm.print_positions(output);
-    swarm.print_springs(output);
-    swarm.print_tail_springs(output);
+    swarm.print_positions(std::cout);
+    swarm.print_springs(std::cout);
+    swarm.print_tail_springs(std::cout);
 
     
 //     heart_pump pump(20,200);

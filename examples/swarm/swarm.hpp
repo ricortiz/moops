@@ -81,17 +81,28 @@ public:
         while (s != s_end)
         {
             for (; s != s_end; ++s)
-                if (s->A()->i == head_offset)
+	    {
+		std::cout << s->getAidx()/3 << std::endl;
+                if (s->getAidx()/3 == head_offset)
                     break;
+	    }
             f = s;
+	    size_t offset = head_offset+tail_offset;
             for (; f != s_end; ++f)
-                if (f->A()->i == head_offset+tail_offset)
+	    {
+		std::cout << f->getAidx()/3 << std::endl;
+                if (f->getAidx()/3 == offset || f->getBidx()/3 == offset)
                 {
-                    do ++f;
-                    while (f->A()->i == head_offset+tail_offset);
+                    while (f->getAidx()/3 <= offset || f->getBidx()/3 <= offset) 
+		    {
+		      std::cout << f->getBidx()/3 << std::endl;
+		      ++f;
+		    }
                     break;
                 }
+	    }
             m_tail_iterator_pairs.push_back(std::make_pair(s, f));
+	    head_offset += offset;
             s = f;
         }
 
