@@ -2,6 +2,7 @@
 #include<list>
 #include<vector>
 #include<map>
+#include<fstream>
 #include "utils/logger.hpp"
 
 // Logger logger;
@@ -28,7 +29,13 @@ int main()
     typedef HeartPump<double,fluid_solver,esdc_integrator> heart_pump;
     typedef Swarm<double,fluid_solver,esdc_integrator> swarm_type;
 
-    swarm_type swarm(6,100,12,21);
+    swarm_type swarm(6,100,12,21,1);
+    std::ofstream output("data.m");
+    swarm.print_positions(output);
+    swarm.print_springs(output);
+    swarm.print_tail_springs(output);
+
+    
 //     heart_pump pump(20,200);
 //     pump.fluid_solver().setDelta(.01);
 //     pump.fluid_solver().initMaps(pump.elasticBoundary());

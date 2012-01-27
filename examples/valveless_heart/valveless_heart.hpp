@@ -82,6 +82,26 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             m_spring_range = std::make_pair(s, f);
         }
 
+        template<typename out_stream>
+        void print_springs(out_stream &out)
+        {
+            out << "springs = [";
+            spring_iterator s = this->springs_begin(), end = this->springs_end();
+            for(;s != end; ++s)
+                out << s->getAidx() << "," << s->getBidx() << ";";
+            out << "];";
+        }
+        template<typename out_stream>
+        void print_positions(out_stream &out)
+        {
+            particle_type *p = this->positions();
+            out << "p = [";
+            for(size_t i = 0; i < this->data_size(); ++i)
+                out << p[i] << " ";
+            out << "];";
+            
+        }
+
 };
 
 template<typename _value_type, typename _fluid_solver, typename _time_integrator>

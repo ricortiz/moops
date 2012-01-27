@@ -89,6 +89,8 @@ class ParticleSystemStorage<T,particle_type,SURFACE>
 
         inline const particle_type *particles() const { return m_data.particles; }
         inline particle_type *particles()             { return m_data.particles; }
+
+        size_t data_size() { return m_data_size; }
 };
 
 template<typename T, typename particle_type>
@@ -144,6 +146,8 @@ class ParticleSystemStorage<T,particle_type,VOLUME>
 
         inline const particle_type *particles() const { return m_data.particles; }
         inline particle_type *particles()             { return m_data.particles; }
+        
+        size_t data_size() { return m_data_size; }
 };
 
 #endif

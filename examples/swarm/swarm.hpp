@@ -34,7 +34,7 @@ public:
         m_geometry.setTailAmplitude(.25);            // initial amplitude of tail
         m_geometry.setTailPitch(4.1);                // pitch of tail
         std::vector<value_type> mesh2d;              // coords of each geometry
-        setGeometryGrid(mesh2d, num_sperms);         // create a grid where to put the geometries
+        setGeometryGrid(mesh2d, num_sperms, num_sperms);         // create a grid where to put the geometries
         std::vector<size_t> col_ptr, col_idx;        // sparse matrix (CSR-format) holding
         std::vector<value_type> strenght;            // interactions between particles
         size_t num_springs = this->particles_size()*9; // estimate total number of springs
@@ -44,7 +44,7 @@ public:
         col_ptr.push_back(0);
         m_geometry.init(&this->particles()[0]);
         m_geometry.getConnections(col_ptr, col_idx);
-        for (size_t i = 1, idx = 3; i < num_sperms; ++i, idx += 3)
+        for (int i = 1, idx = 0; i < num_sperms; ++i, idx += 3)
         {
             particle_type *p_init = &this->particles()[0];
             particle_type *p = &this->particles()[i*m_geometry.numParticles()];
@@ -63,6 +63,18 @@ public:
         setIteratorRanges(Mt*Nt, Mh*(Nh-1)+1);
     }
 
+    void setGeometryGrid(std::vector<value_type> &mesh2d, int x, int y)
+    {
+        value_type dtheta = 1., dalpha = 1.;
+        for (size_t i = 1; i < x; ++i)
+            for (size_t j = 1; j < y; ++j)
+            {
+                mesh2d.push_back(i * dtheta);
+                mesh2d.push_back(0.0);
+                mesh2d.push_back(j * dalpha);
+            }
+    }
+    
     void setIteratorRanges(int tail_offset, int head_offset)
     {
         spring_iterator s = this->springs_begin(), s_end = this->springs_end(), f;
@@ -139,19 +151,6 @@ public:
         updateForceGradient(spring_system);
     }
 
-
-    void setGeometryGrid(std::vector<value_type> &mesh2d, size_t num_geometries)
-    {
-        value_type dtheta = 1., dalpha = 1.;
-        for (size_t i = 0, end = std::sqrt(num_geometries); i < end; ++i)
-            for (size_t j = 0; j < end; ++j)
-            {
-                mesh2d.push_back(i * dtheta);
-                mesh2d.push_back(0.0);
-                mesh2d.push_back(j * dalpha);
-            }
-    }
-
     template<typename spring_system_type>
     void updateForceGradient(spring_system_type &spring_system)
     {
@@ -191,7 +190,39 @@ public:
     {
         return m_geometry;
     }
-
+    
+    template<typename out_stream>
+    void print_springs(out_stream &out)
+    {
+        out << "springs = [";
+        spring_iterator s = this->springs_begin(), end = this->springs_end();
+        for(;s != end; ++s)
+            out << s->getAidx()/3+1 << "," << s->getBidx()/3+1 << ";";
+        out << "];" << std::endl;
+    }
+    
+    template<typename out_stream>
+    void print_positions(out_stream &out)
+    {
+        value_type *p = this->positions();
+        out << "p = [";
+        for(size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx+=3)
+            out << p[idx] << "," << p[idx+1] << "," << p[idx+2] << ";";
+        out << "];" << std::endl;
+    }
+    template<typename out_stream>
+    void print_tail_springs(out_stream &out)
+    {
+        out << "tail_springs = [";
+        for(size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
+        {
+            spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second;
+            for(;s != end; ++s)
+                out << s->getAidx()/3+1 << "," << s->getBidx()/3+1 << ";";
+        }
+        out << "];" << std::endl;
+    }
+    
 };
 
 #include "particle_system/storage/particle_system_storage.hpp"

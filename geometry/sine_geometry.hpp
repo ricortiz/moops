@@ -168,8 +168,8 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             for(size_t j = 0; j < m_dims[1]; ++j)
                 for(size_t i = 0; i < m_dims[0]; ++i)
                 {
-                    this->add_plane_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset);
-                    this->add_cylinder_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset);
+                    this->add_plane_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset + offset);
+                    this->add_cylinder_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset + offset);
                     col_ptr.push_back(col_idx.size());
                 }
         }
