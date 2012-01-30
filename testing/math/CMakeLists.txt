@@ -1,5 +1,3 @@
-
-
 # set(fluid_solvers math/backward_euler forward_euler explicit_sdc semi_implicit_sdc)
 set(math_tests Ode Linear NonLinear)
 set(linear_solvers gmres)

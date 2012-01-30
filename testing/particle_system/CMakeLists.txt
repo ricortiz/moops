@@ -1,0 +1,15 @@
+
+set(particle_system elastic_system)
+
+set(FileList "")
+foreach(test ${particle_system})
+    set(FileList ${FileList} ${test}.cpp)
+endforeach(test)
+CREATE_TEST_SOURCELIST(ElasticSystemTests ElasticSystemTest.cpp ${FileList})
+ADD_EXECUTABLE(ElasticSystemTest ${ElasticSystemTests})
+SET(ElasticSystemTestsToRun ${ElasticSystemTests})
+LIST(REMOVE_ITEM ElasticSystemTestsToRun ElasticSystemTest.cpp)
+FOREACH(test ${ElasticSystemTestsToRun})
+    GET_FILENAME_COMPONENT(TName ${test} NAME_WE)
+    ADD_TEST(${TName} ${CXX_TEST_PATH}/ElasticSystemTest ${TName})
+ENDFOREACH (test) 
