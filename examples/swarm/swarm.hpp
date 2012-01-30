@@ -1,7 +1,7 @@
 #ifndef SWARM_HPP
 #define SWARM_HPP
 
-
+#include "particle_system/particle.hpp"
 #include "particle_system/surface.hpp"
 #include "geometry/sine_geometry.hpp"
 
@@ -138,7 +138,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 gradient[0] /= head_offset;
                 gradient[1] /= head_offset;
                 gradient[2] /= head_offset;
-                value_type norm = std::sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]);
+//                 value_type norm = std::sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]);
 
                 value_type scale = (1.0/std::sqrt(particles[0].position[0]*particles[0].position[0]*particles[0].position[1]*particles[0].position[1]*particles[0].position[2]*particles[0].position[2]));
 
