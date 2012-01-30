@@ -18,7 +18,7 @@ class SpringSystem
         typedef typename spring_container::iterator             spring_iterator;
         typedef typename std::list<spring_type *>               spring_ptr_container;
         typedef typename std::map < particle_type *,
-                                    spring_ptr_container >      spring_lut_type;
+                spring_ptr_container >      spring_lut_type;
 
     private:
         spring_container        m_springs;      ///< Internal data structure used to store all spring constraints.
@@ -29,7 +29,7 @@ class SpringSystem
         {
             return *static_cast<Derived*>(this);
         }
-        
+
         spring_iterator springs_begin()                 { return m_springs.begin(); }
         spring_iterator springs_end()                   { return m_springs.end(); }
 

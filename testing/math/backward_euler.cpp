@@ -8,7 +8,7 @@
 #include "math/ode_solver/euler/backward_euler.hpp"
 #include "rhs_functions.hpp"
 
-int backward_euler(int ac, char **av)
+int backward_euler(int , char **)
 {
     typedef double value_type;
     {
@@ -20,7 +20,7 @@ int backward_euler(int ac, char **av)
 
         value_type x[size] = {1}, rhs[size] = {0};
         value_type time = 0, dt = .01;
-        for(size_t i = 0; i < size - 1; ++i)
+        for(int i = 0; i < size - 1; ++i)
         {
             x[i + 1] = x[i];
             backward_euler(F,time, &x[i + 1], &x[i], &rhs[i+1], dt);
@@ -39,7 +39,7 @@ int backward_euler(int ac, char **av)
 
         value_type x[size][3] = {{1, 0, 0}}, rhs[size][3] = {{0}};
         value_type time = 0, dt = .01;
-        for(size_t i = 0; i < size - 1; ++i)
+        for(int i = 0; i < size - 1; ++i)
         {
             backward_euler(F, time, x[i + 1], x[i], rhs[i+1], dt);
             time += dt;
@@ -50,9 +50,9 @@ int backward_euler(int ac, char **av)
         std::cout << "] \n";
     }
     {
-        const size_t size = 100;
-        const size_t spatial_size = 40;
-        const size_t ode_size = 2 * spatial_size;
+        const int size = 100;
+        const int spatial_size = 40;
+        const int ode_size = 2 * spatial_size;
 
         diffusion_type<value_type, ode_size> F;
 
@@ -60,7 +60,7 @@ int backward_euler(int ac, char **av)
 
         value_type **x = new value_type*[size];
         value_type **f = new value_type*[size];
-        for(size_t i = 0; i < size; ++i)
+        for(int i = 0; i < size; ++i)
         {
             x[i] = new value_type[ode_size];
             f[i] = new value_type[ode_size];
@@ -68,7 +68,7 @@ int backward_euler(int ac, char **av)
         value_type time = 0, dt = .01;
         F.init(0, 1, x[0]);
         F(time, x[0], f[0]);
-        for(size_t i = 0; i < size - 1; ++i)
+        for(int i = 0; i < size - 1; ++i)
         {
             euler(F, time, x[i + 1], x[i], f[i + 1], dt);
             time += dt;
@@ -88,7 +88,7 @@ int backward_euler(int ac, char **av)
         output << "[X Y] = meshgrid(linspace(0,1," << spatial_size << "),linspace(0," << size*dt << "," << size << "));\n";
         output << "mesh(X,Y,u)\n";
         output << "axis equal\n";
-        for(size_t i = 0; i < size; ++i)
+        for(int i = 0; i < size; ++i)
         {
             delete [] x[i];
             delete [] f[i];
@@ -96,4 +96,5 @@ int backward_euler(int ac, char **av)
         delete [] x;
         delete [] f;
     }
+    return 0;
 }

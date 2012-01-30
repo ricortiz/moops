@@ -66,10 +66,9 @@ IF(BUILD_TESTING)
 ENDIF(BUILD_TESTING)
 
 
-
-
-# ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/)
-
-# 
+option(ENABLE_EXAMPLES "Enable examples" ON)
+if(ENABLE_EXAMPLES)
+        add_subdirectory(examples)
+endif(ENABLE_EXAMPLES)
 
 # 

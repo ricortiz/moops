@@ -10,7 +10,7 @@
 #include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
 #include "rhs_functions.hpp"
 
-int semi_implicit_sdc(int ac, char **av)
+int semi_implicit_sdc(int , char **)
 {
     typedef double value_type;
 
@@ -29,11 +29,8 @@ int semi_implicit_sdc(int ac, char **av)
 
         const int size = 10;
         value_type x[size] = {1};
-        value_type error[size] = {0};
         value_type time = 0, dt = .01;
         value_type f = 0;
-        value_type x0 = x[0];
-        int err = 0;
         for (size_t i = 0; i < size - 1; ++i)
         {
             x[i+1] = x[i];
@@ -59,7 +56,6 @@ int semi_implicit_sdc(int ac, char **av)
         value_type x[size][3] = {{1, 0, 0}};
         value_type time = 0, dt = .01;
         value_type f[3];
-        value_type x0[3] = {1, 0, 0};
         for (size_t i = 0; i < size - 1; ++i)
         {
             std::copy(x[i], x[i] + F.ode_size(), x[i+1]);
@@ -128,4 +124,5 @@ int semi_implicit_sdc(int ac, char **av)
         delete [] x;
         delete [] f;
     }
+    return 0;
 }

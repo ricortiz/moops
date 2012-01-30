@@ -62,6 +62,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             }
             getStrengths(col_ptr, col_idx, strenght);
             base_type::setSprings(col_ptr, col_idx, strenght);
+            
             setIteratorRanges(Mt * Nt, Mh * (Nh - 1) + 1);
         }
 
@@ -72,10 +73,11 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 for (spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second; s != end; ++s)
                     m_geometry.resetRestingLength(s, time);
             }
+            print_spring_lengths(std::cout);
             this->clear_forces();
-            std::copy(this->forces(),this->forces()+this->data_size(),std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
             base_type::computeForces();
-            updateForceGradient();
+//             std::copy(this->forces(),this->forces()+this->data_size(),std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+//             updateForceGradient();
         }
 
     private:
@@ -188,6 +190,19 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second;
                 for(; s != end; ++s)
                     out << s->getAidx() / 3 + 1 << "," << s->getBidx() / 3 + 1 << ";";
+            }
+            out << "];" << std::endl;
+        }
+
+        template<typename out_stream>
+        void print_spring_lengths(out_stream &out)
+        {
+            out << "spring_lenghts = [";
+            for(size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
+            {
+                spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second;
+                for(; s != end; ++s)
+                    out << s->resting_length() << ";";
             }
             out << "];" << std::endl;
         }

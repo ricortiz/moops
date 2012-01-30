@@ -27,6 +27,20 @@ class ForwardEuler
             for(size_t i = 0; i < ode_size; ++i)
                 x[i] = xold[i] + dt * v[i];
         }
+
+        template<typename function_type, typename value_type>
+        inline void operator()(function_type &, value_type, value_type *x, value_type *xold, value_type *v, value_type *vold, value_type dt)
+        {
+            for(size_t i = 0; i < ode_size; ++i)
+                x[i] = xold[i] + dt * vold[i];
+        }
+
+        template<typename function_type, typename value_type>
+        inline void operator()(function_type &, value_type, value_type *x, const value_type *v, value_type dt)
+        {
+            for(size_t i = 0; i < ode_size; ++i)
+                x[i] += dt * v[i];
+        }
         
         template<typename value_type>
         inline void operator()(value_type *x, const value_type *v, value_type dt)

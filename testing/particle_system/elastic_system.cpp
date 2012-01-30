@@ -34,5 +34,6 @@ int elastic_system(int ac, char **av)
     swarm.print_positions(std::cout);
     swarm.print_springs(std::cout);
     swarm.print_tail_springs(std::cout);
+    return 0;
 }
 

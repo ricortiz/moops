@@ -8,7 +8,7 @@
 #include "math/ode_solver/euler/forward_euler.hpp"
 #include "rhs_functions.hpp"
 
-int forward_euler(int ac, char **av)
+int forward_euler(int , char **)
 {
     typedef double value_type;
     {
@@ -51,4 +51,5 @@ int forward_euler(int ac, char **av)
             std::copy(x[i], x[i] + 3, std::ostream_iterator<value_type>(std::cout, " "));
         std::cout << "] \n";
     }
+    return 0;
 }

@@ -46,12 +46,12 @@ struct TypeBinder
     typedef CpuStokesSolver<value_type>                         fluid_solver;
 #endif
 
-    typedef ForwardEuler                                        forwaqrd_euler;
+    typedef ForwardEuler                                        forward_euler;
     typedef BackwardEuler<value_type>                           backward_euler;
     typedef ExplicitSDC<value_type>                             explicit_sdc;
     typedef SemiImplicitSDC<value_type>                         implicit_sdc;
 
-    typedef explicit_sdc                                        time_integrator;
+    typedef forward_euler                                        time_integrator;
     
     typedef HeartPump<value_type,fluid_solver,time_integrator>  heart_pump_surface;
     typedef Swarm<value_type,fluid_solver,time_integrator>      swarm_surface;

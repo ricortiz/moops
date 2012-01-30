@@ -37,7 +37,7 @@ void display_stats(stats_type &stats)
     }
 }
 
-int newton(int ac, char **av)
+int newton(int , char **)
 {
     typedef double value_type;
     typedef std::string key_type;

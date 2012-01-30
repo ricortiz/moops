@@ -53,11 +53,10 @@ class BackwardEuler
     private:
         value_type m_t;
         value_type m_dt;
-
         size_t ode_size;
 
     public:
-        BackwardEuler(size_t _ode_size) : forward_euler(_ode_size), ode_size(_ode_size), newton_solver(_ode_size)  {}
+        BackwardEuler(size_t _ode_size) : forward_euler(_ode_size), newton_solver(_ode_size), ode_size(_ode_size)  {}
         
         template<typename function_type>
         inline void operator()(function_type F, value_type t, value_type *x, value_type *v, value_type dt)

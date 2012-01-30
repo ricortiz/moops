@@ -10,7 +10,7 @@
 #include "math/ode_solver/sdc/explicit_sdc.hpp"
 #include "rhs_functions.hpp"
 
-int explicit_sdc(int ac, char **av)
+int explicit_sdc(int , char **)
 {
     typedef double value_type;
     {
@@ -120,5 +120,6 @@ int explicit_sdc(int ac, char **av)
         delete [] x;
         delete [] f;
     }
+    return 0;
 }
 

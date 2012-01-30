@@ -38,14 +38,14 @@ class SwarmApp
 
         SwarmApp(std::string &data_path) :
             m_swarm(Mt,Nt,Mh,Nh,num_sperms),
-            m_time_step(0.0001),
+            m_time_step(0.01),
             m_vtk_storage(m_swarm),
             m_surface_writer(data_path + "/surface/",m_vtk_storage,true),
             m_record(true)
             
         {
             m_swarm.fluid_solver().setDelta(.02);
-            m_swarm.geometry().setWaveSpeed(.0001);
+            m_swarm.geometry().setWaveSpeed(0);
             for(int i = 0; i < num_sperms; ++i)
                 setCells(i*total_particles);
         }
@@ -59,7 +59,7 @@ class SwarmApp
 
         void fake_run()
         {
-            m_swarm.geometry().setWaveSpeed(100);
+            m_swarm.geometry().setWaveSpeed(20);
             if(m_record)
                 m_surface_writer.write(m_swarm.time());
             types::particle_type *particles = m_swarm.particles();

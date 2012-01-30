@@ -48,7 +48,7 @@ template<>
 struct function_type<3>
 {
     template<typename value_type>
-    void operator()(value_type t, const value_type *x, value_type *v)
+    void operator()(value_type , const value_type *x, value_type *v)
     {
         v[0] = -.04 * x[0] + 1e4 * x[1] * x[2];
         v[1] = .04 * x[0] - 1e4 * x[1] * x[2] - 3 * 1e7 * x[1] * x[1];
@@ -56,7 +56,7 @@ struct function_type<3>
     }
 
     template<typename value_type>
-    void Explicit(value_type t, const value_type *x, value_type *v)
+    void Explicit(value_type, const value_type *x, value_type *v)
     {
         v[0] = -.04 * x[0];
         v[1] = .04 * x[0];
@@ -64,7 +64,7 @@ struct function_type<3>
     }
 
     template<typename value_type>
-    void Implicit(value_type t, const value_type *x, value_type *v)
+    void Implicit(value_type, const value_type *x, value_type *v)
     {
         v[0] = 1e4 * x[1] * x[2];
         v[1] = - 1e4 * x[1] * x[2] - 3 * 1e7 * x[1] * x[1];
@@ -91,7 +91,7 @@ struct diffusion_type
     static const value_type B;
     static const value_type A;
 
-    void operator()(value_type t, const value_type *y, value_type *v)
+    void operator()(value_type, const value_type *y, value_type *v)
     {
         size_t i = 0, j = 1;
         v[i] = A        + y[i] * y[i] * y[j] - (B + 1) * y[i] + alpha * 1.0 / (dx * dx) * (1.0 - 2 * y[i] + y[i + 2]);
@@ -126,7 +126,7 @@ struct diffusion_type
             v0[i] = 3.0;
     }
 
-    void Explicit(value_type t, const value_type *y, value_type *v)
+    void Explicit(value_type , const value_type *y, value_type *v)
     {
         for(size_t i = 0, j = 1; j < size; i += 2, j += 2)
         {
@@ -135,7 +135,7 @@ struct diffusion_type
         }
     }
 
-    void Implicit(value_type t, const value_type *y, value_type *v)
+    void Implicit(value_type , const value_type *y, value_type *v)
     {
         size_t i = 0, j = 1;
         v[i] = alpha * 1.0 / (dx * dx) * (1.0 - 2 * y[i] + y[i + 2]);
