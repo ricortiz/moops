@@ -20,12 +20,12 @@ template<typename value_type, typename function_type>
 struct BackwardEulerFunction
 {
     function_type &F;
-    std::vector<value_type> &rhs;
+    value_type *rhs;
     value_type t;
     value_type dt;
     size_t ode_size;
 
-    BackwardEulerFunction(function_type &_F, std::vector<value_type> &_rhs, value_type _t, value_type _dt, size_t _ode_size ) : F(_F), rhs(_rhs), t(_t), dt(_dt), ode_size(_ode_size) {}
+    BackwardEulerFunction(function_type &_F, value_type *_rhs, value_type _t, value_type _dt, size_t _ode_size ) : F(_F), rhs(_rhs), t(_t), dt(_dt), ode_size(_ode_size) {}
 
     inline void operator()(value_type *x, value_type *Fx)
     {
@@ -51,7 +51,6 @@ class BackwardEuler
         newton_solver_type newton_solver;
 
     private:
-        std::vector<value_type> m_rhs;
         value_type m_t;
         value_type m_dt;
 
@@ -61,29 +60,19 @@ class BackwardEuler
         BackwardEuler(size_t _ode_size) : forward_euler(_ode_size), ode_size(_ode_size), newton_solver(_ode_size)  {}
         
         template<typename function_type>
-        inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
+        inline void operator()(function_type F, value_type t, value_type *x, value_type *v, value_type dt)
         {
-            m_rhs.resize(ode_size, 0.0);
-            forward_euler(&m_rhs[0], x, v, dt);
-            BackwardEulerFunction<value_type, function_type> G(F, m_rhs, t, dt, ode_size);
-//             newton_solver_type newton_solver(ode_size);
-            newton_solver(G, x, 1e-15, 1e-15);
-            value_type inv_dt = 1.0 / dt;
-            for (size_t i = 0; i < ode_size; ++i)
-                v[i] = inv_dt * (x[i] - m_rhs[i])-newton_solver.f()[i];
+	  operator()(F,t,x,x,v,v,dt);
         }
 
         template<typename function_type>
-        inline void operator()(function_type &F, value_type t, value_type *x, value_type *xold, value_type *v, value_type *vold, value_type dt)
+        inline void operator()(function_type F, value_type t, value_type *x, value_type *xold, value_type *v, value_type dt)
         {
-            m_rhs.resize(ode_size, 0.0);
-            forward_euler(&m_rhs[0],xold,vold, dt);
-            BackwardEulerFunction<value_type, function_type> G(F, m_rhs, t, dt, ode_size);
-//             newton_solver_type newton_solver(ode_size);
+            BackwardEulerFunction<value_type, function_type> G(F, xold, t, dt, ode_size);
             newton_solver(G, x, 1e-15, 1e-15);
             value_type inv_dt = 1.0 / dt;
             for (size_t i = 0; i < ode_size; ++i)
-                v[i] = inv_dt * (x[i] - m_rhs[i])-newton_solver.f()[i];
+                v[i] = inv_dt * (x[i] - xold[i])-newton_solver.f()[i];
         }
 
 };
