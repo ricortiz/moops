@@ -11,7 +11,6 @@ class SwarmApp
 {
         enum
         {
-            sdc_nodes = 5,
             num_sperms = 1,
             Mt = 6,
             Nt = 100,
@@ -45,7 +44,7 @@ class SwarmApp
             
         {
             m_swarm.fluid_solver().setDelta(.02);
-            m_swarm.geometry().setWaveSpeed(0);
+            m_swarm.geometry().setWaveSpeed(0.1);
             for(int i = 0; i < num_sperms; ++i)
                 setCells(i*total_particles);
         }

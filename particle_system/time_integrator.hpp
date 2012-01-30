@@ -22,7 +22,7 @@ template<typename Derived>
 class TimeIntegrator
 {
     protected:
-        typedef typename surface_traits<Derived>::time_integrator_type time_integrator_type;
+        typedef typename Traits<Derived>::time_integrator_type time_integrator_type;
 
     private:
         time_integrator_type time_integrator;

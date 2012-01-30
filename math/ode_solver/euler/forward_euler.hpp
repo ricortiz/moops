@@ -36,10 +36,11 @@ class ForwardEuler
         }
 
         template<typename function_type, typename value_type>
-        inline void operator()(function_type &, value_type, value_type *x, const value_type *v, value_type dt)
+        inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
         {
             for(size_t i = 0; i < ode_size; ++i)
                 x[i] += dt * v[i];
+            F(t+dt,x,v);
         }
         
         template<typename value_type>

@@ -20,7 +20,7 @@
 Logger logger;
 
 template<typename T>
-struct surface_traits;
+struct Traits;
 
 #include "math/fluid_solver/stokes/cpu_stokes_solver.hpp"
 #include "math/ode_solver/euler/forward_euler.hpp"
@@ -48,10 +48,18 @@ struct TypeBinder
 
     typedef ForwardEuler                                        forward_euler;
     typedef BackwardEuler<value_type>                           backward_euler;
-    typedef ExplicitSDC<value_type>                             explicit_sdc;
-    typedef SemiImplicitSDC<value_type>                         implicit_sdc;
 
-    typedef forward_euler                                        time_integrator;
+    enum
+    {
+        sdc_nodes = 3,
+        sdc_corrections = 3
+    };
+    typedef Integrator<value_type, gauss_lobatto, sdc_nodes> spectral_integrator;
+    
+    typedef ExplicitSDC<value_type,spectral_integrator,sdc_corrections>                             explicit_sdc;
+    typedef SemiImplicitSDC<value_type,spectral_integrator,sdc_corrections>                         implicit_sdc;
+
+    typedef implicit_sdc                                        time_integrator;
     
     typedef HeartPump<value_type,fluid_solver,time_integrator>  heart_pump_surface;
     typedef Swarm<value_type,fluid_solver,time_integrator>      swarm_surface;

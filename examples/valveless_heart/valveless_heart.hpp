@@ -105,7 +105,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
 };
 
 template<typename _value_type, typename _fluid_solver, typename _time_integrator>
-struct surface_traits<HeartPump<_value_type, _fluid_solver, _time_integrator> >
+struct Traits<HeartPump<_value_type, _fluid_solver, _time_integrator> >
 {
     typedef _value_type value_type;
     typedef _fluid_solver fluid_solver_type;

@@ -79,9 +79,6 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, spectral_inte
         inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
         {
             m_storage.setX0(x);
-            F.Explicit(t, x, Fe(0));
-            F.Implicit(t, x, Fi(0));
-
             predictor(F, t, dt);
             corrector(F, t, dt);
 
@@ -106,10 +103,11 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, spectral_inte
         inline void predictor_step(function_type &F, const int k, value_type &t, const value_type &dt)
         {
             assert(k < spectral_integrator_type::sdc_nodes);
+            implicit_function<function_type> G(F);
             t += dt;
             std::vector<value_type> buffer(m_storage.ode_size);
             m_forward_euler(&buffer[0], X(k), Fe(k), dt);
-            m_backward_euler(implicit_function<function_type>(F), t, X(k + 1), &buffer[0], Fi(k + 1), dt);
+            m_backward_euler(G, t, X(k + 1), &buffer[0], Fi(k + 1), dt);
             F.Explicit(t, X(k + 1), Fe(k + 1));
         }
 
@@ -130,12 +128,13 @@ class SemiImplicitSDC : public SDCBase<SemiImplicitSDC<value_type, spectral_inte
         inline void corrector_predictor_step(function_type &F, const int k, value_type *fdiff, value_type &t, const value_type &dt)
         {
             assert(k < spectral_integrator_type::sdc_nodes);
+            implicit_function<function_type> G(F);
             std::vector<value_type> buffer(m_storage.ode_size);
 	    
             t += dt;
             std::transform(fdiff, fdiff + m_storage.ode_size, Fi(k + 1), fdiff, std::minus<value_type>());
             m_forward_euler(&buffer[0], X(k), fdiff, dt);
-            m_backward_euler(implicit_function<function_type>(F), t, X(k + 1), &buffer[0], Fi(k + 1), dt);
+            m_backward_euler(G, t, X(k + 1), &buffer[0], Fi(k + 1), dt);
 	    
             std::copy(Fe(k + 1), Fe(k + 1) + m_storage.ode_size, buffer.begin());
             F.Explicit(t, X(k + 1), Fe(k + 1));

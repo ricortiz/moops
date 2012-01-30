@@ -5,7 +5,7 @@ template<typename Derived>
 class FluidSolver
 {
     protected:
-        typedef typename surface_traits<Derived>::fluid_solver_type fluid_solver_type;
+        typedef typename Traits<Derived>::fluid_solver_type fluid_solver_type;
 
     private:
         fluid_solver_type m_fluid_solver;

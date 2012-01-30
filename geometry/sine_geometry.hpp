@@ -127,7 +127,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                 {
                     surfacePoint(i, j, 0.0, particles[idx], dtheta, dalpha);
                     particles[idx].position[1] += tail_translation_factor;
-                    particles[idx].i = i+m_dims[3];
+                    particles[idx].i = i;
                     particles[idx].j = j;
                 }
         }

@@ -59,19 +59,21 @@ class BackwardEuler
         BackwardEuler(size_t _ode_size) : forward_euler(_ode_size), newton_solver(_ode_size), ode_size(_ode_size)  {}
         
         template<typename function_type>
-        inline void operator()(function_type F, value_type t, value_type *x, value_type *v, value_type dt)
+        inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
         {
-	  operator()(F,t,x,x,v,v,dt);
+            std::vector<value_type> xold(ode_size);
+            std::copy(x,x+ode_size,xold.begin());
+            operator()(F,t,x,&xold[0],v,dt);
         }
 
         template<typename function_type>
-        inline void operator()(function_type F, value_type t, value_type *x, value_type *xold, value_type *v, value_type dt)
+        inline void operator()(function_type &F, value_type t, value_type *x, value_type *xold, value_type *v, value_type dt)
         {
             BackwardEulerFunction<value_type, function_type> G(F, xold, t, dt, ode_size);
             newton_solver(G, x, 1e-15, 1e-15);
             value_type inv_dt = 1.0 / dt;
             for (size_t i = 0; i < ode_size; ++i)
-                v[i] = inv_dt * (x[i] - xold[i])-newton_solver.f()[i];
+                v[i] = inv_dt * (x[i] - xold[i]);
         }
 
 };

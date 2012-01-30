@@ -23,8 +23,8 @@ class ElasticBoundary : public SpringSystem<Derived>
 {
     public:
         typedef SpringSystem<Derived>    	       		base_type;
-        typedef typename surface_traits<Derived>::value_type    value_type;
-        typedef typename surface_traits<Derived>::particle_type particle_type;
+        typedef typename Traits<Derived>::value_type            value_type;
+        typedef typename Traits<Derived>::particle_type         particle_type;
         typedef typename base_type::spring_type       		spring_type;
         typedef typename base_type::spring_iterator   		spring_iterator;
         typedef typename base_type::spring_lut_type             spring_map_type;

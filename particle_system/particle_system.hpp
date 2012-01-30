@@ -23,9 +23,9 @@ template<typename Derived>
 class ParticleSystem
 {
     public:
-        typedef typename surface_traits<Derived>::value_type value_type;
-        typedef typename surface_traits<Derived>::particle_type particle_type;
-        typedef typename surface_traits<Derived>::storage_type storage_type;
+        typedef typename Traits<Derived>::value_type value_type;
+        typedef typename Traits<Derived>::particle_type particle_type;
+        typedef typename Traits<Derived>::storage_type storage_type;
 	
 
     private:

@@ -26,7 +26,7 @@ class CpuStokesSolver
             operator() ( t, x, v, x, f, m_num_particles, m_num_particles );
         }
 
-        inline void operator() ( value_type t, const value_type *x, value_type *v, const value_type *y, const value_type *f, size_t num_sources, size_t num_targets )
+        inline void operator() ( value_type, const value_type *x, value_type *v, const value_type *y, const value_type *f, size_t num_sources, size_t num_targets )
         {
             size_t size_targets = 3 * num_targets;
             size_t size_sources = 3 * num_sources;
@@ -47,7 +47,7 @@ class CpuStokesSolver
             Explicit  ( t, x, v, x, f );
         }
 
-        inline void Implicit ( value_type t, const value_type *x, value_type *v, const value_type *y, const value_type *f )
+        inline void Implicit ( value_type, const value_type *x, value_type *v, const value_type *y, const value_type *f )
         {
             typedef std::vector<size_t>::iterator iterator;
             std::fill(v,v+m_num_particles*3,0.0);
@@ -60,7 +60,7 @@ class CpuStokesSolver
                 }
         }
 
-        inline void Explicit ( value_type t, const value_type *x, value_type *v, const value_type *y, const value_type *f )
+        inline void Explicit ( value_type, const value_type *x, value_type *v, const value_type *y, const value_type *f )
         {
             typedef std::vector<size_t>::iterator iterator;
             std::fill(v,v+m_num_particles*3,0.0);
