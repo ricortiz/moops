@@ -21,7 +21,7 @@
 #include "particle_system/particle.hpp"
 
 template<typename value_type, size_t max_particles, size_t precision>
-class FMMStokesSolver
+class FmmStokesSolver
 {
     protected:
         typedef Particle<value_type> particle_type;
@@ -30,13 +30,15 @@ class FMMStokesSolver
         
     private:
         value_type m_delta;
-
+        size_t m_num_particles;
+        
     public:
-        void operator()(value_type *x, value_type *v, value_type *f)
+        FmmStokesSolver(size_t num_particles) : m_num_particles(num_particles) {}
+        
+        inline void operator()(value_type, value_type *x, value_type *v, value_type *, value_type *f)
         {
-            tree_type tree(x,v,f,num_particles);
+            tree_type tree(x,v,f,m_num_particles);
             tree.init();
-//             std::cout << tree << std::endl;
             fmm_type fmm(tree.boxes().size());
             for (int i = 0; i < 4; ++i)
             {
@@ -45,12 +47,9 @@ class FMMStokesSolver
             }
 
             fmm.compute_velocity(tree.root(), m_delta);
-//             std::cout << "v = [";
-//             std::copy(v,v+3*num_particles,std::ostream_iterator<value_type>(std::cout," "));
-//             std::cout << "];" <<  std::endl;
         }
         
-        value_type const &setDelta(value_type delta) const { return m_delta = delta; }
+        void setDelta(value_type delta) { m_delta = delta; }
 };
 
 

@@ -120,7 +120,7 @@ class MultipoleTaylor
                             for (int b = 0; b <= (j / 2); ++b)
                                 for (int g = 0; g <= (k / 2); ++g)
                                     sum += m_storage.ijk_binomial(m_storage.tetra_three(i - a) - m_storage.tetra_two(i - a + j - b) + k - g) * m_storage.binomial(i - a, a) * m_storage.binomial(j - b, b) * m_storage.binomial(k - g, g) * powers[0][i-2*a] * powers[1][j-2*b] * powers[2][k-2*g];
-                        coeff[idx] = sum*(i + j + k & 1 ? -1 : 1) * r0[i+j+k] / m_storage.ijk_factorial(idx);
+                        coeff[idx] = sum*((i + j + k) & 1 ? -1 : 1) * r0[i+j+k] / m_storage.ijk_factorial(idx);
                     }
         }
 
@@ -367,7 +367,7 @@ class MultipoleTaylor
                         dpowers[i][j] = j*std::pow(dx[i],j-1);
                     }
                 }
-                value_type expansion[3][5] = {0};
+                value_type expansion[3][5] = {{0}};
                 for (int i = 0, idx = 0; i <= m_precision; ++i)
                     for (int j = 0; j <= m_precision - i; ++j)
                         for (int k = 0; k <= m_precision - i - j; ++k, ++idx)

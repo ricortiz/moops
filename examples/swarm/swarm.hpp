@@ -37,7 +37,8 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             std::vector<value_type> mesh2d;              // coords of each geometry
             size_t x = std::sqrt(num_sperms) , y = x;
             setGeometryGrid(mesh2d, x, y);         // create a grid to put the geometries on
-            std::vector<size_t> col_ptr, col_idx;        // sparse matrix (CSR-format) holding
+            std::vector<size_t> &col_ptr = this->fluid_solver().col_ptr;// sparse matrix (CSR-format) holding
+            std::vector<size_t> &col_idx = this->fluid_solver().col_idx;// sparse matrix (CSR-format) holding
             std::vector<value_type> strenght;            // interactions between particles
             size_t num_springs = this->particles_size() * 9; // estimate total number of springs
             col_ptr.reserve(this->particles_size() + 1); // Reserve
@@ -60,12 +61,11 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 }
                 m_geometry.getConnections(col_ptr, col_idx, i * m_geometry.numParticles());
             }
+            sortConnections(col_ptr,col_idx);
             getStrengths(col_ptr, col_idx, strenght);
             base_type::setSprings(col_ptr, col_idx, strenght);
             
             setIteratorRanges(Mt * Nt, Mh * (Nh - 1) + 1);
-	    
-	    this->fluid_solver().initMaps(*this);
         }
 
         inline void computeForces(value_type time)
@@ -116,7 +116,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
 
         void getStrengths(const std::vector<size_t> &, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
         {
-            strengths.resize(col_idx.size(), 5.0);
+            strengths.resize(col_idx.size(), 100.0);
         }
 
         void updateForceGradient()
@@ -155,6 +155,17 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 particles[0].force[2] += gradient[2];
             }
 
+        }
+        
+        void sortConnections(std::vector<size_t> &col_ptr, std::vector<size_t> &col_idx)
+        {
+            std::vector<size_t>::iterator begin, end;
+            for(size_t i = 0; i < col_ptr.size()-1; ++i)
+            {
+                begin = col_idx.begin()+col_ptr[i];
+                end = col_idx.begin()+col_ptr[i+1];
+                std::sort(begin,end);
+            }
         }
 
     public:

@@ -127,7 +127,7 @@ class Octree
             value_type max[3] = {-1e100,-1e100,-1e100};
             center[0] = center[1] = center[2] = 0;
             extent[0] = extent[1] = extent[2] = 0;
-            for (int i = 0; i < num_particles; i++)
+            for (size_t i = 0; i < num_particles; i++)
             {
                 
                 for (int k = 0 ; k < 3; ++k)

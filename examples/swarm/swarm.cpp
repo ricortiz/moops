@@ -37,7 +37,7 @@ class SwarmApp
 
         SwarmApp(std::string &data_path) :
             m_swarm(Mt,Nt,Mh,Nh,num_sperms),
-            m_time_step(0.01),
+            m_time_step(0.001),
             m_vtk_storage(m_swarm),
             m_surface_writer(data_path + "/surface/",m_vtk_storage,true),
             m_record(true)

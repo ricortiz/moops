@@ -100,7 +100,7 @@ class multipole_taylor_storage
         inline const int &tetra_three(int i) const { return m_data.tetra_three[i]; }
         inline int &tetra_three(int i)             { return m_data.tetra_three[i]; }
     
-        inline const size_t coeff_size() const { return 4*m_coeff_size; }
+        inline size_t coeff_size() { return 4*m_coeff_size; }
 
         enum
         {

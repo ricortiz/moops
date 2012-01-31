@@ -8,7 +8,7 @@ void getbits ( int x, int n, int bits[] )
 {
     int pattern;
 
-    pattern = 1 << n-1;
+    pattern = 1 << (n-1);
     for ( int i = 0; i < n; ++i, pattern >>= 1 )
         bits[i] = ( x & pattern ) ? 1 : -1;
 
@@ -21,7 +21,7 @@ void getbits ( int x, int n, int bits[] )
 int bits2int ( int n, int bits[] )
 {
     int x;
-    int pattern = 1 << n-1;
+    int pattern = 1 << (n-1);
     x = 0;
     for ( int i = 0; i < n; i++, pattern >>= 1 )
         if ( bits[i] == 1 )
