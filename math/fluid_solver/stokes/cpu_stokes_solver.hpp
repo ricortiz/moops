@@ -74,7 +74,7 @@ class CpuStokesSolver
         }
 
         template<typename spring_system_type>
-        inline void initMaps ( spring_system_type &spring_system )
+        void initMaps ( spring_system_type &spring_system )
         {
             typedef typename spring_system_type::particle_type   particle_type;
             typedef typename spring_system_type::spring_lut_type spring_map_type;

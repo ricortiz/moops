@@ -31,7 +31,7 @@ struct Traits;
 #include "examples/swarm/swarm.hpp"
 
 #ifdef USE_CUDA_FLUID_SOLVER
-    #include "math/fluid_solver/stokes/gpu_stokes_solver.hpp"
+#include "math/fluid_solver/stokes/gpu_stokes_solver.hpp"
 #endif
 
 template<typename _value_type>
@@ -55,19 +55,19 @@ struct TypeBinder
         sdc_corrections = 3
     };
     typedef Integrator<value_type, gauss_lobatto, sdc_nodes> spectral_integrator;
-    
-    typedef ExplicitSDC<value_type,spectral_integrator,sdc_corrections>                             explicit_sdc;
-    typedef SemiImplicitSDC<value_type,spectral_integrator,sdc_corrections>                         implicit_sdc;
+
+    typedef ExplicitSDC<value_type, spectral_integrator, sdc_corrections>                             explicit_sdc;
+    typedef SemiImplicitSDC<value_type, spectral_integrator, sdc_corrections>                         implicit_sdc;
 
     typedef implicit_sdc                                        time_integrator;
-    
-    typedef HeartPump<value_type,fluid_solver,time_integrator>  heart_pump_surface;
-    typedef Swarm<value_type,fluid_solver,time_integrator>      swarm_surface;
-    
-    typedef vtkStorageWrapper<swarm_surface>                            vtk_storage;
-    typedef IO::VtkWriter<vtk_storage,vtkXMLPolyDataWriter>                 vtk_writer;
 
-    
+    typedef HeartPump<value_type, fluid_solver, time_integrator>  heart_pump_surface;
+    typedef Swarm<value_type, fluid_solver, time_integrator>      swarm_surface;
+
+    typedef vtkStorageWrapper<swarm_surface>                            vtk_storage;
+    typedef IO::VtkWriter<vtk_storage, vtkXMLPolyDataWriter>                 vtk_writer;
+
+
 };
 
 #endif

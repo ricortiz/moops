@@ -64,6 +64,8 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             base_type::setSprings(col_ptr, col_idx, strenght);
             
             setIteratorRanges(Mt * Nt, Mh * (Nh - 1) + 1);
+	    
+	    this->fluid_solver().initMaps(*this);
         }
 
         inline void computeForces(value_type time)
@@ -142,7 +144,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
 
                 value_type scale = (1.0/std::sqrt(particles[0].position[0]*particles[0].position[0]*particles[0].position[1]*particles[0].position[1]*particles[0].position[2]*particles[0].position[2]));
 
-                if (scale > 1e10)
+                if (scale > 1)
                     return;
                 
                 gradient[0] = -particles[0].position[0]*scale;
