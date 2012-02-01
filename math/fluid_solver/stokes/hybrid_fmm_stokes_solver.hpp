@@ -2,7 +2,7 @@
 #define HYBRID_FMM_STOKES_SOLVER_HPP
 
 #include <vector>
-#include <map>
+
 extern "C" {
 #include "math/fluid_solver/stokes/fmm/hybrid/hybridfmm.h"
 }
@@ -16,21 +16,29 @@ class HybridFmmStokesSolver
         map_type m_map_implicit;
         size_t m_num_particles;
         std::vector<float> m_gpu_velocity;
+        std::vector<Potential> m_fields;
+        std::vector<Field> m_potentials;
 
     public:
-        HybridFmmStokesSolver(size_t num_particles) : m_num_particles(num_particles)
+        HybridFmmStokesSolver(size_t num_particles) 
+	: 
+	m_num_particles(num_particles), 
+	m_gpu_velocity(3*num_particles + 1 << 11),
+	m_fields(num_particles),
+	m_potentials(num_particles)	
         {
             octree.maxBodiesPerNode = 50;
             octree.numParticles = num_particles;
-            m_gpu_velocity.resize(3*num_particles + 1 << 11);
             int precision = 6;
-            
+            octree.fields = &m_fields[0];
+	    octree.potentials = &m_potentials[0];
+	    octree.GPU_Veloc = &m_gpu_velocity[0];
             
         }
         
         inline void operator() ( value_type t, const value_type *x, value_type *v, const  value_type *f)
         {
-            operator() ( t, x, v, x, f, m_num_particles, m_num_particles );
+	  octree.CPU_Veloc = v;
         }
 
 

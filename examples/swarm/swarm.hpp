@@ -24,7 +24,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
     public:
 
         Swarm(size_t Mt, size_t Nt, size_t Mh, size_t Nh, int num_sperms = 1)
-            : base_type(num_sperms * (Mt * Nt + Mh * (Nh - 1) + 1)), m_num_geometries(num_sperms)
+                : base_type(num_sperms * (Mt * Nt + Mh * (Nh - 1) + 1)), m_num_geometries(num_sperms)
         {
             // Set geometry parameters
             m_geometry.setDimensions(Mt, Nt, Mh, Nh);    // tail dims: MtxNt; head dims: MhxNh
@@ -61,16 +61,16 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 }
                 m_geometry.getConnections(col_ptr, col_idx, i * m_geometry.numParticles());
             }
-            sortConnections(col_ptr,col_idx);
+            sortConnections(col_ptr, col_idx);
             getStrengths(col_ptr, col_idx, strenght);
             base_type::setSprings(col_ptr, col_idx, strenght);
-            
+
             setIteratorRanges(Mt * Nt, Mh * (Nh - 1) + 1);
         }
 
         inline void computeForces(value_type time)
         {
-            for(size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
+            for (size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
             {
                 for (spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second; s != end; ++s)
                     m_geometry.resetRestingLength(s, time);
@@ -127,7 +127,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             size_t head_offset = Mh * (Nh - 1) + 1;
             size_t offset = tail_offset + head_offset;
 
-            for(int i = 0; i < m_num_geometries; ++i)
+            for (int i = 0; i < m_num_geometries; ++i)
             {
                 value_type gradient[3] = {0};
                 particle_type *particles = this->particles() + i * offset;
@@ -142,29 +142,29 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 gradient[2] /= head_offset;
 //                 value_type norm = std::sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]);
 
-                value_type scale = (1.0/std::sqrt(particles[0].position[0]*particles[0].position[0]*particles[0].position[1]*particles[0].position[1]*particles[0].position[2]*particles[0].position[2]));
+                value_type scale = (1.0 / std::sqrt(particles[0].position[0] * particles[0].position[0] * particles[0].position[1] * particles[0].position[1] * particles[0].position[2] * particles[0].position[2]));
 
                 if (scale > 1)
                     return;
-                
-                gradient[0] = -particles[0].position[0]*scale;
-                gradient[1] = -particles[0].position[1]*scale;
-                gradient[2] = -particles[0].position[2]*scale;
+
+                gradient[0] = -particles[0].position[0] * scale;
+                gradient[1] = -particles[0].position[1] * scale;
+                gradient[2] = -particles[0].position[2] * scale;
                 particles[0].force[0] += gradient[0];
                 particles[0].force[1] += gradient[1];
                 particles[0].force[2] += gradient[2];
             }
 
         }
-        
+
         void sortConnections(std::vector<size_t> &col_ptr, std::vector<size_t> &col_idx)
         {
             std::vector<size_t>::iterator begin, end;
-            for(size_t i = 0; i < col_ptr.size()-1; ++i)
+            for (size_t i = 0; i < col_ptr.size() - 1; ++i)
             {
-                begin = col_idx.begin()+col_ptr[i];
-                end = col_idx.begin()+col_ptr[i+1];
-                std::sort(begin,end);
+                begin = col_idx.begin() + col_ptr[i];
+                end = col_idx.begin() + col_ptr[i+1];
+                std::sort(begin, end);
             }
         }
 
@@ -179,17 +179,17 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
         {
             out << "springs = [";
             spring_iterator s = this->springs_begin(), end = this->springs_end();
-            for(; s != end; ++s)
+            for (; s != end; ++s)
                 out << s->getAidx() / 3 + 1 << "," << s->getBidx() / 3 + 1 << ";";
             out << "];" << std::endl;
         }
-        
+
         template<typename out_stream>
         void print_forces(out_stream &out = std::cout)
         {
             value_type *p = this->forces();
             out << "f = [";
-            for(size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+            for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
                 out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
             out << "];" << std::endl;
         }
@@ -199,17 +199,17 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
         {
             value_type *p = this->velocities();
             out << "v = [";
-            for(size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+            for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
                 out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
             out << "];" << std::endl;
         }
-        
+
         template<typename out_stream>
         void print_positions(out_stream &out = std::cout)
         {
             value_type *p = this->positions();
             out << "p = [";
-            for(size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+            for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
                 out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
             out << "];" << std::endl;
         }
@@ -218,10 +218,10 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
         void print_tail_springs(out_stream &out = std::cout)
         {
             out << "tail_springs = [";
-            for(size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
+            for (size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
             {
                 spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second;
-                for(; s != end; ++s)
+                for (; s != end; ++s)
                     out << s->getAidx() / 3 + 1 << "," << s->getBidx() / 3 + 1 << ";";
             }
             out << "];" << std::endl;
@@ -231,10 +231,10 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
         void print_spring_lengths(out_stream &out = std::cout)
         {
             out << "spring_lenghts = [";
-            for(size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
+            for (size_t i = 0; i < m_tail_iterator_pairs.size(); ++i)
             {
                 spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second;
-                for(; s != end; ++s)
+                for (; s != end; ++s)
                     out << s->resting_length() << ";";
             }
             out << "];" << std::endl;
