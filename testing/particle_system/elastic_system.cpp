@@ -27,13 +27,16 @@ int elastic_system(int, char **)
     typedef ExplicitSDC<double> esdc_integrator;
     typedef SemiImplicitSDC<double> sisdc_integrator;
 //     typedef HeartPump<double,fluid_solver,esdc_integrator> heart_pump;
-    typedef Swarm<double,fluid_solver,esdc_integrator> swarm_type;
+    typedef Swarm<double,fluid_solver,fetime_integrator> swarm_type;
 
-    swarm_type swarm(6,100,12,21,2);
-    std::ofstream output("data.m");
-    swarm.print_positions(std::cout);
-    swarm.print_springs(std::cout);
-    swarm.print_tail_springs(std::cout);
+    swarm_type swarm(6,100,12,21,12100);
+    std::ofstream output("swimmers_10M.dat");
+    output.precision(16);
+    swarm.print_positions(output,true);
+    output.flush();
+    output.close();
+//     swarm.print_springs(std::cout);
+//     swarm.print_tail_springs(std::cout);
     return 0;
 }
 

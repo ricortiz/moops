@@ -32,7 +32,8 @@ class ParticleSystem
         value_type            m_time;         ///< Current time.
         storage_type          m_storage;
 	size_t 		      m_num_particles;
-
+        value_type            m_domain[2][3]
+;
     public:
 
         ParticleSystem(size_t num_particles) : m_time(0.0), m_storage(num_particles), m_num_particles(num_particles)
@@ -54,34 +55,39 @@ class ParticleSystem
         inline particle_type *particles()             { return m_storage.particles(); }
 
 
-        inline void getDimensions(value_type center[], value_type extent[])
+        inline void setDomain()
         {
-            value_type highest = std::numeric_limits<value_type>::infinity();
-            value_type lowest = std::numeric_limits<value_type>::min();
-            value_type min[3] = {highest,highest,highest};
-            value_type max[3] = {lowest,lowest,lowest};
-            center[0] = center[1] = center[2] = 0;
-            extent[0] = extent[1] = extent[2] = 0;
-            for (int i = 0; i < m_num_particles; i++)
+            particle_type *p = m_storage.particles();
+            value_type min[3] = {p[0].position[0], p[0].position[1], p[0].position[2]};
+            value_type max[3] = {p[0].position[0], p[0].position[1], p[0].position[2]};
+            // center
+            m_domain[0][0] = m_domain[0][1] = m_domain[0][2] = 0;
+            // extent
+            m_domain[1][0] = m_domain[1][1] = m_domain[1][2] = 0;
+            for(int i = 0; i < m_num_particles; i++)
             {
-                value_type *position = m_storage.position(i);
-                for (int k = 0 ; k < 3; ++k)
+                for(int k = 0 ; k < 3; ++k)
                 {
-                    if (position[k] > max[k])
-                        max[k] = position[k];
-                    if (position[k] < min[k])
-                        min[k] = position[k];
-                    center[k] += position[k];
+                    if(p[i].position[k] > max[k])
+                        max[k] = p[i].position[k];
+                    if(p[i].position[k] < min[k])
+                        min[k] = p[i].position[k];
+                    m_domain[0][k] += p[i].position[k];
                 }
             }
-
-            for (int i = 0; i < 3; ++i)
+            
+            value_type R0 = 0;
+            for(int i = 0; i < 3; ++i)
             {
-                center[i] /= m_num_particles;
-                max[i] = std::abs(max[i]-center[i])+.001;
-                min[i] = std::abs(min[i]-center[i])+.001;
-                extent[i] = std::max(max[i],min[i]);
+                m_domain[0][i] /= m_num_particles;
+                m_domain[0][i] = int(m_domain[0][i] + .5); // shift center to nearest integer
+                R0 = std::max(max[i] - m_domain[0][i], R0);
+                R0 = std::max(m_domain[0][i] - min[i], R0);
+                max[i] = std::abs(max[i] - m_domain[0][i]) + .001;
+                min[i] = std::abs(min[i] - m_domain[0][i]) + .001;
             }
+            
+            m_domain[1][0] = m_domain[1][1] = m_domain[1][2] = R0 * 1.000001;
         }
 
         void clear() { m_time = 0.; }

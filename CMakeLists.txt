@@ -70,4 +70,5 @@ if(ENABLE_EXAMPLES)
         add_subdirectory(examples)
 endif(ENABLE_EXAMPLES)
 
+ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid)
 # 

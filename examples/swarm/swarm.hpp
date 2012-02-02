@@ -24,7 +24,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
     public:
 
         Swarm(size_t Mt, size_t Nt, size_t Mh, size_t Nh, int num_sperms = 1)
-                : base_type(num_sperms * (Mt * Nt + Mh * (Nh - 1) + 1)), m_num_geometries(num_sperms)
+            : base_type(num_sperms * (Mt * Nt + Mh * (Nh - 1) + 1)), m_num_geometries(num_sperms)
         {
             // Set geometry parameters
             m_geometry.setDimensions(Mt, Nt, Mh, Nh);    // tail dims: MtxNt; head dims: MhxNh
@@ -163,7 +163,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             for (size_t i = 0; i < col_ptr.size() - 1; ++i)
             {
                 begin = col_idx.begin() + col_ptr[i];
-                end = col_idx.begin() + col_ptr[i+1];
+                end = col_idx.begin() + col_ptr[i + 1];
                 std::sort(begin, end);
             }
         }
@@ -205,13 +205,22 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
         }
 
         template<typename out_stream>
-        void print_positions(out_stream &out = std::cout)
+        void print_positions(out_stream &out = std::cout, bool fortran = false)
         {
             value_type *p = this->positions();
-            out << "p = [";
-            for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
-                out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
-            out << "];" << std::endl;
+            if(!fortran)
+            {
+                out << "p = [";
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
+                out << "];" << std::endl;
+            }
+            else
+            {
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << " " << p[idx + 1] << " " << p[idx + 2] << "\n";
+                out << std::endl;
+            }
         }
 
         template<typename out_stream>
