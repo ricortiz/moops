@@ -24,6 +24,7 @@ class Spring
 {
     protected:
         typedef typename particle_type::value_type value_type;
+
     private:
         particle_type * m_A;           ///< Pointer to one of the affected particles.
         particle_type * m_B;           ///< Pointer to one other affected particle.
@@ -34,7 +35,6 @@ class Spring
 
 
     public:
-
         particle_type       * A()              { return m_A; }
         particle_type       * B()              { return m_B; }
         particle_type const * A() const        { return m_A; }
@@ -49,9 +49,7 @@ class Spring
         size_t &getBidx() { return m_Bidx; }
 
     public:
-
-        Spring() : m_A(0), m_B(0), m_l(0), m_k(1) { }
-        ~Spring()  {  }
+        Spring() : m_A(0), m_B(0), m_l(0), m_k(1), m_Aidx(0), m_Bidx(0) { }
 
     public:
 
@@ -100,7 +98,6 @@ class Spring
             f2[1] += L * dx[1];
             f2[2] += L * dx[2];
         }
-
 };
 
 #endif

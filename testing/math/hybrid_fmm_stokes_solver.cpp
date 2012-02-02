@@ -22,16 +22,19 @@ int hybrid_fmm_stokes_solver(int ,char **)
 {
     srand(0);
     typedef double value_type;
-    size_t num_sources = 100;
-    size_t num_targets = 100;
+    size_t num_sources = 1 << 7;
+    size_t num_targets = 1 << 7;
     size_t size_sources = 3*num_sources;
     size_t size_targets = 3*num_targets;
     std::vector<value_type> sources(size_sources), targets(size_targets), velocities(size_targets), forces(size_sources);
     value_type delta = .01;
     value_type domain[2][3] = {{0,0,0},{10,10,10}};
     HybridFmmStokesSolver<value_type> fmm(num_sources);
-    fmm.setDomain(domain);
+    std::generate(sources.begin(),sources.end(),random_generator<value_type>());
+    std::generate(targets.begin(),targets.end(),random_generator<value_type>());
+    std::generate(forces.begin(),forces.end(),random_generator<value_type>());
     fmm.setDelta(delta);
+    fmm(0,&sources[0],&velocities[0],&forces[0]);
     
     return 0;
 }

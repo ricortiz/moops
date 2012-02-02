@@ -125,8 +125,10 @@ typedef struct _Octree
     Node **near_neighbor;
     NodeInfo *rootInfo;
     FILE *output;
-    GPU_Velocities *GPU_Veloc;
-    CPU_Velocities *CPU_Veloc;
+    float *GPU_Veloc;
+    double *CPU_Veloc;
+//     GPU_Velocities *GPU_Veloc;
+//     CPU_Velocities *CPU_Veloc;
     Potential *potentials;
     Field *fields;    
 
@@ -234,7 +236,7 @@ typedef struct _Octree
                         float * gpuVelocities, 
                         unsigned int * target_list, 
                         unsigned int * num_interaction_pairs, 
-                        unsigned int * interaction_pairs);
+                        unsigned int * interaction_pairs, float delta);
 
     void gpuGetVelocities();
 

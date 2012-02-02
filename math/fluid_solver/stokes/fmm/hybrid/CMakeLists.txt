@@ -1,9 +1,11 @@
 
 #FindCUDA
 FIND_PACKAGE(CUDA REQUIRED)
+SET(CUDA_NVCC_FLAGS --compiler-bindir /opt/gcc-4.4.6/bin/ -gencode arch=compute_10,code=sm_10)
+
+
 SET(CUDA_TARGETS_SOURCES kernel.cu)
-SET(CUDA_NVCC_FLAGS --compiler-bindir /opt/gcc-4.4.6/bin -gencode arch=compute_10,code=sm_10)
-cuda_add_library(kernel STATIC kernel.cu)
+cuda_add_library(kernel STATIC ${CUDA_TARGETS_SOURCES})
 TARGET_LINK_LIBRARIES(kernel ${CUDA_LIBRARIES})
 
 add_library(hybridfmm hybridfmm.c expansions.c tree.c)

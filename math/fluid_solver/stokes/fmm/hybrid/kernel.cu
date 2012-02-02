@@ -20,15 +20,14 @@ unsigned int *source_list, *source_start_indices_for_blocks, *GL_num_interaction
 double startTime;
 
 
-__device__ float3 evaluate(float3 a, float3 b, float3 force, float3 velocity)
+__device__ float3 evaluate(float3 a, float3 b, float3 force, float3 velocity, float delta)
 {
     float3 dx;
     dx.x = b.x - a.x;
     dx.y = b.y - a.y;
     dx.z = b.z - a.z;
-
+    float d2 = delta*delta;
     float r2 = dx.x * dx.x + dx.y * dx.y + dx.z * dx.z ;
-    float d2 = 0.05;
     float R1 = r2 + d2;
     float R2 = R1 + d2;
     float invR = 1.0 / R1;
@@ -43,7 +42,7 @@ __device__ float3 evaluate(float3 a, float3 b, float3 force, float3 velocity)
     return velocity;
 }
 
-__device__ float3 TileCalculate(float3 pos, float3 velocity, int numBody, int NUM_THREADS)
+__device__ float3 TileCalculate(float3 pos, float3 velocity, int numBody, int NUM_THREADS, float delta)
 {
     extern __shared__ float3 sharedPos[];
 #ifdef _Win64
@@ -53,7 +52,7 @@ __device__ float3 TileCalculate(float3 pos, float3 velocity, int numBody, int NU
 #endif
     for (unsigned int counter = 0; counter < numBody; i++, counter++ )
     {
-        velocity = evaluate(pos, sharedPos[i], sharedPos[i + NUM_THREADS], velocity);
+        velocity = evaluate(pos, sharedPos[i], sharedPos[i + NUM_THREADS], velocity, delta);
     }
     return velocity;
 }
@@ -66,7 +65,7 @@ __device__ float3 compute_velocity( float3 current_target_pos,
                                     int source_start,
                                     int total_num_sources_for_this_loop,
                                     int num_targets_for_this_loop,
-                                    int NUM_THREADS)
+                                    int NUM_THREADS, float delta)
 {
     int num_threads_in_this_block = blockDim.x * blockDim.y;
     extern __shared__ float3 sharedPos[];
@@ -102,7 +101,7 @@ __device__ float3 compute_velocity( float3 current_target_pos,
         __syncthreads();
 
         if(threadIdx.x < num_targets_for_this_loop)
-            vel = TileCalculate(current_target_pos, vel, num_threads_in_this_block, NUM_THREADS);
+            vel = TileCalculate(current_target_pos, vel, num_threads_in_this_block, NUM_THREADS,delta);
 
         __syncthreads();
     }
@@ -135,7 +134,7 @@ __device__ float3 compute_velocity( float3 current_target_pos,
         __syncthreads();
 
         if(threadIdx.x < num_targets_for_this_loop)
-            vel = TileCalculate(current_target_pos, vel, num_sources_left, NUM_THREADS);
+            vel = TileCalculate(current_target_pos, vel, num_sources_left, NUM_THREADS,delta);
         __syncthreads();
     }
     return vel;
@@ -148,7 +147,7 @@ __global__ void kernel(    int block_offset,
                            unsigned int * source_list,
                            unsigned int * num_interaction_pairs,
                            unsigned int * source_start_array,
-                           int NUM_THREADS)
+                           int NUM_THREADS, float delta)
 {
     int blockId = block_offset + blockIdx.x;
     int target_start = target_list[blockId * 2];
@@ -178,7 +177,7 @@ __global__ void kernel(    int block_offset,
                 source_start_for_this_block,
                 total_num_sources,
                 blockDim.x * blockDim.y,
-                NUM_THREADS);
+                NUM_THREADS,delta);
     }
 
     int targetsLeft = num_targets - num_vertical_tiles * (blockDim.x * blockDim.y);
@@ -195,7 +194,7 @@ __global__ void kernel(    int block_offset,
                                source_start_for_this_block,
                                total_num_sources,
                                targetsLeft,
-                               NUM_THREADS);
+                               NUM_THREADS,delta);
 
         if(threadIdx.x < targetsLeft)
             velocities[ target_start + num_vertical_tiles * blockDim.x + threadIdx.x ] = vel;
@@ -300,7 +299,7 @@ extern "C" {
                             float * gpuVelocities,
                             unsigned int * target_list,
                             unsigned int * num_interaction_pairs,
-                            unsigned int * interaction_pairs)
+                            unsigned int * interaction_pairs, float delta)
     {
 
         startTime = wcTime();
@@ -379,7 +378,7 @@ extern "C" {
                         float rz = positions[6 * l + 2] - positions[6 * k + 2];
 
                         float r2 = rx * rx + ry * ry + rz * rz ;
-                        float d2 = 0.05;
+                        float d2 = delta*delta;
                         float R1 = r2 + d2;
                         float R2 = R1 + d2;
                         float invR = 1.0 / R1;
@@ -613,7 +612,7 @@ extern "C" {
                         (unsigned int *)dsource_list,
                         (unsigned int *)dnum_interaction_pairs,
                         (unsigned int *)dsource_start_indices_for_blocks,
-                        NUM_THREADS);
+                        NUM_THREADS,delta);
                 j++;
                 load_balance_length[current_gpu] -= MAX_BLOCK_SIZE;
             }
@@ -630,7 +629,7 @@ extern "C" {
                     (unsigned int *)dsource_list,
                     (unsigned int *)dnum_interaction_pairs,
                     (unsigned int *)dsource_start_indices_for_blocks,
-                    NUM_THREADS);
+                    NUM_THREADS,delta);
 
         }
 

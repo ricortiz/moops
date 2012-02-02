@@ -73,8 +73,8 @@ class ElasticBoundary : public SpringSystem<Derived>
             {
                 size_t i = s->getAidx();
                 size_t j = s->getBidx();
-                value_type *x1 = &x[i];
-                value_type *x2 = &x[j];
+                const value_type *x1 = &x[i];
+                const value_type *x2 = &x[j];
                 value_type *f1 = &f[i];
                 value_type *f2 = &f[j];
                 s->apply(x1, x2, f1, f2);

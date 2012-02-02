@@ -715,7 +715,7 @@ void FMM(unsigned long number_particles, double dt, int cflag, int dflag)
                 gpuVelocitiesEval(octree.numParticles, octree.numLeafDInodes,
                     octree.total_interaction_pairs,(float *) octree.bodies, 
                     (float *) octree.GPU_Veloc,octree.target_list,
-                    octree.number_IP, octree.interaction_pairs);
+                    octree.number_IP, octree.interaction_pairs,.05);
             }
         }
         #pragma omp single
@@ -853,20 +853,20 @@ void AllPairs(unsigned long number_particles, double dt)
  **********************************************************************/
 void UpdateBodies(unsigned long number_particles, double dt)
 {
-    int i;
+    int i, idx;
     #pragma omp for private(i)
-    for (i=0; i<number_particles; i++)
+    for (i=0, idx = 0; i<number_particles; i++, idx +=3)
     {        
-        octree.bodies[i].position[0] += dt*octree.GPU_Veloc[i].x;
-        octree.bodies[i].position[1] += dt*octree.GPU_Veloc[i].y;
-        octree.bodies[i].position[2] += dt*octree.GPU_Veloc[i].z;
+        octree.bodies[i].position[0] += dt*octree.GPU_Veloc[idx];
+        octree.bodies[i].position[1] += dt*octree.GPU_Veloc[idx+1];
+        octree.bodies[i].position[2] += dt*octree.GPU_Veloc[idx+2];
         
         octree.bodies[i].position[0] = Modulus(octree.bodies[i].position[0], 256.0);
         octree.bodies[i].position[1] = Modulus(octree.bodies[i].position[1], 256.0);
         octree.bodies[i].position[2] = Modulus(octree.bodies[i].position[2], 256.0);
 
         //reset forces
-        octree.GPU_Veloc[i].x=octree.GPU_Veloc[i].y=octree.GPU_Veloc[i].z=0.0;
+        octree.GPU_Veloc[idx]=octree.GPU_Veloc[idx+1]=octree.GPU_Veloc[idx+2]=0.0;
         
         /*assert((octree.bodies[i].x < 256.0)&&(octree.bodies[i].x >= 0) &&
                 (octree.bodies[i].y < 256.0)&&(octree.bodies[i].y >= 0) &&
@@ -882,27 +882,27 @@ void UpdateBodies(unsigned long number_particles, double dt)
  **********************************************************************/
 void UpdateBodiesWithGPU(unsigned long number_particles, double dt)
 {
-    int i;
+    int i,idx;
     #pragma omp for private(i)
-    for (i=0; i<number_particles; i++)
+    for (i=0,idx=0; i<number_particles; i++,idx+=3)
     {
         //combine CPU & GPU contributions
-        octree.CPU_Veloc[i].x += octree.GPU_Veloc[i].x;
-        octree.CPU_Veloc[i].y += octree.GPU_Veloc[i].y;
-        octree.CPU_Veloc[i].z += octree.GPU_Veloc[i].z;
+        octree.CPU_Veloc[idx] += octree.GPU_Veloc[idx];
+        octree.CPU_Veloc[idx+1] += octree.GPU_Veloc[idx+1];
+        octree.CPU_Veloc[idx+2] += octree.GPU_Veloc[idx+2];
 
         //update positions
-        octree.bodies[i].position[0] += dt*octree.CPU_Veloc[i].x;
-        octree.bodies[i].position[1] += dt*octree.CPU_Veloc[i].y;
-        octree.bodies[i].position[2] += dt*octree.CPU_Veloc[i].z;
+        octree.bodies[i].position[0] += dt*octree.CPU_Veloc[idx];
+        octree.bodies[i].position[1] += dt*octree.CPU_Veloc[idx+1];
+        octree.bodies[i].position[2] += dt*octree.CPU_Veloc[idx+2];
         
         octree.bodies[i].position[0] = Modulus(octree.bodies[i].position[0], 256.0);
         octree.bodies[i].position[1] = Modulus(octree.bodies[i].position[1], 256.0);
         octree.bodies[i].position[2] = Modulus(octree.bodies[i].position[2], 256.0);
 
         //reset velocities
-        octree.CPU_Veloc[i].x=octree.CPU_Veloc[i].y=octree.CPU_Veloc[i].z=0.0;
-        octree.GPU_Veloc[i].x=octree.GPU_Veloc[i].y=octree.GPU_Veloc[i].z=0.0;
+        octree.CPU_Veloc[idx]=octree.CPU_Veloc[idx+1]=octree.CPU_Veloc[idx+2]=0.0;
+        octree.GPU_Veloc[idx]=octree.GPU_Veloc[idx+1]=octree.GPU_Veloc[idx+2]=0.0;
         
         if((octree.bodies[i].position[0]>=256.0)||(octree.bodies[i].position[0] < 0.0) ||
                 (octree.bodies[i].position[1]>=256.0)||(octree.bodies[i].position[1] < 0.0) ||

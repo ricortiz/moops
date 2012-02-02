@@ -343,9 +343,10 @@ void ApplyLocalExpansion(Node *node)
                 }
             }
         }
-        octree.CPU_Veloc[pNum].x += octree.potentials[pNum].x - p->position[0]*octree.fields[pNum].field[0][0] - p->position[1]*octree.fields[pNum].field[0][1] - p->position[2]*octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3];
-        octree.CPU_Veloc[pNum].y += octree.potentials[pNum].y - p->position[0]*octree.fields[pNum].field[1][0] - p->position[1]*octree.fields[pNum].field[1][1] - p->position[2]*octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3];
-        octree.CPU_Veloc[pNum].z += octree.potentials[pNum].z - p->position[0]*octree.fields[pNum].field[2][0] - p->position[1]*octree.fields[pNum].field[2][1] - p->position[2]*octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3];
+        int idx = 3*pNum;
+        octree.CPU_Veloc[idx] += octree.potentials[pNum].x - p->position[0]*octree.fields[pNum].field[0][0] - p->position[1]*octree.fields[pNum].field[0][1] - p->position[2]*octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3];
+        octree.CPU_Veloc[idx+1] += octree.potentials[pNum].y - p->position[0]*octree.fields[pNum].field[1][0] - p->position[1]*octree.fields[pNum].field[1][1] - p->position[2]*octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3];
+        octree.CPU_Veloc[idx+1] += octree.potentials[pNum].z - p->position[0]*octree.fields[pNum].field[2][0] - p->position[1]*octree.fields[pNum].field[2][1] - p->position[2]*octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3];
     }
 }
 
@@ -472,8 +473,8 @@ void ComputeVelocityDirect(int target, int source)
     double fdx = octree.bodies[source].force[0]*dx[0]+
                  octree.bodies[source].force[1]*dx[1]+
                  octree.bodies[source].force[2]*dx[2];
-
-    octree.GPU_Veloc[target].x += H*(octree.bodies[source].force[0]*R2+fdx*dx[0]);
-    octree.GPU_Veloc[target].y += H*(octree.bodies[source].force[1]*R2+fdx*dx[1]);
-    octree.GPU_Veloc[target].z += H*(octree.bodies[source].force[2]*R2+fdx*dx[2]);
+    int idx = 3*target;
+    octree.GPU_Veloc[idx] += H*(octree.bodies[source].force[0]*R2+fdx*dx[0]);
+    octree.GPU_Veloc[idx+1] += H*(octree.bodies[source].force[1]*R2+fdx*dx[1]);
+    octree.GPU_Veloc[idx+2] += H*(octree.bodies[source].force[2]*R2+fdx*dx[2]);
 }
