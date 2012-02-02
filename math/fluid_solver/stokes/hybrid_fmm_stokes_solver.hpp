@@ -11,13 +11,13 @@ template<typename value_type>
 class HybridFmmStokesSolver
 {
     private:
-        value_type m_delta;
-        value_type m_extents[2];
         size_t m_num_particles;
         GPU_Velocities *m_gpu_velocity;
         Particle *m_particles;
         std::vector<Field> m_fields;
         std::vector<Potential> m_potentials;
+        value_type m_delta;
+        value_type m_extents[2];
 
     public:
         HybridFmmStokesSolver(size_t num_particles) 
