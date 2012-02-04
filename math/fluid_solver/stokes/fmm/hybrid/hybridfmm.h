@@ -18,7 +18,6 @@
 #include <time.h>
 #include <math.h>
 #include <omp.h>
-
 /*
   Define declarations for the N-body program.
 */
@@ -59,7 +58,8 @@
 */
 typedef struct _Particle
 {
-  float position[3], force[3];
+//   float position[3], force[3];
+  float *position, *force;
 } Particle;
 
 
@@ -88,6 +88,7 @@ typedef struct _Node
   float mid_x, mid_y, mid_z, *phi[4], *psi[4];
   int pArrayLow, pArrayHigh, *colleagueCount, *list1Count, *list2Count,
     *list4Count,*list3Count, isParent;
+    double extent;
 } Node;
 
 typedef struct _Synch
@@ -126,7 +127,7 @@ typedef struct _Octree
     NodeInfo *rootInfo;
     FILE *output;
     float *GPU_Veloc;
-    double *CPU_Veloc;
+    float *CPU_Veloc;
 //     GPU_Velocities *GPU_Veloc;
 //     CPU_Velocities *CPU_Veloc;
     Potential *potentials;
@@ -169,7 +170,7 @@ typedef struct _Octree
     void PrintBodies(int);
     int IsBorder(Node *, Node *);
     void MultipoleExpansion(Node *,Node *,register float *);
-    void FMM(unsigned long,double,int,int);
+    void FMM(double);
     void AllPairs(unsigned long, double);
     void par_time(double *, double *, double *, double *);
     void PickVector(double rad, int ndim, float *x, float *y, float *z);

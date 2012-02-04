@@ -25,7 +25,7 @@ class HybridFmmStokesSolver
                 :
                 m_num_particles(num_particles),
                 m_gpu_velocity(new float[3*num_particles + 2 * MEMORY_ALIGNMENT/sizeof(float)]),
-                m_particles(new Particle[3*num_particles + 2 * MEMORY_ALIGNMENT/sizeof(Particle)]),
+                m_particles(new Particle[num_particles + 2 * MEMORY_ALIGNMENT/sizeof(Particle)]),
                 m_fields(num_particles),
                 m_potentials(num_particles)
         {
@@ -37,8 +37,7 @@ class HybridFmmStokesSolver
             octree.bodies = (Particle *) ALIGN_UP( m_particles, MEMORY_ALIGNMENT );
             float *start = octree.GPU_Veloc;
             std::fill(start, start + 3*num_particles, 0.0);
-            start = &octree.bodies[0].position[0];
-            std::fill(start, start + 6*num_particles, 0.0);
+
 
         }
         ~HybridFmmStokesSolver()
@@ -46,49 +45,56 @@ class HybridFmmStokesSolver
             delete [] m_gpu_velocity;
             delete [] m_particles;
         }
-        inline void operator() ( value_type, const value_type *x, value_type *v, const  value_type *f)
+        inline void operator() ( value_type, value_type *x, value_type *v, value_type *f)
         {
-            initData(x,v,f);
+            initData(x, v, f);
             logger.startTimer("CreateOctree");
-            CreateOctree(m_num_particles, 6, 256, 0);
+            CreateOctree(m_num_particles, 6, 2, 0);
             logger.stopTimer("CreateOctree");
-//             #pragma omp parallel
+            #pragma omp parallel
             {
                 #pragma omp single
                 {
-                    logger.startTimer("gpuVelocitiesEval");
                     gpuVelocitiesEval(octree.numParticles, octree.numLeafDInodes,
-                    octree.total_interaction_pairs, (float *) octree.bodies,
-                    (float *) octree.GPU_Veloc, octree.target_list,
-                                      octree.number_IP, octree.interaction_pairs,m_delta);
-                    logger.stopTimer("gpuVelocitiesEval");
+                                      octree.total_interaction_pairs, (float *) octree.bodies,
+                                      (float *) octree.GPU_Veloc, octree.target_list,
+                                      octree.number_IP, octree.interaction_pairs, m_delta);
                 }
                 #pragma omp single
-                {                    
+                {
                     UpSweep(octree.root);
                     DownSweep(octree.root);
                 }
+                #pragma omp barrier
+                #pragma omp single
+                {
+                    gpuGetVelocities();
+                }
+                #pragma omp barrier
+                #pragma omp single
+                {
+                    //ReSort(octree.root, octree.rootInfo);
+                    /*if(ReSort(octree.root, octree.rootInfo))
+                     *       RebuildTree(number_particles, precision, maximum_extent, minimum_extent);
+                     * */
+                }
             }
-            #pragma omp barrier
             copyVelocities(v);
         }
 
-        void initData(const value_type *x, value_type *v, const value_type *f)
+        void initData(value_type *x, value_type *v, value_type *f)
         {
             for (size_t p = 0, idx = 0; p < m_num_particles; ++p, idx += 3)
             {
-                octree.bodies[p].position[0] = x[idx];
-                octree.bodies[p].position[1] = x[idx+1];
-                octree.bodies[p].position[2] = x[idx+2];
-                octree.bodies[p].force[0] = f[idx];
-                octree.bodies[p].force[1] = f[idx+1];
-                octree.bodies[p].force[2] = f[idx+2];
+                octree.bodies[p].position = &x[idx];
+                octree.bodies[p].force = &f[idx];
             }
             octree.CPU_Veloc = v;
         }
 
         void copyVelocities(value_type *v)
         {
+            std::copy(octree.GPU_Veloc, octree.GPU_Veloc + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
             for (size_t p = 0, idx = 0; p < m_num_particles; ++p, idx += 3)
             {
                 v[idx] += octree.GPU_Veloc[idx];

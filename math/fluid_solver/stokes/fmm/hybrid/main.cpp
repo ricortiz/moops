@@ -1,3 +1,4 @@
+
 extern "C" {
     #include "hybridfmm.h"
 }
@@ -16,7 +17,7 @@ int main(int argc, char **argv)
     unsigned int iterations;
 
     Particle *tmpBod;
-    GPU_Velocities *temp_GPU_velocities;
+    float *temp_GPU_velocities;
 
     for(i = 0; i < argc; i++)
     {
@@ -58,25 +59,28 @@ int main(int argc, char **argv)
     }
     printf("Iterations: %i\n", iterations);
 
-    tmpBod = (Particle *) malloc((number_particles * sizeof(Particle)) + 2 * MEMORY_ALIGNMENT);
+//     tmpBod = (Particle *) malloc((number_particles * sizeof(Particle)) + 2 * MEMORY_ALIGNMENT);
+    tmpBod = new Particle[number_particles+ 1 << 11];
     if (tmpBod == NULL)
     {
         printf("Not able to allocate memory");
         exit(4);
     }
 
-    temp_GPU_velocities = (GPU_Velocities *) malloc((number_particles * sizeof(GPU_Velocities)) + 2 * MEMORY_ALIGNMENT);
+//     temp_GPU_velocities = (float *) malloc(number_particles * sizeof(float) + 2 * MEMORY_ALIGNMENT);
+temp_GPU_velocities = new float[3*number_particles + 1 << 11];
     if (temp_GPU_velocities == NULL)
     {
         printf("Not able to allocate memory");
         exit(4);
     }
     //align for GPU
-    octree.GPU_Veloc = (GPU_Velocities *) ALIGN_UP( temp_GPU_velocities, MEMORY_ALIGNMENT );
+    octree.GPU_Veloc = (float*) ALIGN_UP( temp_GPU_velocities, MEMORY_ALIGNMENT );
     octree.bodies = (Particle *) ALIGN_UP( tmpBod, MEMORY_ALIGNMENT );
 
 
-    octree.CPU_Veloc = (CPU_Velocities *) malloc(number_particles * sizeof(CPU_Velocities));
+//     octree.CPU_Veloc = (double*) malloc(number_particles * sizeof(double/*CPU_Velocities*/));
+    octree.CPU_Veloc = new float[3*number_particles];
     if (octree.CPU_Veloc == NULL)
     {
         printf("Not able to allocate memory");
@@ -180,7 +184,7 @@ int main(int argc, char **argv)
         for(i = 1; i <= iterations; i++)
         {
             fprintf(octree.output, "%lu, %d, %lu, ", number_particles, octree.maxBodiesPerNode, precision);
-            FMM(number_particles, dt, cflag, dflag);
+            FMM(dt);
             //reset phi and psi
             for(j = 0; j < 4; j++)
             {
@@ -209,11 +213,11 @@ int main(int argc, char **argv)
             }*/
 
     //Free up memory
-    free((Particle *) tmpBod);
-    free((GPU_Velocities *) temp_GPU_velocities);
-    free((CPU_Velocities *) octree.CPU_Veloc);
-    free((Field *) octree.fields);
-    free((double *) octree.potentials);
+    delete [] tmpBod;
+    delete [] temp_GPU_velocities;
+    delete [] octree.CPU_Veloc;
+//     free((Field *) octree.fields);
+//     free((double *) octree.potentials);
     FreeOctree();
 
     fclose(octree.output);

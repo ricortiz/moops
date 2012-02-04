@@ -11,5 +11,5 @@ TARGET_LINK_LIBRARIES(kernel ${CUDA_LIBRARIES})
 add_library(hybridfmm hybridfmm.c expansions.c tree.c)
 target_link_libraries(hybridfmm kernel)
 
-# add_executable(main main.cpp)
-# target_link_libraries(main hybridfmm)
+add_executable(main main.cpp)
+target_link_libraries(main hybridfmm)

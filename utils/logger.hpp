@@ -47,24 +47,28 @@ class Logger
         // Print timer event
         inline void printTimerEvent(std::string event)
         {
-            for(timer_iterator t = m_timer_log.begin(); t != m_timer_log.end(); ++t)
-                std::cout << event << " " << m_timer_log[event] << std::endl;
+            std::cout << event << " " << m_timer_log[event] << std::endl;
         }
         
         // Print timer
         inline void printTimer()
         {
-            for(timer_iterator t = m_timer_log.begin(); t != m_timer_log.end(); ++t)
-                std::cout << t->first << " " << t->second << std::endl;
+            std::cout << *this;
         }
 
         // Write timer
         inline void writeTimer(std::string file = "time.log")
         {
             std::ofstream fout(file.c_str());
-            for(timer_iterator t = m_timer_log.begin(); t != m_timer_log.end(); ++t)
-                fout << t->first << " " << t->second << std::endl;
-            fout.close();
+            fout << *this;
+        }
+
+        template<typename output>
+        friend output &operator<<(output &out, Logger &logger)
+        {
+            for(timer_iterator t = logger.m_timer_log.begin(); t != logger.m_timer_log.end(); ++t)
+                out << t->first << " " << t->second << std::endl;
+            return out;
         }
 };
 
