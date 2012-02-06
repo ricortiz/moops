@@ -3,6 +3,8 @@
 #include<algorithm>
 #include<iterator>
 #include<cstdlib>
+#include <QtGui/QApplication>
+#include "math/fluid_solver/stokes/fmm/hybrid/tree_renderer.hpp"
 
 #include "utils/logger.hpp"
 
@@ -18,7 +20,7 @@ struct random_generator
     }
 };
 
-int hybrid_fmm_stokes_solver(int ,char **)
+int hybrid_fmm_stokes_solver(int ac,char **av)
 {
     srand(0);
     typedef float value_type;
@@ -37,7 +39,24 @@ int hybrid_fmm_stokes_solver(int ,char **)
     std::copy(targets.begin(),targets.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << std::endl;    
     std::copy(forces.begin(),forces.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << std::endl;
     fmm.setDelta(delta);
-    fmm(0,&sources[0],&velocities[0],&forces[0]);
+//     fmm(0,&sources[0],&velocities[0],&forces[0]);
+    fmm.initData(&sources[0],&velocities[0],&forces[0]);
+    CreateOctree(num_sources, 6, 2, 0);
     logger.printTimer();
-    return 0;
+    QApplication app(ac, av);
+    
+    if (!QGLFormat::hasOpenGL())
+    {
+        std::cerr << "This system has no OpenGL support" << std::endl;
+        return 1;
+    }
+    QGL::setPreferredPaintEngine(QPaintEngine::OpenGL);
+    OctreeRenderer tree_renderer;
+    tree_renderer.init(octree);
+
+    tree_renderer.setWindowTitle(QObject::tr("Quad Tree"));
+    tree_renderer.setMinimumSize(200, 200);
+    tree_renderer.resize(800,600);
+    tree_renderer.show();
+    return app.exec();
 }

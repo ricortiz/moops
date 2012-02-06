@@ -2,6 +2,8 @@
 #define OVAL_GEOMETRY_HPP
 
 #include <cmath>
+#include <vector>
+#include<cassert>
 #include "base_geometry.hpp"
 #include "particle_system/particle.hpp"
 
@@ -145,8 +147,16 @@ protected:
             size_t idx = std::max(std::min(spring->A()->i,m_hi-1),m_lo) - m_lo;
             base_type::resetRestingLength(spring,m_radius_scale[idx]);
         }
-               
-        const std::vector<value_type> &setRadiusScaling(value_type t)
+        const std::vector<value_type> &setCylindricalRadiusScaling(value_type t)
+	{
+	  size_t n = m_hi - m_lo;
+	  size_t m = m_dims[0]/2;
+            // Range of stretchy part
+            value_type x_1 = 0.0;
+            value_type x_2 = 1.0;
+	    
+	}
+        const std::vector<value_type> &setPeristalticRadiusScaling(value_type t)
         {
             size_t n = m_hi - m_lo;
             // Range of stretchy part

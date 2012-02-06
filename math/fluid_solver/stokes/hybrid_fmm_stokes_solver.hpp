@@ -24,7 +24,7 @@ class HybridFmmStokesSolver
         HybridFmmStokesSolver(size_t num_particles)
                 :
                 m_num_particles(num_particles),
-                m_gpu_velocity(new float[3*num_particles + 2 * MEMORY_ALIGNMENT/sizeof(float)]),
+                m_gpu_velocity(new value_type[3*num_particles + 2 * MEMORY_ALIGNMENT/sizeof(value_type)]),
                 m_particles(new Particle[num_particles + 2 * MEMORY_ALIGNMENT/sizeof(Particle)]),
                 m_fields(num_particles),
                 m_potentials(num_particles)
@@ -33,12 +33,10 @@ class HybridFmmStokesSolver
             octree.numParticles = num_particles;
             octree.fields = &m_fields[0];
             octree.potentials = &m_potentials[0];
-            octree.GPU_Veloc = (float*) ALIGN_UP(m_gpu_velocity, MEMORY_ALIGNMENT);
+            octree.GPU_Veloc = (value_type*) ALIGN_UP(m_gpu_velocity, MEMORY_ALIGNMENT);
             octree.bodies = (Particle *) ALIGN_UP( m_particles, MEMORY_ALIGNMENT );
-            float *start = octree.GPU_Veloc;
+            value_type *start = octree.GPU_Veloc;
             std::fill(start, start + 3*num_particles, 0.0);
-
-
         }
         ~HybridFmmStokesSolver()
         {
@@ -56,8 +54,8 @@ class HybridFmmStokesSolver
                 #pragma omp single
                 {
                     gpuVelocitiesEval(octree.numParticles, octree.numLeafDInodes,
-                                      octree.total_interaction_pairs, (float *) octree.bodies,
-                                      (float *) octree.GPU_Veloc, octree.target_list,
+                                      octree.total_interaction_pairs, (value_type*)octree.bodies,
+                                      octree.GPU_Veloc, octree.target_list,
                                       octree.number_IP, octree.interaction_pairs, m_delta);
                 }
                 #pragma omp single

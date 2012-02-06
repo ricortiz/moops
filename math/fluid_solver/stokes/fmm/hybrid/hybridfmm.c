@@ -44,7 +44,7 @@ unsigned int Binomial(int n, int k)
     j = n;
     for (i = 1; i <= k; i++)
     {
-        binomial = (unsigned long) ((binomial * (float) j / i) + 0.5);
+        binomial = (unsigned long)((binomial * (float) j / i) + 0.5);
         j--;
     }
     return binomial;
@@ -1015,7 +1015,7 @@ void Plummer(int N)
 
     for (i = 0; i < N; i++)
     {
-        double temp = (((double) 1 ) / (pow((double)mfrac * randdouble(), ((double)1.5)))) - 1;
+        double temp = (((double) 1) / (pow((double)mfrac * randdouble(), ((double)1.5)))) - 1;
         ri = 1 / sqrt(temp);
 
         PickVector(rsc*ri, ndim, &octree.bodies[i].position[0], &octree.bodies[i].position[1], &octree.bodies[i].position[2]);

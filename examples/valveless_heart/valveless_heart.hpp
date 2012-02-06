@@ -34,7 +34,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
 
         inline void computeForces(value_type time)
         {
-            m_geometry.setRadiusScaling(time);
+            m_geometry.setPeristalticRadiusScaling(time);
             for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
                 m_geometry.resetRestingLength(s);
             base_type::computeForces();
@@ -101,7 +101,11 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             out << "];";
             
         }
-
+    public:
+        oval_type &geometry()
+        {
+            return m_geometry;
+        }
 };
 
 template<typename _value_type, typename _fluid_solver, typename _time_integrator>

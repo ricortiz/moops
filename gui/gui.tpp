@@ -37,6 +37,10 @@
 #include <QHBoxLayout>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <QGLWidget>
+#include <QRadialGradient>
+#include <QMouseEvent>
+#include <QTextDocument>
 
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
@@ -62,41 +66,43 @@ Gui<app_type>::Gui() : GuiBase()
     hboxLayout->addWidget(m_vtk_widget);
 
     vtkSmartPointer<vtkRenderWindow> renwin = vtkSmartPointer<vtkRenderWindow>::New();
-    
+
     // Activate 3DConnexion device
-    #ifdef VTK_USE_TDX
+#ifdef VTK_USE_TDX
     m_vtk_widget->SetUseTDx(true);
-    #endif
-    
+#endif
+
     m_vtk_widget->SetRenderWindow(renwin);
-    
-    const double angleSensitivity=0.01;
-    const double translationSensitivity=0.001;
-    
+
+    const double angleSensitivity = 0.01;
+    const double translationSensitivity = 0.001;
+
     QVTKInteractor *interactor = m_vtk_widget->GetInteractor();
     vtkInteractorStyle *s = static_cast<vtkInteractorStyle *>(interactor->GetInteractorStyle());
-    vtkTDxInteractorStyleCamera *t= static_cast<vtkTDxInteractorStyleCamera *>(s->GetTDxStyle());
-    
+    vtkTDxInteractorStyleCamera *t = static_cast<vtkTDxInteractorStyleCamera *>(s->GetTDxStyle());
+
     t->GetSettings()->SetAngleSensitivity(angleSensitivity);
     t->GetSettings()->SetTranslationXSensitivity(translationSensitivity);
     t->GetSettings()->SetTranslationYSensitivity(translationSensitivity);
     t->GetSettings()->SetTranslationZSensitivity(translationSensitivity);
-    
+
     // add a renderer
     m_vtk_renderer = vtkRenderer::New();
-    m_vtk_renderer->SetBackground(84./110,89./110,109./110);
+    m_vtk_renderer->SetBackground(105. / 255, 146. / 255, 182. / 255);
+    m_vtk_renderer->SetBackground2(16. / 255, 56. / 255, 121. / 255);
+    m_vtk_renderer->SetGradientBackground(true);
     m_vtk_widget->GetRenderWindow()->AddRenderer(m_vtk_renderer);
-    
+
     // add a popup menu for the window and connect it to our slot
     QMenu* popupMenu = new QMenu(m_vtk_widget);
     popupMenu->addAction("Reset");
     connect(popupMenu, SIGNAL(triggered(QAction*)), this, SLOT(reset(QAction*)));
 
-    m_connections = vtkEventQtSlotConnect::New();    
+    m_connections = vtkEventQtSlotConnect::New();
     // get right mouse pressed with high priority
-    m_connections->Connect(m_vtk_widget->GetRenderWindow()->GetInteractor(),vtkCommand::RightButtonPressEvent,this,SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)),popupMenu, 1.0);
+    m_connections->Connect(m_vtk_widget->GetRenderWindow()->GetInteractor(), vtkCommand::RightButtonPressEvent, this, SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)), popupMenu, 1.0);
     // update coords as we move through the window
-    m_connections->Connect(m_vtk_widget->GetRenderWindow()->GetInteractor(),vtkCommand::MouseMoveEvent,this,SLOT(updateCoords(vtkObject*)));    
+    m_connections->Connect(m_vtk_widget->GetRenderWindow()->GetInteractor(), vtkCommand::MouseMoveEvent, this, SLOT(updateCoords(vtkObject*)));
     m_connections->PrintSelf(cout, vtkIndent());
 }
 
@@ -109,19 +115,26 @@ Gui<app_type>::~Gui()
 
 
 template<typename app_type>
-void Gui<app_type>::setActor(vtkPolyData *poly_data)
+void Gui<app_type>::setActor(bool smooth = false)
 {
-    vtkSmartPointer<vtkSmoothPolyDataFilter> smoother = vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
-    smoother->SetInput(poly_data);
-    smoother->SetNumberOfIterations(15);
-    vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
-    normals->SetInputConnection(smoother->GetOutputPort());
-    normals->SetSplitting(1);
-    normals->SetNonManifoldTraversal(1);
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-    mapper->SetInputConnection(normals->GetOutputPort());
-//     mapper->SetInput(poly_data);
+    if (smooth)
+    {
+        vtkSmartPointer<vtkSmoothPolyDataFilter> smoother = vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
+        smoother->SetInput(app()->vtk_storage().grid());
+        smoother->SetNumberOfIterations(15);
+        vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
+        normals->SetInputConnection(smoother->GetOutputPort());
+        normals->SetSplitting(1);
+        normals->SetNonManifoldTraversal(1);
+        mapper->SetInputConnection(normals->GetOutputPort());
+    }
+    else
+    {
+        mapper->SetInput(app()->vtk_storage().grid());
+    }
     actor->SetMapper(mapper);
+
     m_vtk_renderer->AddViewProp(actor);
 }

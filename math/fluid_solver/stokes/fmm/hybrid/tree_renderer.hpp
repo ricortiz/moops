@@ -6,14 +6,14 @@
 #include <QtGui/QRadialGradient>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QTextDocument>
-
+#include <iostream>
 
 class OctreeRenderer : public QGLWidget
 {
         Q_OBJECT
 
     public:
-        OctreeRenderer(QWidget *parent = 0): QGLWidget(parent)
+        OctreeRenderer(QWidget *parent = 0): QGLWidget(parent), num_particles(0), num_boxes(0)
         {
             setFormat(QGLFormat(QGL::SampleBuffers));
 
@@ -33,10 +33,10 @@ class OctreeRenderer : public QGLWidget
         void init(box_array_type &boxes)
         {
             createGradient();
-            renderBox(&boxes[0]);
-            num_boxes = boxes.size();
+            renderBox(boxes.root,boxes.bodies,boxes.edge_length[0]);
+            num_boxes = 0;//boxes.size();
 //             depth = tree->depth();
-            num_particles = boxes[0].particles().size();
+//             num_particles = 0;//boxes[0].particles().size();
 //             max_particles = tree->get_max_particles();
         }
     protected:
@@ -89,8 +89,8 @@ class OctreeRenderer : public QGLWidget
             m_gradient.setColorAt(0.8, QColor(16, 56, 121));
         }
 
-        template<typename box_type>
-        void renderBox(const box_type &box)
+        template<typename box_type, typename particle_array>
+        void renderBox(const box_type *box, particle_array *particles, double extent)
         {
             makeCurrent();
 
@@ -101,57 +101,68 @@ class OctreeRenderer : public QGLWidget
             qglColor(QColor(255, 239, 191));
             glLineWidth(1.0);
 
-            createBoxes(box);
+            createBoxes(box,particles,extent);
 
             glEndList();
         }
 
-        template<typename box_type>
-        void createBoxes(box_type *box, int level)
+        template<typename box_type, typename particle_array>
+        void createBoxes(box_type *box, particle_array* particles, double extent)
         {
-            typedef typename box_type::box_iterator box_iterator;
-            typedef typename box_type::particle_iterator particle_iterator;
             {
                 glBegin(GL_LINES);
-                glVertex3f(box->x()+box->u(), box->y()+box->v(), box->z()-box->w());
-                glVertex3f(box->x()-box->u(), box->y()+box->v(), box->z()-box->w());
-                glVertex3f(box->x()+box->u(), box->y()-box->v(), box->z()-box->w());
-                glVertex3f(box->x()-box->u(), box->y()-box->v(), box->z()-box->w());
-                glVertex3f(box->x()+box->u(), box->y()-box->v(), box->z()+box->w());
-                glVertex3f(box->x()-box->u(), box->y()-box->v(), box->z()+box->w());
+                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z-extent);
+                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z-extent);
+                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z-extent);
+                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z-extent);
+                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z+extent);
+                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z+extent);
                 glEnd();
 
                 glBegin(GL_LINE_LOOP);
-                glVertex3f(box->x()+box->u(), box->y()+box->v(), box->z()+box->w());
-                glVertex3f(box->x()+box->u(), box->y()+box->v(), box->z()-box->w());
-                glVertex3f(box->x()+box->u(), box->y()-box->v(), box->z()-box->w());
-                glVertex3f(box->x()+box->u(), box->y()-box->v(), box->z()+box->w());
-                glVertex3f(box->x()+box->u(), box->y()+box->v(), box->z()+box->w());
-                glVertex3f(box->x()-box->u(), box->y()+box->v(), box->z()+box->w());
-                glVertex3f(box->x()-box->u(), box->y()+box->v(), box->z()-box->w());
-                glVertex3f(box->x()-box->u(), box->y()-box->v(), box->z()-box->w());
-                glVertex3f(box->x()-box->u(), box->y()-box->v(), box->z()+box->w());
-                glVertex3f(box->x()-box->u(), box->y()+box->v(), box->z()+box->w());
+                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z+extent);
+                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z-extent);
+                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z-extent);
+                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z+extent);
+                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z+extent);
+                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z+extent);
+                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z-extent);
+                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z-extent);
+                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z+extent);
+                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z+extent);
                 glEnd();
             }
-            if (box->children().size() == 0)
-                for (particle_iterator p = box->particles().begin(), end = box->particles().end(); p != end; ++p)
-                {
-                    GLfloat r = std::max(box->u(),std::max(box->v(),box->w()))/100;
+            
+            for(int i = 0 ; i < 8; ++i)
+	    {
+	      bool leaf = true;
+	      if(box->child[i])
+	      {
+		leaf = false;
+		num_boxes++;
+		createBoxes(box->child[i],particles,extent*.5);
+	      }
+	      if(leaf)
+	      {
+		  int low = box->pArrayLow;
+		  int high = box->pArrayHigh;
+		  for (int p = low; p <= high; ++p)
+		  {
+		    GLfloat r = .005;
                     GLUquadric * qobj = gluNewQuadric();
                     glPushMatrix();
-                    glTranslatef((*p)->position[0], (*p)->position[1], (*p)->position[2]);
+                    glTranslatef(particles[p].position[0], particles[p].position[1], particles[p].position[2]);
                     GLint slices = 8;
                     GLint stacks = 8;
                     gluSphere(qobj, r, slices, stacks);
                     glPopMatrix();
                     gluDeleteQuadric(qobj);
-                }
-
-            for (box_iterator b = box->children().begin(), end = box->children().end(); b != end; ++b)
-            {
-                createBoxes(*b);
-            }
+		    num_particles++;
+		  }
+	      }
+		
+	    }
+            
 
         }
 

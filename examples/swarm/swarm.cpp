@@ -29,8 +29,8 @@ class SwarmApp
     private:
         types::swarm_surface m_swarm;
         types::value_type m_time_step;
-        types::vtk_storage m_vtk_storage;
-        types::vtk_writer m_surface_writer;
+        types::swarm_vtk_storage m_vtk_storage;
+        types::swarm_vtk_writer m_surface_writer;
         bool m_record;
 
     public:
@@ -112,12 +112,12 @@ class SwarmApp
             }
         }
 
-        types::vtk_storage &vtk_storage() { return m_vtk_storage; }
+        types::swarm_vtk_storage &vtk_storage() { return m_vtk_storage; }
         
     public:
-        types::swarm_surface *boundary()
+        types::swarm_surface &boundary()
         {
-            return &m_swarm;
+            return m_swarm;
         }
 
 };

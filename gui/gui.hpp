@@ -9,29 +9,29 @@ class vtkEventQtSlotConnect;
 class vtkObject;
 class vtkCommand;
 class QVTKWidget;
-class GuiBase;
 
 template<typename app_type>
 class Gui : public GuiBase
 {
-public:
-    Gui();
-    ~Gui();
-    void setActor(vtkPolyData *);
-public slots:
-    void popup(vtkObject * obj, unsigned long,void * client_data, void *,vtkCommand * command);
-    void updateCoords(vtkObject* obj);
-    
-protected:
-    app_type *app() {
-        return static_cast<app_type*>(this);
-    }
+    public:
+        Gui();
+        ~Gui();
+        void setActor(bool);
+    public slots:
+        void popup(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command);
+        void updateCoords(vtkObject* obj);
 
-private:
+    protected:
+        app_type *app()
+        {
+            return static_cast<app_type*>(this);
+        }
 
-    vtkRenderer* m_vtk_renderer;
-    vtkEventQtSlotConnect* m_connections;
-    QVTKWidget *m_vtk_widget;
+    private:
+
+        vtkRenderer* m_vtk_renderer;
+        vtkEventQtSlotConnect* m_connections;
+        QVTKWidget *m_vtk_widget;
 };
 
 #include "gui.tpp"

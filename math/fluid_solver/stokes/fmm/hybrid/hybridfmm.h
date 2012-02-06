@@ -88,7 +88,6 @@ typedef struct _Node
   float mid_x, mid_y, mid_z, *phi[4], *psi[4];
   int pArrayLow, pArrayHigh, *colleagueCount, *list1Count, *list2Count,
     *list4Count,*list3Count, isParent;
-    double extent;
 } Node;
 
 typedef struct _Synch

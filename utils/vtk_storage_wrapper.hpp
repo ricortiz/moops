@@ -135,7 +135,7 @@ class vtkStorageWrapper
                     setEdgeCells(i,j,M,N,offset);
         }
 
-        void setTopells(int M, int N, size_t offset = 0)
+        void setTopCells(int M, int N, size_t offset = 0)
         {
             for(int j = 0; j < N; ++j)
                 for(int i = 0; i < M; ++i)
