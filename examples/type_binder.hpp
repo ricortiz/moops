@@ -61,12 +61,12 @@ struct TypeBinder
     typedef ExplicitSDC<value_type, spectral_integrator, sdc_corrections>                             explicit_sdc;
     typedef SemiImplicitSDC<value_type, spectral_integrator, sdc_corrections>                         implicit_sdc;
 
-    typedef implicit_sdc                                        time_integrator;
+    typedef explicit_sdc                                        time_integrator;
 
     typedef HeartPump<value_type, fluid_solver, time_integrator>  heart_pump_surface;
-    typedef Swarm<value_type, fluid_solver, time_integrator>      swarm_surface;
+    typedef Swarm<value_type, fmm_fluid_solver, time_integrator>      swarm_surface;
 
-    typedef vtkStorageWrapper<swarm_surface>                      swarm_vtk_storage;
+    typedef vtkStorageWrapper<swarm_surface,vtkFloatArray>                      swarm_vtk_storage;
     typedef vtkStorageWrapper<heart_pump_surface>                 heart_vtk_storage;
     typedef IO::VtkWriter<swarm_vtk_storage, vtkXMLPolyDataWriter>      swarm_vtk_writer;
     typedef IO::VtkWriter<heart_vtk_storage, vtkXMLPolyDataWriter>      heart_vtk_writer;

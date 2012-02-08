@@ -8,7 +8,7 @@ extern "C"
 #include "math/fluid_solver/stokes/fmm/hybrid/hybridfmm.h"
 }
 
-template<typename value_type, int precision = 6>
+template < typename value_type, int precision = 6 >
 class HybridFmmStokesSolver
 {
     private:
@@ -39,7 +39,8 @@ class HybridFmmStokesSolver
         inline void operator()(value_type, value_type *x, value_type *v, value_type *f)
         {
             logger.startTimer("initData");
-            initData(x, v, f);
+            initData(x, f);
+	    octree.CPU_Veloc = v;
             logger.stopTimer("initData");
             logger.startTimer("CreateOctree");
             CreateOctree(m_num_particles, precision, 255.9999, 0);
@@ -83,13 +84,53 @@ class HybridFmmStokesSolver
                 }
             }
 //             std::cout << "gpu_velocities = ";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
-	    logger.startTimer("copyVelocities");
+            logger.startTimer("copyVelocities");
             copyVelocities(v);
-	    logger.stopTimer("copyVelocities");
+            logger.stopTimer("copyVelocities");
 //             std::cout << "hv_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
         }
+        inline void Implicit(value_type, const value_type *x, value_type *v, const value_type *f)
+        {
+	    logger.startTimer("initData");
+            initData(x, f);
+            octree.GPU_Veloc = v;
+            logger.stopTimer("initData");
+            logger.startTimer("gpuVelocitiesEval");
+            gpuVelocitiesEval(octree.numParticles,
+                              octree.numLeafDInodes,
+                              octree.total_interaction_pairs,
+                              (float*)octree.bodies,
+                              octree.GPU_Veloc,
+                              octree.target_list,
+                              octree.number_IP,
+                              octree.interaction_pairs,
+                              m_delta);
+            logger.stopTimer("gpuVelocitiesEval");
+	    gpuGetVelocities();
+        }
 
-        void initData(value_type *x, value_type *v, value_type *f)
+        inline void Explicit(value_type, const value_type *x, value_type *v, const value_type *f)
+        {
+            logger.startTimer("initData");
+            initData(x, f);
+	    octree.CPU_Veloc = v;
+            logger.stopTimer("initData");
+            logger.startTimer("CreateOctree");
+            CreateOctree(m_num_particles, precision, 255.9999, 0);
+            logger.stopTimer("CreateOctree");
+	    #pragma omp parallel
+            {
+		#pragma omp single
+                {
+                    logger.startTimer("UpSweep");
+                    UpSweep(octree.root);
+                    DownSweep(octree.root);
+                    logger.stopTimer("UpSweep");
+//                     std::cout << "fmm_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+                }
+            }
+        }
+        void initData(const value_type *x, const value_type *f)
         {
             for (size_t p = 0, idx = 0; p < m_num_particles; ++p, idx += 3)
             {
@@ -100,7 +141,6 @@ class HybridFmmStokesSolver
                 octree.bodies[p].force[1] = f[idx+1];
                 octree.bodies[p].force[2] = f[idx+2];
             }
-            octree.CPU_Veloc = v;
         }
 
         void copyVelocities(value_type *v)

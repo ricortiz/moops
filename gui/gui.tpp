@@ -47,6 +47,8 @@
 #include <vtkCommand.h>
 #include <vtkEventQtSlotConnect.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkDataSetMapper.h>
+#include <vtkProperty.h>
 #include <vtkActor.h>
 #include <vtkInteractorStyle.h>
 #include <vtkTDxInteractorStyleCamera.h>
@@ -115,7 +117,7 @@ Gui<app_type>::~Gui()
 
 
 template<typename app_type>
-void Gui<app_type>::setActor(bool smooth = false)
+void Gui<app_type>::setGridActor(bool smooth = false)
 {
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
@@ -138,3 +140,16 @@ void Gui<app_type>::setActor(bool smooth = false)
 
     m_vtk_renderer->AddViewProp(actor);
 }
+
+template<typename app_type>
+void Gui<app_type>::setBoxActor()
+{
+    vtkSmartPointer<vtkDataSetMapper> mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+    mapper->SetInput(app()->vtk_storage().box());
+    actor->SetMapper(mapper);
+//     actor->GetProperty()->SetOpacity(.1);
+
+    m_vtk_renderer->AddViewProp(actor);
+}
+

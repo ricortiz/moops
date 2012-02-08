@@ -16,7 +16,8 @@ class Gui : public GuiBase
     public:
         Gui();
         ~Gui();
-        void setActor(bool);
+        void setGridActor(bool);
+        void setBoxActor(bool);
     public slots:
         void popup(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command);
         void updateCoords(vtkObject* obj);

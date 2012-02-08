@@ -11,7 +11,7 @@ class SwarmApp
 {
         enum
         {
-            num_sperms = 100,
+            num_sperms = 25,
             Mt = 6,
             Nt = 100,
             Mh = 12,
@@ -23,7 +23,7 @@ class SwarmApp
             data_size = 3 * num_particles
         };
     protected:
-        typedef double value_type;
+        typedef float value_type;
         typedef TypeBinder<value_type> types;
         
     private:
@@ -138,7 +138,8 @@ int main(int ac, char **av)
     SwarmApp swarm(data_dir);
 #ifdef USE_QT_GUI
     swarm.vtk_storage().grid()->PrintSelf(std::cout, vtkIndent());
-    swarm.setActor(swarm.vtk_storage().grid());
+    swarm.setGridActor(swarm.vtk_storage().grid());
+    swarm.setBoxActor(swarm.vtk_storage().box());
     swarm.show();
     return app.exec();
 #else

@@ -1,3 +1,3 @@
 
 ADD_EXECUTABLE(swarm swarm.cpp)
-TARGET_LINK_LIBRARIES(swarm ${APP_LIBS})
+TARGET_LINK_LIBRARIES(swarm ${APP_LIBS} hybridfmm)

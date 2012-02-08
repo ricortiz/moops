@@ -37,8 +37,8 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             std::vector<value_type> mesh2d;              // coords of each geometry
             size_t x = std::sqrt(num_sperms) , y = x;
             setGeometryGrid(mesh2d, x, y);         // create a grid to put the geometries on
-            std::vector<size_t> &col_ptr = this->fluid_solver().col_ptr;// sparse matrix (CSR-format) holding
-            std::vector<size_t> &col_idx = this->fluid_solver().col_idx;// sparse matrix (CSR-format) holding
+            std::vector<size_t> /*&*/col_ptr/* = this->fluid_solver().col_ptr*/;// sparse matrix (CSR-format) holding
+            std::vector<size_t> /*&*/col_idx/* = this->fluid_solver().col_idx*/;// sparse matrix (CSR-format) holding
             std::vector<value_type> strenght;            // interactions between particles
             size_t num_springs = this->particles_size() * 9; // estimate total number of springs
             col_ptr.reserve(this->particles_size() + 1); // Reserve
