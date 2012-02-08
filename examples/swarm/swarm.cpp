@@ -11,7 +11,7 @@ class SwarmApp
 {
         enum
         {
-            num_sperms = 1,
+            num_sperms = 100,
             Mt = 6,
             Nt = 100,
             Mh = 12,

@@ -1,9 +1,11 @@
 
 #FindCUDA
 FIND_PACKAGE(CUDA REQUIRED)
-set(NVCC_FLAGS -g -G -gencode arch=compute_11,code=sm_11)
-SET(CUDA_NVCC_FLAGS ${NVCC_FLAGS})
-
+set(NVCC_FLAGS --compiler-bindir /usr/bin/gcc-4.4 -gencode arch=compute_20,code=sm_20)
+SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${NVCC_FLAGS})
+if(${CMAKE_BUILD_TYPE} MATCHES "Release")
+  SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} )
+endif()
 
 SET(CUDA_TARGETS_SOURCES kernel.cu)
 cuda_add_library(kernel STATIC ${CUDA_TARGETS_SOURCES})

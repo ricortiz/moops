@@ -8,15 +8,15 @@
 // #define IGNORE_FIRST_DEVICE             //ignore first device, (on systems where first device might be hooked to display) or might not be a faster GPU
 // #define LOAD_BALANCING                  //to enable or disable load balancing, if disabled each GPU executes same amount of CUDA blocks, which might change actual load
 
-#define CUDA_LOG                        //enable logs (minimal)
-#define GPU_INFO                        //print which GPUs are being used
+// #define CUDA_LOG                        //enable logs (minimal)
+// #define GPU_INFO                        //print which GPUs are being used
 
 // #define ENABLE_BLOCKING                 //CPU thread that invokes cuda gets blocked
 // #define CPU_EXECUTE                     //execute on CPU as well, just for validating GPU results with CPU
 // #define CUDA_DEBUG                      //detailed GPU logging
 
-#define MEMORY_ALIGNMENT  4096
-#define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
+// #define MEMORY_ALIGNMENT  4096
+// #define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
 
 //globals
 FILE *fp;
@@ -205,10 +205,10 @@ __global__ void kernel(    int block_offset,
     }
 }
 
-inline unsigned int getAlignedSize(unsigned int size)
-{
-    return (size + MEMORY_ALIGNMENT - (size % MEMORY_ALIGNMENT));
-}
+// inline unsigned int getAlignedSize(unsigned int size)
+// {
+//     return (size + MEMORY_ALIGNMENT - (size % MEMORY_ALIGNMENT));
+// }
 
 inline double wcTime()
 {
@@ -713,8 +713,8 @@ extern "C"
         cudaMemcpy(gpuVelocities, (float *)dvelocities, 100*sizeof(float), cudaMemcpyDeviceToHost);
         fprintf(stdout, "CUDA_LOG::Total GPU Time(Blocking call): %f\n,", wcTime() - startTime);
 #endif
-        err = cudaDeviceSynchronize();
-        checkError(err);
+//         err = cudaDeviceSynchronize();
+//         checkError(err);
         //assign globals
         GL_positions              = positions;
         GL_gpuVelocities          = gpuVelocities;

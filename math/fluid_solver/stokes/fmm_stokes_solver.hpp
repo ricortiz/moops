@@ -24,7 +24,7 @@ template<typename value_type, size_t max_particles, size_t precision>
 class FmmStokesSolver
 {
     protected:
-        typedef Particle<value_type> particle_type;
+        typedef ParticleWrapper<value_type> particle_type;
         typedef Octree<value_type,max_particles,particle_type> tree_type;
         typedef MultipoleTaylor<value_type,precision> fmm_type;
         

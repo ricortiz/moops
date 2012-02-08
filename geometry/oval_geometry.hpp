@@ -14,7 +14,7 @@ class OvalGeometry : public BaseGeometry<OvalGeometry<value_type> >
 protected:
 
     typedef BaseGeometry<OvalGeometry<value_type> > base_type;
-    typedef Particle<value_type> particle_type;
+    typedef ParticleWrapper<value_type> particle_type;
     
     private:
         value_type       m_x0[3];
@@ -204,7 +204,7 @@ template<typename _value_type>
 struct geometry_traits<OvalGeometry<_value_type> >
 {
     typedef _value_type          value_type;
-    typedef Particle<value_type> particle_type;
+    typedef ParticleWrapper<value_type> particle_type;
 };
 
 #endif

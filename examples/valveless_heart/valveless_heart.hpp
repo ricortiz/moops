@@ -12,7 +12,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
         typedef Surface<HeartPump<value_type, fluid_solver, time_integrator> > base_type;
         typedef typename base_type::spring_iterator spring_iterator;
         typedef OvalGeometry<value_type> oval_type;
-        typedef Particle<value_type> particle_type;
+        typedef ParticleWrapper<value_type> particle_type;
         typedef std::pair<spring_iterator, spring_iterator> spring_iterator_pair;
 
     private:
@@ -114,7 +114,7 @@ struct Traits<HeartPump<_value_type, _fluid_solver, _time_integrator> >
     typedef _value_type value_type;
     typedef _fluid_solver fluid_solver_type;
     typedef _time_integrator time_integrator_type;
-    typedef Particle<value_type> particle_type;
+    typedef ParticleWrapper<value_type> particle_type;
     typedef ParticleSystemStorage<value_type, particle_type, SURFACE> storage_type;
 };
 

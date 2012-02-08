@@ -16,7 +16,7 @@ struct Traits;
 template<>
 struct Traits<int>
 {
-    typedef Particle<double> particle_type;
+    typedef ParticleWrapper<double> particle_type;
     typedef double value_type;
 };
 

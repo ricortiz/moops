@@ -8,7 +8,7 @@ extern "C"
 #include "math/fluid_solver/stokes/fmm/hybrid/hybridfmm.h"
 }
 
-template<typename value_type>
+template<typename value_type, int precision = 6>
 class HybridFmmStokesSolver
 {
     private:
@@ -36,20 +36,19 @@ class HybridFmmStokesSolver
             octree.GPU_Veloc = &m_gpu_velocity[0];
             octree.bodies = &m_particles[0];
         }
-        ~HybridFmmStokesSolver()
+        inline void operator()(value_type, value_type *x, value_type *v, value_type *f)
         {
-        }
-        inline void operator() ( value_type, value_type *x, value_type *v, value_type *f)
-        {
+            logger.startTimer("initData");
             initData(x, v, f);
+            logger.stopTimer("initData");
             logger.startTimer("CreateOctree");
-            CreateOctree(m_num_particles, 6, 255.9999, 0);
+            CreateOctree(m_num_particles, precision, 255.9999, 0);
             logger.stopTimer("CreateOctree");
-            #pragma omp parallel
+	    #pragma omp parallel
             {
-                #pragma omp single
+		#pragma omp single
                 {
-                    
+                    logger.startTimer("gpuVelocitiesEval");
                     gpuVelocitiesEval(octree.numParticles,
                                       octree.numLeafDInodes,
                                       octree.total_interaction_pairs,
@@ -59,20 +58,23 @@ class HybridFmmStokesSolver
                                       octree.number_IP,
                                       octree.interaction_pairs,
                                       m_delta);
+                    logger.stopTimer("gpuVelocitiesEval");
                 }
-                #pragma omp single
+		#pragma omp single
                 {
+                    logger.startTimer("UpSweep");
                     UpSweep(octree.root);
                     DownSweep(octree.root);
-                    std::copy(octree.CPU_Veloc, octree.CPU_Veloc + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+                    logger.stopTimer("UpSweep");
+//                     std::cout << "fmm_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
                 }
-                #pragma omp barrier
-                #pragma omp single
+		#pragma omp barrier
+		#pragma omp single
                 {
                     gpuGetVelocities();
                 }
-                #pragma omp barrier
-                #pragma omp single
+		#pragma omp barrier
+		#pragma omp single
                 {
                     //ReSort(octree.root, octree.rootInfo);
                     /*if(ReSort(octree.root, octree.rootInfo))
@@ -80,7 +82,11 @@ class HybridFmmStokesSolver
                      * */
                 }
             }
+//             std::cout << "gpu_velocities = ";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+	    logger.startTimer("copyVelocities");
             copyVelocities(v);
+	    logger.stopTimer("copyVelocities");
+//             std::cout << "hv_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
         }
 
         void initData(value_type *x, value_type *v, value_type *f)
@@ -99,14 +105,14 @@ class HybridFmmStokesSolver
 
         void copyVelocities(value_type *v)
         {
-            std::transform(m_gpu_velocity.begin(),m_gpu_velocity.end(),v,v,std::plus<value_type>());
-            std::fill(m_gpu_velocity.begin(),m_gpu_velocity.end(),0.0);
+            std::transform(m_gpu_velocity.begin(), m_gpu_velocity.end(), v, v, std::plus<value_type>());
+            std::fill(m_gpu_velocity.begin(), m_gpu_velocity.end(), 0.0);
         }
         void setDomain(value_type domain[2][3])
         {
             value_type tmp[3] = {domain[0][0] + domain[1][0], domain[0][1] + domain[1][0], domain[0][2] + domain[1][0]};
             m_extents[0] = 0, m_extents[1] = 0;
-            for ( int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 if (m_extents[0] < tmp[i])
                     m_extents[0] = tmp[i];
@@ -118,13 +124,14 @@ class HybridFmmStokesSolver
 
         void allPairs()
         {
-            AllPairs(m_num_particles,0,m_delta);
-            
-            std::cout << "velocities = ";std::copy(m_gpu_velocity.begin(),m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+            AllPairs(m_num_particles, 0, m_delta);
+
+            std::cout << "ap_velocities = ";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
         }
         void setDelta(value_type delta) { m_delta = delta; }
 };
 
 
 #endif
+
 

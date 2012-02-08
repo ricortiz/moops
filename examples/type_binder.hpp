@@ -23,6 +23,7 @@ template<typename T>
 struct Traits;
 
 #include "math/fluid_solver/stokes/cpu_stokes_solver.hpp"
+#include "math/fluid_solver/stokes/hybrid_fmm_stokes_solver.hpp"
 #include "math/ode_solver/euler/forward_euler.hpp"
 #include "math/ode_solver/euler/backward_euler.hpp"
 #include "math/ode_solver/sdc/explicit_sdc.hpp"
@@ -39,11 +40,12 @@ struct TypeBinder
 {
     typedef TypeBinder<_value_type>                             Types;
     typedef _value_type value_type;
-    typedef Particle<value_type>                                particle_type;
+    typedef ParticleWrapper<value_type>                                particle_type;
 #ifdef USE_CUDA_FLUID_SOLVER
     typedef GpuStokesSolver<float>                              fluid_solver;
 #else
     typedef CpuStokesSolver<value_type>                         fluid_solver;
+    typedef HybridFmmStokesSolver<value_type>                         fmm_fluid_solver;
 #endif
 
     typedef ForwardEuler                                        forward_euler;

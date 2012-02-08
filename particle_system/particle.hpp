@@ -21,7 +21,7 @@
 /// 	ParticleSystem particle_system_storage
 
 template<typename _value_type>
-struct Particle
+struct ParticleWrapper
 {
   typedef _value_type value_type;
     value_type *position;
