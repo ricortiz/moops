@@ -137,9 +137,10 @@ int main(int ac, char **av)
 
     SwarmApp swarm(data_dir);
 #ifdef USE_QT_GUI
-    swarm.vtk_storage().grid()->PrintSelf(std::cout, vtkIndent());
-    swarm.setGridActor(swarm.vtk_storage().grid());
-    swarm.setBoxActor(swarm.vtk_storage().box());
+//     swarm.vtk_storage().grid()->PrintSelf(std::cout, vtkIndent());
+    swarm.vtk_storage().box()->PrintSelf(std::cout, vtkIndent());
+    swarm.setGridActor(true);
+    swarm.setBoxActor();
     swarm.show();
     return app.exec();
 #else

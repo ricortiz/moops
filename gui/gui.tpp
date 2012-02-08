@@ -105,7 +105,7 @@ Gui<app_type>::Gui() : GuiBase()
     m_connections->Connect(m_vtk_widget->GetRenderWindow()->GetInteractor(), vtkCommand::RightButtonPressEvent, this, SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)), popupMenu, 1.0);
     // update coords as we move through the window
     m_connections->Connect(m_vtk_widget->GetRenderWindow()->GetInteractor(), vtkCommand::MouseMoveEvent, this, SLOT(updateCoords(vtkObject*)));
-    m_connections->PrintSelf(cout, vtkIndent());
+//     m_connections->PrintSelf(cout, vtkIndent());
 }
 
 template<typename app_type>
@@ -148,7 +148,7 @@ void Gui<app_type>::setBoxActor()
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     mapper->SetInput(app()->vtk_storage().box());
     actor->SetMapper(mapper);
-//     actor->GetProperty()->SetOpacity(.1);
+    actor->GetProperty()->SetOpacity(.1);
 
     m_vtk_renderer->AddViewProp(actor);
 }
