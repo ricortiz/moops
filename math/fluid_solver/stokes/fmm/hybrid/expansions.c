@@ -344,9 +344,9 @@ void ApplyLocalExpansion(Node *node)
             }
         }
         int idx = 3*pNum;
-        octree.CPU_Veloc[idx] += octree.potentials[pNum].x - p->position[0]*octree.fields[pNum].field[0][0] - p->position[1]*octree.fields[pNum].field[0][1] - p->position[2]*octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3];
-        octree.CPU_Veloc[idx+1] += octree.potentials[pNum].y - p->position[0]*octree.fields[pNum].field[1][0] - p->position[1]*octree.fields[pNum].field[1][1] - p->position[2]*octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3];
-        octree.CPU_Veloc[idx+1] += octree.potentials[pNum].z - p->position[0]*octree.fields[pNum].field[2][0] - p->position[1]*octree.fields[pNum].field[2][1] - p->position[2]*octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3];
+        octree.CPU_Veloc[idx]   += 0.039788735772974*(octree.potentials[pNum].x - p->position[0]*octree.fields[pNum].field[0][0] - p->position[1]*octree.fields[pNum].field[0][1] - p->position[2]*octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3]);
+        octree.CPU_Veloc[idx+1] += 0.039788735772974*(octree.potentials[pNum].y - p->position[0]*octree.fields[pNum].field[1][0] - p->position[1]*octree.fields[pNum].field[1][1] - p->position[2]*octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3]);
+        octree.CPU_Veloc[idx+1] += 0.039788735772974*(octree.potentials[pNum].z - p->position[0]*octree.fields[pNum].field[2][0] - p->position[1]*octree.fields[pNum].field[2][1] - p->position[2]*octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3]);
     }
 }
 
@@ -357,7 +357,7 @@ void ApplyLocalExpansion(Node *node)
  * within leaf node while taking into acount newton's third law
  *
  **********************************************************************/
-void PerformDirectWithinNode(Node *node)
+void PerformDirectWithinNode(Node *node,double delta)
 {
     int pNum, qNum;
 
@@ -365,7 +365,7 @@ void PerformDirectWithinNode(Node *node)
     {
         for (qNum = node->pArrayLow; qNum <= node->pArrayHigh; qNum++)
         {
-            ComputeVelocityDirect(pNum,qNum);
+            ComputeVelocityDirect(pNum,qNum,delta);
         }
     }
 }
@@ -457,18 +457,18 @@ void MultipoleExpansion(Node *node,Node *parent, float *phi_tilde)
  * @brief - compute velocity between two particles directly
  *
  ***********************************************************************/
-void ComputeVelocityDirect(int target, int source)
+void ComputeVelocityDirect(int target, int source, double delta)
 {
     double dx[] = {octree.bodies[target].position[0] - octree.bodies[source].position[0],
                    octree.bodies[target].position[1] - octree.bodies[source].position[1],
                    octree.bodies[target].position[2] - octree.bodies[source].position[2]};
 
     double r2 = dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2];
-    double d2 = 0.05;
+    double d2 = delta*delta;
     double R1 = r2 + d2;
     double R2 = R1 + d2;
     double invR = 1.0/R1;
-    double H = sqrt(invR)*invR;
+    double H = sqrt(invR)*invR*0.039788735772974;
 
     double fdx = octree.bodies[source].force[0]*dx[0]+
                  octree.bodies[source].force[1]*dx[1]+

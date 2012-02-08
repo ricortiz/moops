@@ -2,6 +2,7 @@
 #define OCTREE_RENDERER_HPP
 
 #include <cmath>
+#include <GL/glu.h>
 #include <QtOpenGL/QGLWidget>
 #include <QtGui/QRadialGradient>
 #include <QtGui/QMouseEvent>
@@ -142,13 +143,16 @@ class OctreeRenderer : public QGLWidget
 		num_boxes++;
 		createBoxes(box->child[i],particles,extent*.5);
 	      }
-	      if(leaf)
-	      {
-		  int low = box->pArrayLow;
-		  int high = box->pArrayHigh;
-		  for (int p = low; p <= high; ++p)
-		  {
-		    GLfloat r = .005;
+
+		
+	    }
+	    if(box->parent == box)
+            {
+                int low = box->pArrayLow;
+                int high = box->pArrayHigh;
+                for (int p = low; p <= high; ++p)
+                {
+                    GLfloat r = .005;
                     GLUquadric * qobj = gluNewQuadric();
                     glPushMatrix();
                     glTranslatef(particles[p].position[0], particles[p].position[1], particles[p].position[2]);
@@ -157,12 +161,9 @@ class OctreeRenderer : public QGLWidget
                     gluSphere(qobj, r, slices, stacks);
                     glPopMatrix();
                     gluDeleteQuadric(qobj);
-		    num_particles++;
-		  }
-	      }
-		
-	    }
-            
+                    num_particles++;
+                }
+            }
 
         }
 

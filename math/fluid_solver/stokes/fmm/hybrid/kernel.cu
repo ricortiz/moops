@@ -6,14 +6,14 @@
 //*****************************USE THESE PARAMETERS TO CHANGE THE BEHAVIOR********************************
 
 // #define IGNORE_FIRST_DEVICE             //ignore first device, (on systems where first device might be hooked to display) or might not be a faster GPU
-#define LOAD_BALANCING                  //to enable or disable load balancing, if disabled each GPU executes same amount of CUDA blocks, which might change actual load
+// #define LOAD_BALANCING                  //to enable or disable load balancing, if disabled each GPU executes same amount of CUDA blocks, which might change actual load
 
 #define CUDA_LOG                        //enable logs (minimal)
 #define GPU_INFO                        //print which GPUs are being used
 
-//#define ENABLE_BLOCKING                 //CPU thread that invokes cuda gets blocked
-//#define CPU_EXECUTE                     //execute on CPU as well, just for validating GPU results with CPU
-//#define CUDA_DEBUG                      //detailed GPU logging
+// #define ENABLE_BLOCKING                 //CPU thread that invokes cuda gets blocked
+// #define CPU_EXECUTE                     //execute on CPU as well, just for validating GPU results with CPU
+// #define CUDA_DEBUG                      //detailed GPU logging
 
 #define MEMORY_ALIGNMENT  4096
 #define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
@@ -28,23 +28,20 @@ double startTime;
 
 __device__ float3 evaluate(float3 a, float3 b, float3 force, float3 velocity, float delta)
 {
-    float3 dx;
-    dx.x = b.x - a.x;
-    dx.y = b.y - a.y;
-    dx.z = b.z - a.z;
+    float3 dx = {b.x - a.x,b.y - a.y,b.z - a.z};
 
-    float r2 = dx.x * dx.x + dx.y * dx.y + dx.z * dx.z ;
-    float d2 = 0.05;
+    float r2 = dx.x * dx.x + dx.y * dx.y + dx.z * dx.z;
+    float d2 = delta * delta;
     float R1 = r2 + d2;
     float R2 = R1 + d2;
-    float invR = 1.0 / R1;
-    float H = sqrt(invR) * invR;
+    float invR = 1.0f/R1;
+    float H = sqrtf(invR)*invR * 0.039788735772974;
 
-    float fdx =  force.x * dx.x + force.y * dx.y + force.z * dx.z;
+    float fdx = (force.x*dx.x+force.y*dx.y+force.z*dx.z);
 
-    velocity.x += H * (force.x * R2 + fdx * dx.x);
-    velocity.y += H * (force.y * R2 + fdx * dx.y);
-    velocity.z += H * (force.z * R2 + fdx * dx.z);
+    velocity.x += H*(force.x*R2+fdx*dx.x);
+    velocity.y += H*(force.y*R2+fdx*dx.y);
+    velocity.z += H*(force.z*R2+fdx*dx.z);
 
     return velocity;
 }
@@ -224,7 +221,7 @@ inline void checkError(cudaError_t err)
 {
 #ifdef CUDA_DEBUG
     if (err != cudaSuccess )
-        printf("CUDA_DEBUG:: cudaError = %u\n", err);
+        printf("CUDA_DEBUG:: cudaError = %s\n", cudaGetErrorString(err));
 #endif
 }
 
@@ -392,7 +389,7 @@ extern "C"
                         float R1 = r2 + d2;
                         float R2 = R1 + d2;
                         float invR = 1.0 / R1;
-                        float H = sqrt(invR) * invR;
+                        float H = sqrt(invR) * invR * 0.039788735772974;
 
                         float fdx =  positions[6*l+3] * rx + positions[6*l+4] * ry + positions[6*l+5] * rz;
 
@@ -426,8 +423,8 @@ extern "C"
                (float)sizeof(unsigned int)* NUM_LEAF_NODES / (1024.0f*1024.0f) );
 #endif
 
-        source_start_indices_for_blocks_temp = (unsigned int *) malloc (sizeof(unsigned int) * (NUM_LEAF_NODES + 1) + MEMORY_ALIGNMENT );
-        source_list_temp = (unsigned int *) malloc (sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES + MEMORY_ALIGNMENT );
+        source_start_indices_for_blocks_temp = (unsigned int *) malloc (sizeof(unsigned int) * (NUM_LEAF_NODES + 1) /*+ MEMORY_ALIGNMENT*/ );
+        source_list_temp = (unsigned int *) malloc (sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES/* + MEMORY_ALIGNMENT*/ );
         if (source_list_temp == NULL || source_start_indices_for_blocks_temp == NULL)
         {
             printf("CUDA ::Not enough memory on CPU.. Exiting\n");
@@ -435,8 +432,8 @@ extern "C"
         }
 
         //align
-        source_list = (unsigned int *) ALIGN_UP( source_list_temp, MEMORY_ALIGNMENT );
-        source_start_indices_for_blocks = (unsigned int *) ALIGN_UP( source_start_indices_for_blocks_temp, MEMORY_ALIGNMENT );
+        source_list = (unsigned int *) /*ALIGN_UP(*/ source_list_temp/*, MEMORY_ALIGNMENT )*/;
+        source_start_indices_for_blocks = (unsigned int *) /*ALIGN_UP( */source_start_indices_for_blocks_temp/*, MEMORY_ALIGNMENT )*/;
 
         //copy source_list and source_indices array
         unsigned int j = 0, k = 0, num_sources_to_interact_with = 0;
@@ -465,12 +462,12 @@ extern "C"
         printf("Total Work = %lu\n", total_work);
         for (int i = 0; i < NUM_LEAF_NODES; i++)
         {
-            fprintf(fp, "\n\nLeaf node: %d", i);
+            printf(/*fp,*/ "\n\nLeaf node: %d", i);
             int source_pair_offset = 2 * source_start_indices_for_blocks[i];
             for (int j = 0; j < num_interaction_pairs[i] ; j++)
             {
-                fprintf(fp, "\nInteracting target (%d): %d %d  with source (%d) %d %d",
-                        i, target_list[2*i], target_list[2*i+1], interaction_pairs[max_count] , source_list[source_pair_offset], source_list[source_pair_offset+1] );
+                printf(/*fp,*/ "\nInteracting target (%d): %d %d  with source (%d) %d %d",
+                               i, target_list[2*i], target_list[2*i+1], interaction_pairs[max_count] , source_list[source_pair_offset], source_list[source_pair_offset+1] );
                 source_pair_offset += 2;
                 max_count++;
             }
@@ -511,17 +508,17 @@ extern "C"
 
         //register memory
         cudaError_t err;
-        err =   cudaHostRegister(positions, getAlignedSize(sizeof(float) * 6 * NUM_BODIES), cudaHostRegisterPortable);
+        err =   cudaHostRegister(positions, sizeof(float) * 6 * NUM_BODIES, cudaHostRegisterMapped);
         checkError(err);
-        err =   cudaHostRegister(gpuVelocities, getAlignedSize(sizeof(float) * 3 * NUM_BODIES), cudaHostRegisterPortable);
+        err =   cudaHostRegister(gpuVelocities, sizeof(float) * 3 * NUM_BODIES, cudaHostRegisterMapped);
         checkError(err);
-        err =   cudaHostRegister(target_list, getAlignedSize(sizeof(unsigned int) * 2 * NUM_LEAF_NODES), cudaHostRegisterPortable);
+        err =   cudaHostRegister(target_list, sizeof(unsigned int) * 2 * NUM_LEAF_NODES, cudaHostRegisterMapped);
         checkError(err);
-        err =   cudaHostRegister(num_interaction_pairs, getAlignedSize(sizeof(unsigned int) * NUM_LEAF_NODES), cudaHostRegisterPortable);
+        err =   cudaHostRegister(num_interaction_pairs, sizeof(unsigned int) * NUM_LEAF_NODES, cudaHostRegisterMapped);
         checkError(err);
-        err =   cudaHostRegister(source_list, getAlignedSize(sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES), cudaHostRegisterPortable);
+        err =   cudaHostRegister(source_list, sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES, cudaHostRegisterMapped);
         checkError(err);
-        err =   cudaHostRegister(source_start_indices_for_blocks, getAlignedSize(sizeof(unsigned int) * (NUM_LEAF_NODES + 1)), cudaHostRegisterPortable);
+        err =   cudaHostRegister(source_start_indices_for_blocks, sizeof(unsigned int) * (NUM_LEAF_NODES + 1), cudaHostRegisterMapped);
         checkError(err);
 
         err =   cudaHostGetDevicePointer((void **) & dpositions, (void *)positions, 0);
@@ -570,7 +567,7 @@ extern "C"
         // BUG: rortiz - Initialize to zero
         int *load_balance_offset = (int *)malloc (sizeof(int) * num_gpus);
         int *load_balance_length = (int *)malloc (sizeof(int) * num_gpus);
-        for(int i = 0; i < num_gpus; ++i)
+        for (int i = 0; i < num_gpus; ++i)
         {
             load_balance_offset[i] = 0;
             load_balance_length[i] = 0;
@@ -710,15 +707,14 @@ extern "C"
                     (unsigned int *)dnum_interaction_pairs,
                     (unsigned int *)dsource_start_indices_for_blocks,
                     NUM_THREADS, delta);
-
         }
-
 
 #ifdef ENABLE_BLOCKING
         cudaMemcpy(gpuVelocities, (float *)dvelocities, 100*sizeof(float), cudaMemcpyDeviceToHost);
         fprintf(stdout, "CUDA_LOG::Total GPU Time(Blocking call): %f\n,", wcTime() - startTime);
 #endif
-
+        err = cudaDeviceSynchronize();
+        checkError(err);
         //assign globals
         GL_positions              = positions;
         GL_gpuVelocities          = gpuVelocities;

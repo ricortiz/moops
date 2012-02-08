@@ -580,7 +580,7 @@ int IsBorder(Node * constructListFor, Node * toCheck)
  * particle in each box in node's @list
  *
  **********************************************************************/
-void CalculateDirectInteractions(Node *node, Node **list, int max)
+void CalculateDirectInteractions(Node *node, Node **list, int max, double delta)
 {
 
     Node *list_node;
@@ -606,7 +606,7 @@ void CalculateDirectInteractions(Node *node, Node **list, int max)
                         //for every particle in list node
                         for (qNum = list_Low; qNum <= list_High; qNum++)
                         {
-                            ComputeVelocityDirect(pNum, qNum);
+                            ComputeVelocityDirect(pNum, qNum, delta);
                         }
                     }
                 }
@@ -623,7 +623,7 @@ void CalculateDirectInteractions(Node *node, Node **list, int max)
  * yet so just set to allways do all pairs method
  *
  **********************************************************************/
-void DirectViaExpansion(Node *target, Node *source)
+void DirectViaExpansion(Node *target, Node *source, double delta)
 {
     int i, j;
 
@@ -631,7 +631,7 @@ void DirectViaExpansion(Node *target, Node *source)
     {
         for (j = source->pArrayLow; j <= source->pArrayHigh; j++)
         {
-            ComputeVelocityDirect(i, j);
+            ComputeVelocityDirect(i, j, delta);
         }
     }
     /*
@@ -852,7 +852,7 @@ void par_time(double *ccTot, double *phiTot, double *psiTot, double *diTot)
  * pairs method
  *
  **********************************************************************/
-void AllPairs(unsigned long number_particles, double dt)
+void AllPairs(unsigned long number_particles, double dt, double delta)
 {
     int i, j;
 
@@ -863,10 +863,10 @@ void AllPairs(unsigned long number_particles, double dt)
         {
             for (j = 0; j < number_particles; j++)
             {
-                ComputeVelocityDirect(i, j);
+                ComputeVelocityDirect(i, j, delta);
             }
         }
-        UpdateBodies(number_particles, dt);
+//         UpdateBodies(number_particles, dt);
 #pragma omp single
         {
             //ReSort(octree.root, octree.rootInfo);
@@ -949,16 +949,16 @@ void UpdateBodiesWithGPU(unsigned long number_particles, double dt)
  * @brief Carry out all direct interactions in tree
  *
  **********************************************************************/
-void PerformDirectInterations(Node *node)
+void PerformDirectInterations(Node *node,double delta)
 {
     int id;
 
     if (!node->isParent)
     {
-        CalculateDirectInteractions(node, node->list4, *node->list4Count);
-        PerformDirectWithinNode(node);
-        CalculateDirectInteractions(node, node->list1, *node->list1Count);
-        CalculateDirectInteractions(node, node->list3, *node->list3Count);
+        CalculateDirectInteractions(node, node->list4, *node->list4Count,delta);
+        PerformDirectWithinNode(node,delta);
+        CalculateDirectInteractions(node, node->list1, *node->list1Count,delta);
+        CalculateDirectInteractions(node, node->list3, *node->list3Count,delta);
     }
 
     if (node->isParent)
@@ -968,7 +968,7 @@ void PerformDirectInterations(Node *node)
             if (node->child[id]->pArrayLow != -1)
             {
 #pragma omp task firstprivate(id)
-                PerformDirectInterations(node->child[id]);
+                PerformDirectInterations(node->child[id],delta);
             }
         }
 #pragma omp taskwait

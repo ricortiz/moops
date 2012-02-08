@@ -24,27 +24,28 @@ int hybrid_fmm_stokes_solver(int ac,char **av)
 {
     srand(0);
     typedef float value_type;
-    size_t num_sources = 1 << 7;
-    size_t num_targets = 1 << 7;
+    size_t num_sources = 1 << 10;
+    size_t num_targets = 1 << 10;
     size_t size_sources = 3*num_sources;
     size_t size_targets = 3*num_targets;
     std::vector<value_type> sources(size_sources), targets(size_targets), velocities(size_targets), forces(size_sources);
-    value_type delta = .01;
+    value_type delta = .000001;
     value_type domain[2][3] = {{0,0,0},{10,10,10}};
     HybridFmmStokesSolver<value_type> fmm(num_sources);
     std::generate(sources.begin(),sources.end(),random_generator<value_type>());
     std::generate(targets.begin(),targets.end(),random_generator<value_type>());
     std::generate(forces.begin(),forces.end(),random_generator<value_type>());    
-    std::copy(sources.begin(),sources.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << std::endl;    
-    std::copy(targets.begin(),targets.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << std::endl;    
-    std::copy(forces.begin(),forces.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << std::endl;
+    std::cout << "sources = ["; std::copy(sources.begin(),sources.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << "];" << std::endl;
+    std::cout << "targets = ["; std::copy(targets.begin(),targets.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << "];" << std::endl;
+    std::cout << "forces = ["; std::copy(forces.begin(),forces.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << "];" << std::endl;
     fmm.setDelta(delta);
-//     fmm(0,&sources[0],&velocities[0],&forces[0]);
-    fmm.initData(&sources[0],&velocities[0],&forces[0]);
-    CreateOctree(num_sources, 6, 2, 0);
-    logger.printTimer();
+    fmm(0,&sources[0],&velocities[0],&forces[0]);
+
+    std::cout << "velocities = "; std::copy(velocities.begin(),velocities.end(),std::ostream_iterator<value_type>(std::cout," ")); std::cout << std::endl;
+    std::fill(velocities.begin(),velocities.end(),0.0);
+    fmm.allPairs();
     QApplication app(ac, av);
-    
+
     if (!QGLFormat::hasOpenGL())
     {
         std::cerr << "This system has no OpenGL support" << std::endl;
@@ -59,4 +60,5 @@ int hybrid_fmm_stokes_solver(int ac,char **av)
     tree_renderer.resize(800,600);
     tree_renderer.show();
     return app.exec();
+//     return 0;
 }

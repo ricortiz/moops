@@ -58,8 +58,7 @@
 */
 typedef struct _Particle
 {
-//   float position[3], force[3];
-  float *position, *force;
+  float position[3], force[3];
 } Particle;
 
 
@@ -161,8 +160,8 @@ typedef struct _Octree
     void CheckList1(Node *, Node *);
     void UpSweep(Node *);
     void DownSweep(register Node *);
-    void DirectViaExpansion(Node *, Node *);
-    void PerformDirectInterations(Node *);
+    void DirectViaExpansion(Node *, Node *,double);
+    void PerformDirectInterations(Node *,double);
     void FindNeighbors(register Node *);
     void UpdateBodies(unsigned long,double);
     void UpdateBodiesWithGPU(unsigned long, double);
@@ -170,7 +169,7 @@ typedef struct _Octree
     int IsBorder(Node *, Node *);
     void MultipoleExpansion(Node *,Node *,register float *);
     void FMM(double);
-    void AllPairs(unsigned long, double);
+    void AllPairs(unsigned long, double,double);
     void par_time(double *, double *, double *, double *);
     void PickVector(double rad, int ndim, float *x, float *y, float *z);
     void Plummer(int);
@@ -212,16 +211,16 @@ typedef struct _Octree
      ******************************************************************/
 
      void ApplyLocalExpansion(Node *);
-     void CalculateDirectInteractions(Node *, Node **, int);
+     void CalculateDirectInteractions(Node *, Node **, int,double);
      void FormOuterExpansion(Node *);
      void FormLocalExpansion(Node *,Node *, float *);
      void ShiftFromChildToParent(Node *);
      void ShiftFromParentToLeaf(Node *);
-     void PerformDirectWithinNode(Node *);
+     void PerformDirectWithinNode(Node *,double);
      void OuterToInner(Node *source, Node *target, float *target_psi[4], int isLeaf);
      void DownShift(Node *, int);
      void BuildGPUArrays();
-     void ComputeVelocityDirect(int target, int source);
+     void ComputeVelocityDirect(int target, int source, double delta);
      
 
      /******************************************************************

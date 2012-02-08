@@ -173,7 +173,7 @@ temp_GPU_velocities = new float[3*number_particles + 1 << 11];
         startTime = wcTime();
         for(i = 1; i <= iterations; i++)
         {
-            AllPairs(number_particles, dt);
+            AllPairs(number_particles, dt, .05);
         }
         printf("Allpairs: %8.3fs\n", wcTime() - startTime);
         //RebuildTree(number_particles, precision, maximum_extent, minimum_extent);

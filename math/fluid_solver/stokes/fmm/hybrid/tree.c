@@ -901,41 +901,42 @@ Node *InitializeNode(int id,int level,Node *parent, double mid_x,
 void ParticleSwap(int from, int to)
 {
   Particle temp;
-  temp.position = octree.bodies[from].position;
-  temp.force = octree.bodies[from].force;
-  
+//   temp.position = octree.bodies[from].position;
+//   temp.force = octree.bodies[from].force;
+  float position[3];
+  float force[3];
   //copy data
-//   temp.position[0] = octree.bodies[from].position[0];
-//   temp.position[1] = octree.bodies[from].position[1];
-//   temp.position[2] = octree.bodies[from].position[2];
-//   
-//   temp.force[0] = octree.bodies[from].force[0];
-//   temp.force[1] = octree.bodies[from].force[1];
-//   temp.force[2] = octree.bodies[from].force[2];
+  position[0] = octree.bodies[from].position[0];
+  position[1] = octree.bodies[from].position[1];
+  position[2] = octree.bodies[from].position[2];
+
+  force[0] = octree.bodies[from].force[0];
+  force[1] = octree.bodies[from].force[1];
+  force[2] = octree.bodies[from].force[2];
 //   
 // 
 //   //overwrite
-  octree.bodies[from].position = octree.bodies[to].position;
-  octree.bodies[from].force = octree.bodies[to].force;
-//   octree.bodies[from].position[0] = octree.bodies[to].position[0];
-//   octree.bodies[from].position[1] = octree.bodies[to].position[1];
-//   octree.bodies[from].position[2] = octree.bodies[to].position[2];
-//   
-//   octree.bodies[from].force[0] = octree.bodies[to].force[0];
-//   octree.bodies[from].force[1] = octree.bodies[to].force[1];
-//   octree.bodies[from].force[2] = octree.bodies[to].force[2];
+//   octree.bodies[from].position = octree.bodies[to].position;
+//   octree.bodies[from].force = octree.bodies[to].force;
+  octree.bodies[from].position[0] = octree.bodies[to].position[0];
+  octree.bodies[from].position[1] = octree.bodies[to].position[1];
+  octree.bodies[from].position[2] = octree.bodies[to].position[2];
+
+  octree.bodies[from].force[0] = octree.bodies[to].force[0];
+  octree.bodies[from].force[1] = octree.bodies[to].force[1];
+  octree.bodies[from].force[2] = octree.bodies[to].force[2];
 //   
 // 
 //   //copy over
-  octree.bodies[to].position = temp.position;
-  octree.bodies[to].force = temp.force;
-//   octree.bodies[to].position[0] = temp.position[0];
-//   octree.bodies[to].position[1] = temp.position[1];
-//   octree.bodies[to].position[2] = temp.position[2];
-//   
-//   octree.bodies[to].force[0] = temp.force[0];
-//   octree.bodies[to].force[1] = temp.force[1];
-//   octree.bodies[to].force[2] = temp.force[2];
+//   octree.bodies[to].position = position;
+//   octree.bodies[to].force = force;
+  octree.bodies[to].position[0] = position[0];
+  octree.bodies[to].position[1] = position[1];
+  octree.bodies[to].position[2] = position[2];
+
+  octree.bodies[to].force[0] = force[0];
+  octree.bodies[to].force[1] = force[1];
+  octree.bodies[to].force[2] = force[2];
 
 }
 
