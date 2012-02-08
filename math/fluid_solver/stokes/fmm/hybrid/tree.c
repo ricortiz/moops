@@ -64,7 +64,7 @@ void CreateOctree(unsigned long number_particles, int precision, double maximum_
         #pragma omp barrier
         #pragma omp single
         {
-            fprintf(stderr, "Total Nodes: %i\n", octree.rootInfo->subtree_size);
+//             fprintf(stderr, "Total Nodes: %i\n", octree.rootInfo->subtree_size);
             octree.nodes = (Node *) malloc(octree.rootInfo->subtree_size*sizeof(Node));
             for(i=0;i<4;i++)
             {
@@ -139,7 +139,7 @@ void CreateOctree(unsigned long number_particles, int precision, double maximum_
     //printf("Rebuilds: %i\n",  octree.treeRebuilds);
     BuildGPUArrays();
 
-    printf("Tree depth: %lu\n", octree.depth);
+//     printf("Tree depth: %lu\n", octree.depth);
 }
 
 void FreeOctree()

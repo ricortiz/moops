@@ -76,8 +76,8 @@ Gui<app_type>::Gui() : GuiBase()
 
     m_vtk_widget->SetRenderWindow(renwin);
 
-    const double angleSensitivity = 0.01;
-    const double translationSensitivity = 0.001;
+    const double angleSensitivity = 0.1;
+    const double translationSensitivity = 0.01;
 
     QVTKInteractor *interactor = m_vtk_widget->GetInteractor();
     vtkInteractorStyle *s = static_cast<vtkInteractorStyle *>(interactor->GetInteractorStyle());
@@ -149,6 +149,7 @@ void Gui<app_type>::setBoxActor()
     mapper->SetInput(app()->vtk_storage().box());
     actor->SetMapper(mapper);
     actor->GetProperty()->SetOpacity(.1);
+    actor->GetProperty()->SetEdgeVisibility(1);
 
     m_vtk_renderer->AddViewProp(actor);
 }

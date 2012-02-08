@@ -884,7 +884,7 @@ void AllPairs(unsigned long number_particles, double dt, double delta)
 void UpdateBodies(unsigned long number_particles, double dt)
 {
     int i, idx;
-#pragma omp for private(i)
+// #pragma omp for private(i)
     for (i = 0, idx = 0; i < number_particles; i++, idx += 3)
     {
         octree.bodies[i].position[0] += dt * octree.GPU_Veloc[idx];
@@ -913,7 +913,7 @@ void UpdateBodies(unsigned long number_particles, double dt)
 void UpdateBodiesWithGPU(unsigned long number_particles, double dt)
 {
     int i, idx;
-#pragma omp for private(i)
+// #pragma omp for private(i)
     for (i = 0, idx = 0; i < number_particles; i++, idx += 3)
     {
         //combine CPU & GPU contributions

@@ -34,25 +34,27 @@ struct vtkArrays
 };
 
 
-template<typename particle_system_storage, typename array_type = vtkDoubleArray >
+template < typename particle_system_storage, typename array_type = vtkDoubleArray >
 class vtkStorageWrapper
 {
     private:
         vtkArrays<array_type>         m_vtk_data;
-        vtkSmartPointer<vtkPolyData>  m_poly_data;	
-	vtkSmartPointer<vtkUnstructuredGrid> m_box_grid;
+        vtkSmartPointer<vtkPolyData>  m_poly_data;
+        vtkSmartPointer<vtkUnstructuredGrid> m_box_grid;
+        vtkSmartPointer<vtkPoints> m_hex_points;
         vtkIdType                     m_id_buffer[4][2];
 
     public:
-        vtkStorageWrapper(particle_system_storage &data) 
-	  : m_poly_data(vtkSmartPointer<vtkPolyData>::New()),
-	    m_box_grid(vtkSmartPointer<vtkUnstructuredGrid>::New())
+        vtkStorageWrapper(particle_system_storage &data)
+                : m_poly_data(vtkSmartPointer<vtkPolyData>::New()),
+                m_box_grid(vtkSmartPointer<vtkUnstructuredGrid>::New()),
+                m_hex_points(vtkSmartPointer<vtkPoints>::New())
         {
             m_vtk_data.positions = vtkSmartPointer<array_type>::New();
             m_vtk_data.velocities = vtkSmartPointer<array_type>::New();
             m_vtk_data.forces = vtkSmartPointer<array_type>::New();
             m_vtk_data.cells = vtkSmartPointer<vtkCellArray>::New();
-            
+
             size_t size = data.data_size();
             m_vtk_data.positions->SetArray(data.positions(), size, 1);
             m_vtk_data.velocities->SetArray(data.velocities(), size, 1);
@@ -72,31 +74,6 @@ class vtkStorageWrapper
             if (m_vtk_data.forces->GetSize() > 0)
                 m_poly_data->GetPointData()->AddArray(m_vtk_data.forces);
             m_poly_data->SetPolys(m_vtk_data.cells);
-	    
-	    vtkSmartPointer<vtkHexahedron> hexahedron = vtkSmartPointer<vtkHexahedron>::New();
-            hexahedron->GetPointIds()->SetId(0, 0);
-            hexahedron->GetPointIds()->SetId(1, 1);
-            hexahedron->GetPointIds()->SetId(2, 2);
-            hexahedron->GetPointIds()->SetId(3, 3);
-            hexahedron->GetPointIds()->SetId(4, 4);
-            hexahedron->GetPointIds()->SetId(5, 5);
-            hexahedron->GetPointIds()->SetId(6, 6);
-            hexahedron->GetPointIds()->SetId(7, 7);
-	    
-	    vtkSmartPointer<vtkPoints> hexPoints = vtkSmartPointer<vtkPoints>::New();
-            hexPoints->SetNumberOfPoints(8);
-            hexPoints->SetPoint(0, 0., 0, 0.);
-            hexPoints->SetPoint(1, 256., 0., 0.);
-            hexPoints->SetPoint(2, 256., 256., 0.);
-            hexPoints->SetPoint(3, 0., 256., 0.);
-            hexPoints->SetPoint(4, 0., 0., 256.);
-            hexPoints->SetPoint(5, 256., 0., 256.);
-            hexPoints->SetPoint(6, 256., 256., 256.);
-            hexPoints->SetPoint(7, 0., 256., 256.);
-	    
-	    m_box_grid->Allocate(1, 1);
-            m_box_grid->InsertNextCell(hexahedron->GetCellType(), hexahedron->GetPointIds());
-            m_box_grid->SetPoints(hexPoints);
         }
 
         inline const vtkSmartPointer<array_type> &positions() const    { return m_vtk_data.positions; }
@@ -109,12 +86,12 @@ class vtkStorageWrapper
         inline vtkSmartPointer<vtkCellArray> &cells()                  { return m_vtk_data.cells; }
         inline const vtkSmartPointer<vtkPolyData> &grid() const        { return m_poly_data; }
         inline vtkSmartPointer<vtkPolyData> &grid()                    { return m_poly_data; }
-        inline const vtkSmartPointer<vtkUnstructuredGrid> &box() const        { return m_box_grid; }
-        inline vtkSmartPointer<vtkUnstructuredGrid> &box()                    { return m_box_grid; }
+        inline const vtkSmartPointer<vtkUnstructuredGrid> &box() const { return m_box_grid; }
+        inline vtkSmartPointer<vtkUnstructuredGrid> &box()             { return m_box_grid; }
 
         inline void setInnerCells(int i, int j, int M, int N, size_t offset)
         {
-            if(i < M - 1 && j < N - 1)
+            if (i < M - 1 && j < N - 1)
             {
                 setIdBuffer(i, j);
                 vtkIdType cell[4] =
@@ -130,14 +107,14 @@ class vtkStorageWrapper
 
         inline void setEdgeCells(int i, int j, int M, int N, size_t offset)
         {
-            if(i == M - 1 && j < N - 1)
+            if (i == M - 1 && j < N - 1)
             {
                 setIdBuffer(i, j);
                 vtkIdType cell[4] =
                 {
                     m_id_buffer[0][1]*M + m_id_buffer[0][0] + offset,
-                    m_id_buffer[1][1]*M + m_id_buffer[1][0]%M + offset,
-                    m_id_buffer[2][1]*M + m_id_buffer[2][0]%M + offset,
+                    m_id_buffer[1][1]*M + m_id_buffer[1][0] % M + offset,
+                    m_id_buffer[2][1]*M + m_id_buffer[2][0] % M + offset,
                     m_id_buffer[3][1]*M + m_id_buffer[3][0] + offset
                 };
                 m_vtk_data.cells->InsertNextCell(4, cell);
@@ -146,15 +123,15 @@ class vtkStorageWrapper
 
         inline void setTopCells(int i, int j, int M, int N, size_t offset)
         {
-            if(i <= M - 1 && j == N - 1)
+            if (i <= M - 1 && j == N - 1)
             {
                 setIdBuffer(i, j);
                 vtkIdType cell[4] =
                 {
                     m_id_buffer[0][1]*M + m_id_buffer[0][0] + offset,
-                    m_id_buffer[1][1]*M + m_id_buffer[1][0]%M + offset,
-                    m_id_buffer[2][1]%N*M + m_id_buffer[2][0]%M + offset,
-                    m_id_buffer[3][1]%N*M + m_id_buffer[3][0] + offset
+                    m_id_buffer[1][1]*M + m_id_buffer[1][0] % M + offset,
+                    m_id_buffer[2][1] % N*M + m_id_buffer[2][0] % M + offset,
+                    m_id_buffer[3][1] % N*M + m_id_buffer[3][0] + offset
                 };
                 m_vtk_data.cells->InsertNextCell(4, cell);
             }
@@ -162,23 +139,67 @@ class vtkStorageWrapper
 
         void setEdgeCells(int M, int N, size_t offset = 0)
         {
-            for(int j = 0; j < N; ++j)
-                for(int i = 0; i < M; ++i)
-                    setEdgeCells(i,j,M,N,offset);
+            for (int j = 0; j < N; ++j)
+                for (int i = 0; i < M; ++i)
+                    setEdgeCells(i, j, M, N, offset);
         }
 
         void setTopCells(int M, int N, size_t offset = 0)
         {
-            for(int j = 0; j < N; ++j)
-                for(int i = 0; i < M; ++i)
-                    setTopCells(i,j,M,N,offset);
+            for (int j = 0; j < N; ++j)
+                for (int i = 0; i < M; ++i)
+                    setTopCells(i, j, M, N, offset);
         }
 
         void setInnerCells(int M, int N, size_t offset = 0)
         {
-            for(int j = 0; j < N; ++j)
-                for(int i = 0; i < M; ++i)
-                    setInnerCells(i,j,M,N,offset);
+            for (int j = 0; j < N; ++j)
+                for (int i = 0; i < M; ++i)
+                    setInnerCells(i, j, M, N, offset);
+        }
+
+
+        template<typename tree_type>
+        void setOctree(tree_type &tree)
+        {
+            setNode(tree.root, tree.edge_length);
+            m_box_grid->SetPoints(m_hex_points);
+        }
+        template<typename node_type>
+        void setNode(node_type *node, float *extent)
+        {
+            float points[8][3] =
+            {
+                {node->mid_x - extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z - extent[node->level+1]},
+                {node->mid_x + extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z - extent[node->level+1]},
+                {node->mid_x + extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z - extent[node->level+1]},
+                {node->mid_x - extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z - extent[node->level+1]},
+                {node->mid_x - extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z + extent[node->level+1]},
+                {node->mid_x + extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z + extent[node->level+1]},
+                {node->mid_x + extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z + extent[node->level+1]},
+                {node->mid_x - extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z + extent[node->level+1]}
+            };
+
+            for (int i = 0 ; i < 8; ++i)
+                if (node->child[i])
+                    setNode(node->child[i], extent);
+
+                if (!node->isParent && node->pArrayLow >= 0 && node->pArrayHigh >= 0)
+                setBox(points);
+        }
+
+        void setBox(float points[8][3])
+        {
+            vtkSmartPointer<vtkHexahedron> hexahedron = vtkSmartPointer<vtkHexahedron>::New();
+            hexahedron->GetPointIds()->SetId(0, m_hex_points->InsertNextPoint(points[0]));
+            hexahedron->GetPointIds()->SetId(1, m_hex_points->InsertNextPoint(points[1]));
+            hexahedron->GetPointIds()->SetId(2, m_hex_points->InsertNextPoint(points[2]));
+            hexahedron->GetPointIds()->SetId(3, m_hex_points->InsertNextPoint(points[3]));
+            hexahedron->GetPointIds()->SetId(4, m_hex_points->InsertNextPoint(points[4]));
+            hexahedron->GetPointIds()->SetId(5, m_hex_points->InsertNextPoint(points[5]));
+            hexahedron->GetPointIds()->SetId(6, m_hex_points->InsertNextPoint(points[6]));
+            hexahedron->GetPointIds()->SetId(7, m_hex_points->InsertNextPoint(points[7]));
+            m_box_grid->InsertNextCell(hexahedron->GetCellType(), hexahedron->GetPointIds());
         }
     private:
         inline void setIdBuffer(int i, int j)

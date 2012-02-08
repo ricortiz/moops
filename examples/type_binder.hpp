@@ -53,8 +53,8 @@ struct TypeBinder
 
     enum
     {
-        sdc_nodes = 3,
-        sdc_corrections = 3
+        sdc_nodes = 5,
+        sdc_corrections = 5
     };
     typedef Integrator<value_type, gauss_lobatto, sdc_nodes> spectral_integrator;
 
@@ -68,8 +68,8 @@ struct TypeBinder
 
     typedef vtkStorageWrapper<swarm_surface,vtkFloatArray>                      swarm_vtk_storage;
     typedef vtkStorageWrapper<heart_pump_surface>                 heart_vtk_storage;
-    typedef IO::VtkWriter<swarm_vtk_storage, vtkXMLPolyDataWriter>      swarm_vtk_writer;
-    typedef IO::VtkWriter<heart_vtk_storage, vtkXMLPolyDataWriter>      heart_vtk_writer;
+    typedef IO::VtkWriter<vtkXMLPolyDataWriter>      vtk_poly_writer;
+    typedef IO::VtkWriter<vtkXMLUnstructuredGridWriter>      vtk_unstructured_writer;
 
 
 };

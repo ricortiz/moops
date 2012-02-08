@@ -34,7 +34,7 @@ class OctreeRenderer : public QGLWidget
         void init(box_array_type &boxes)
         {
             createGradient();
-            renderBox(boxes.root,boxes.bodies,boxes.edge_length[0]);
+            renderBox(boxes.root, boxes.bodies, boxes.edge_length);
             num_boxes = 0;//boxes.size();
 //             depth = tree->depth();
 //             num_particles = 0;//boxes[0].particles().size();
@@ -91,7 +91,7 @@ class OctreeRenderer : public QGLWidget
         }
 
         template<typename box_type, typename particle_array>
-        void renderBox(const box_type *box, particle_array *particles, double extent)
+        void renderBox(const box_type *box, particle_array *particles, float *extent)
         {
             makeCurrent();
 
@@ -102,51 +102,50 @@ class OctreeRenderer : public QGLWidget
             qglColor(QColor(255, 239, 191));
             glLineWidth(1.0);
 
-            createBoxes(box,particles,extent);
+            createBoxes(box, particles, extent);
 
             glEndList();
         }
 
         template<typename box_type, typename particle_array>
-        void createBoxes(box_type *box, particle_array* particles, double extent)
+        void createBoxes(box_type *box, particle_array* particles, float *extent)
         {
+            bool leaf = true;
+            for (int i = 0 ; i < 8; ++i)
+            {                
+                if (box->child[i])
+                {
+                    leaf = false;
+                    num_boxes++;
+                    createBoxes(box->child[i], particles, extent);
+                }
+            }
+            if(leaf || box->parent == box)
             {
                 glBegin(GL_LINES);
-                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z-extent);
-                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z-extent);
-                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z-extent);
-                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z-extent);
-                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z+extent);
-                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z+extent);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
                 glEnd();
 
                 glBegin(GL_LINE_LOOP);
-                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z+extent);
-                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z-extent);
-                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z-extent);
-                glVertex3f(box->mid_x+extent, box->mid_y-extent, box->mid_z+extent);
-                glVertex3f(box->mid_x+extent, box->mid_y+extent, box->mid_z+extent);
-                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z+extent);
-                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z-extent);
-                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z-extent);
-                glVertex3f(box->mid_x-extent, box->mid_y-extent, box->mid_z+extent);
-                glVertex3f(box->mid_x-extent, box->mid_y+extent, box->mid_z+extent);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
                 glEnd();
             }
-            
-            for(int i = 0 ; i < 8; ++i)
-	    {
-	      bool leaf = true;
-	      if(box->child[i])
-	      {
-		leaf = false;
-		num_boxes++;
-		createBoxes(box->child[i],particles,extent*.5);
-	      }
-
-		
-	    }
-	    if(box->parent == box)
+                
+            if (box->parent == box)
             {
                 int low = box->pArrayLow;
                 int high = box->pArrayHigh;
@@ -181,7 +180,7 @@ class OctreeRenderer : public QGLWidget
             glPushMatrix();
             glLoadIdentity();
             GLfloat x = 10.0 * GLfloat(width()) / height();
-            glOrtho(-x, +x, -x, +x, -250.0, 200.0);
+            glOrtho(-x, + x, -x, + x, -250.0, 200.0);
 
             glMatrixMode(GL_MODELVIEW);
             glPushMatrix();
@@ -205,7 +204,7 @@ class OctreeRenderer : public QGLWidget
 
             glPopAttrib();
         }
-        
+
         void drawLegend(QPainter *painter)
         {
             const int Margin = 11;
@@ -213,9 +212,9 @@ class OctreeRenderer : public QGLWidget
 
             QString label = "<h4 align=\"center\">Tree Info</h4>";
             label += "<p align=\"center\"><table width=\"100%\">";
-            label += "<tr><td>Num Boxes: <td> "+ QString::number(num_boxes);
+            label += "<tr><td>Num Boxes: <td> " + QString::number(num_boxes);
 //             label += "<tr><td>Depth: <td> "+ QString::number(depth);
-            label += "<tr><td>Num Particles: <td> "+ QString::number(num_particles);
+            label += "<tr><td>Num Particles: <td> " + QString::number(num_particles);
 //             label += "<tr><td>Particles per box: <td> "+ QString::number(max_particles);
 
             QTextDocument textDocument;
@@ -251,4 +250,6 @@ class OctreeRenderer : public QGLWidget
 
 
 #endif  // PARTICLE_RENDERER_HPP
+
+
 

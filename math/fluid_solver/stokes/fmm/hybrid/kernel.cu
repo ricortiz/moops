@@ -508,17 +508,17 @@ extern "C"
 
         //register memory
         cudaError_t err;
-        err =   cudaHostRegister(positions, sizeof(float) * 6 * NUM_BODIES, cudaHostRegisterMapped);
+        err =   cudaHostRegister(positions, sizeof(float) * 6 * NUM_BODIES, cudaHostRegisterPortable);
         checkError(err);
-        err =   cudaHostRegister(gpuVelocities, sizeof(float) * 3 * NUM_BODIES, cudaHostRegisterMapped);
+        err =   cudaHostRegister(gpuVelocities, sizeof(float) * 3 * NUM_BODIES, cudaHostRegisterPortable);
         checkError(err);
-        err =   cudaHostRegister(target_list, sizeof(unsigned int) * 2 * NUM_LEAF_NODES, cudaHostRegisterMapped);
+        err =   cudaHostRegister(target_list, sizeof(unsigned int) * 2 * NUM_LEAF_NODES, cudaHostRegisterPortable);
         checkError(err);
-        err =   cudaHostRegister(num_interaction_pairs, sizeof(unsigned int) * NUM_LEAF_NODES, cudaHostRegisterMapped);
+        err =   cudaHostRegister(num_interaction_pairs, sizeof(unsigned int) * NUM_LEAF_NODES, cudaHostRegisterPortable);
         checkError(err);
-        err =   cudaHostRegister(source_list, sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES, cudaHostRegisterMapped);
+        err =   cudaHostRegister(source_list, sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES, cudaHostRegisterPortable);
         checkError(err);
-        err =   cudaHostRegister(source_start_indices_for_blocks, sizeof(unsigned int) * (NUM_LEAF_NODES + 1), cudaHostRegisterMapped);
+        err =   cudaHostRegister(source_start_indices_for_blocks, sizeof(unsigned int) * (NUM_LEAF_NODES + 1), cudaHostRegisterPortable);
         checkError(err);
 
         err =   cudaHostGetDevicePointer((void **) & dpositions, (void *)positions, 0);

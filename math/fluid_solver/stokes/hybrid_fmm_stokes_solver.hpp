@@ -38,13 +38,7 @@ class HybridFmmStokesSolver
         }
         inline void operator()(value_type, value_type *x, value_type *v, value_type *f)
         {
-            logger.startTimer("initData");
-            initData(x, f);
-	    octree.CPU_Veloc = v;
-            logger.stopTimer("initData");
-            logger.startTimer("CreateOctree");
-            CreateOctree(m_num_particles, precision, 255.9999, 0);
-            logger.stopTimer("CreateOctree");
+            initOctree(x,v,f);
 	    #pragma omp parallel
             {
 		#pragma omp single
@@ -111,13 +105,7 @@ class HybridFmmStokesSolver
 
         inline void Explicit(value_type, const value_type *x, value_type *v, const value_type *f)
         {
-            logger.startTimer("initData");
-            initData(x, f);
-	    octree.CPU_Veloc = v;
-            logger.stopTimer("initData");
-            logger.startTimer("CreateOctree");
-            CreateOctree(m_num_particles, precision, 255.9999, 0);
-            logger.stopTimer("CreateOctree");
+            initOctree(x,v,f);
 	    #pragma omp parallel
             {
 		#pragma omp single
@@ -143,6 +131,16 @@ class HybridFmmStokesSolver
             }
         }
 
+        inline void initOctree(const value_type *x, value_type *v, const value_type *f)
+        {
+            logger.startTimer("initData");
+            initData(x, f);
+            octree.CPU_Veloc = v;
+            logger.stopTimer("initData");
+            logger.startTimer("CreateOctree");
+            CreateOctree(m_num_particles, precision, 255.9999, 0);
+            logger.stopTimer("CreateOctree");
+        }
         void copyVelocities(value_type *v)
         {
             std::transform(m_gpu_velocity.begin(), m_gpu_velocity.end(), v, v, std::plus<value_type>());

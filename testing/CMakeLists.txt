@@ -1,12 +1,11 @@
 
-MACRO(MAKE_TESTS TestList DriverName TargetLinks)
+MACRO(MAKE_TESTS TestList DriverName)
     SET(FileList "")
     FOREACH(test ${TestList})
         SET(FileList ${FileList} ${test}.cpp)
     ENDFOREACH(test)
     CREATE_TEST_SOURCELIST(TestDriverSources ${DriverName}.cpp ${FileList})
     ADD_EXECUTABLE(${DriverName} ${TestDriverSources})
-    TARGET_LINK_LIBRARIES(${DriverName} ${TargetLinks})
     FOREACH(test ${FileList})
         GET_FILENAME_COMPONENT(TestName ${test} NAME_WE)
         ADD_TEST(${TestName} ${CMAKE_CURRENT_BINARY_DIR}/${DriverName} ${TestName})

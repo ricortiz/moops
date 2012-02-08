@@ -47,6 +47,8 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             col_ptr.push_back(0);
             m_geometry.init(&this->particles()[0]);
             m_geometry.getConnections(col_ptr, col_idx);
+            value_type T[3] = {128,240,128};
+            m_geometry.applyTranslation(&this->particles()[0],T);
             for (int i = 1, idx = 3; i < num_sperms; ++i, idx += 3)
             {
                 particle_type *p_init = &this->particles()[0];

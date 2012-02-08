@@ -33,26 +33,22 @@ namespace IO
             return filename.str();
         }
     }
-    template<typename vtk_storage, typename vtk_writer_type>
-    class VtkWriter;
-
-    template<typename vtk_storage>
-    class VtkWriter<vtk_storage, vtkXMLPolyDataWriter>
+    template<typename vtk_writer_type>
+    class VtkWriter/*<vtkXMLPolyDataWriter>*/
     {
             size_t m_file_counter;
             std::string m_data_path;
-            vtkSmartPointer<vtkXMLPolyDataWriter> m_writer;
+            vtkSmartPointer<vtk_writer_type> m_writer;
             bool m_write_binary;
 
         public:
             VtkWriter() : m_file_counter(0), m_write_binary(true) {}
-            VtkWriter(const std::string &data_path, vtk_storage &storage, bool write_binary = true) :
+            VtkWriter(const std::string &data_path, bool write_binary = true) :
                     m_file_counter(0),
                     m_data_path(data_path),
-                    m_writer(vtkSmartPointer<vtkXMLPolyDataWriter>::New()),
+                    m_writer(vtkSmartPointer<vtk_writer_type>::New()),
                     m_write_binary(write_binary)
             {
-                m_writer->SetInput(storage.grid());
                 if (m_write_binary)
                     m_writer->SetDataModeToBinary();
                 else
@@ -65,8 +61,10 @@ namespace IO
                 m_writer->SetInput(poly_data, i);
             }
 
-            void write(double timestep, bool print = true)
+            template<typename data_set_type>
+            void write(data_set_type &grid, double timestep, bool print = true)
             {
+                m_writer->SetInput(grid);
                 std::string file_name = m_data_path + "data_" + detail::file_number(m_file_counter++, 10) + "." + m_writer->GetDefaultFileExtension();
                 m_writer->SetFileName(file_name.c_str());
                 if (print) std::cout << "Saving " << file_name << " ... ";

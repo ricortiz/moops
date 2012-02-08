@@ -207,7 +207,31 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             getTailConnections(col_ptr,col_idx,offset);
         }
 
+        template <typename particle_type>
+        void applyRotation(particle_type *particles, value_type Q[3][3])
+        {
+            size_t i;
+            #pragma omp parallel for private(i) shared(particles,Q)
+            for(i = 0; i < m_num_particles; ++i)
+            {
+                particles[i].position[0] = Q[0][0]*particles[i].position[0]+Q[0][1]*particles[i].position[1]+Q[0][2]*particles[i].position[2];
+                particles[i].position[1] = Q[1][0]*particles[i].position[0]+Q[1][1]*particles[i].position[1]+Q[1][2]*particles[i].position[2];
+                particles[i].position[2] = Q[2][0]*particles[i].position[0]+Q[2][1]*particles[i].position[1]+Q[2][2]*particles[i].position[2];
+            }
+        }
 
+        template < typename particle_type>
+        void applyTranslation(particle_type *particles, value_type T[3])
+        {
+            size_t i;
+            #pragma omp parallel for private(i) shared(particles,T)
+            for(i = 0; i < m_num_particles; ++i)
+            {
+                particles[i].position[0] += T[0];
+                particles[i].position[1] += T[1];
+                particles[i].position[2] += T[2];
+            }
+        }
     private:
         value_type amplitude_cubic(const value_type &s)
         {
