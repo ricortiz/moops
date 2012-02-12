@@ -1,7 +1,7 @@
 
 #FindCUDA
 FIND_PACKAGE(CUDA REQUIRED)
-set(NVCC_FLAGS -ccbin /usr/bin/gcc-4.4 -gencode arch=compute_20,code=sm_20)
+set(NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
 SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${NVCC_FLAGS})
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} )
