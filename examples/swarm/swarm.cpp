@@ -11,7 +11,7 @@ class SwarmApp
 {
         enum
         {
-            num_sperms = 25,
+            num_sperms = 1,
             Mt = 6,
             Nt = 100,
             Mh = 12,
@@ -38,10 +38,10 @@ class SwarmApp
 
         SwarmApp(std::string &data_path) :
                 m_swarm(Mt, Nt, Mh, Nh, num_sperms),
-                m_time_step(0.001),
+                m_time_step(0.01),
                 m_vtk_storage(m_swarm),
-                m_surface_writer(data_path + "/surface/", true),
-                m_octree_writer(data_path + "/octree/", true),
+                m_surface_writer(data_path + "/surface/swarm", true),
+                m_octree_writer(data_path + "/octree/octree", true),
                 m_record(true)
         {
             m_swarm.fluid_solver().setDelta(.02);
@@ -153,6 +153,6 @@ int main(int ac, char **av)
     return app.exec();
 #else
     while (1)
-        swarm.fake_run();
+        swarm.run();
 #endif
 }

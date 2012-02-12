@@ -411,7 +411,6 @@ void BuildList1(Node *node)
 void BuildList2(Node *node)
 {
     int i, j;
-
     for (i = 0;i < MaxColleagues;i++)
     {
         if (node->parent->Colleagues[i] == NULL)
@@ -506,6 +505,27 @@ void BuildList3And4(Node * node)
         //#pragma omp taskwait
     }
 }
+/**
+ * @brief Check if node2 shares a boundary or point with node1
+ *
+ **/
+int IsBorder(Node *node1, Node *node2)
+{
+    float extents[2] = {octree.edge_length[node1->level]*.5,octree.edge_length[node2->level]*.5};
+    float point[4][3] = 
+    {
+      {node1->mid_x - extents[0],node1->mid_y - extents[0],node1->mid_z - extents[0]},
+      {node1->mid_x + extents[0],node1->mid_y + extents[0],node1->mid_z + extents[0]},
+      {node2->mid_x - extents[1],node2->mid_y - extents[1],node2->mid_z - extents[1]},
+      {node2->mid_x + extents[1],node2->mid_y + extents[1],node2->mid_z + extents[1]}
+    };
+    
+    int result = ((point[0][0] - point[2][0] <= 1e-6 && point[2][0] - point[1][0] <= 1e-6) || ( point[0][0] - point[3][0] <= 1e-6 && point[3][0] - point[1][0] <= 1e-6));
+    result = result && (( point[0][1] - point[2][1] <= 1e-6 && point[2][1] - point[1][1] <= 1e-6) || ( point[0][1] - point[3][1] <= 1e-6 && point[3][1] - point[1][1] <= 1e-6));
+    result = result && (( point[0][2] - point[2][2] <= 1e-6 && point[2][2] - point[1][2] <= 1e-6) || ( point[0][2] - point[3][2] <= 1e-6 && point[3][2] - point[1][2] <= 1e-6));
+    
+    return result;
+}
 
 /***********************************************************************
  *
@@ -513,66 +533,66 @@ void BuildList3And4(Node * node)
  * borders constructListFor and returns 1 if so, 0 otherwise.
  *
  **********************************************************************/
-int IsBorder(Node * constructListFor, Node * toCheck)
-{
-
-    float toCheckMidX, toCheckMidY, toCheckMidZ, constructMidX, constructMidY, constructMidZ,
-    minusCheckX, plusCheckX, minusCheckY, plusCheckY, minusCheckZ, plusCheckZ, minusConstX,
-    plusConstX, minusConstY, plusConstY, minusConstZ, plusConstZ;
-    double toCheckBisect, constructBisect;
-
-    int toReturn;
-
-    toCheckMidX = toCheck->mid_x;
-    toCheckMidY = toCheck->mid_y;
-    toCheckMidZ = toCheck->mid_z;
-    toCheckBisect = octree.edge_length[toCheck->level] * 0.5;
-
-    minusCheckX = toCheckMidX - toCheckBisect;
-    plusCheckX = toCheckMidX + toCheckBisect;
-    minusCheckY = toCheckMidY - toCheckBisect;
-    plusCheckY = toCheckMidY + toCheckBisect;
-    minusCheckZ = toCheckMidZ - toCheckBisect;
-    plusCheckZ = toCheckMidZ + toCheckBisect;
-
-    constructMidX = constructListFor->mid_x;
-    constructMidY = constructListFor->mid_y;
-    constructMidZ = constructListFor->mid_z;
-    constructBisect = octree.edge_length[constructListFor->level] * 0.5;
-
-    minusConstX = constructMidX - constructBisect;
-    plusConstX = constructMidX + constructBisect;
-    minusConstY = constructMidY - constructBisect;
-    plusConstY = constructMidY + constructBisect;
-    minusConstZ = constructMidZ - constructBisect;
-    plusConstZ = constructMidZ + constructBisect;
-
-    if ((minusConstX == plusCheckX) || (plusConstX == minusCheckX))
-    {
-        if ((plusConstY >= minusCheckY) && (minusConstY <= plusCheckY)
-                && (minusConstZ <= plusCheckZ) && (plusConstZ >= minusCheckZ))
-        {
-            return 1;
-        }
-    }
-    else if ((minusConstZ == plusCheckZ) || (plusConstZ == minusCheckZ))
-    {
-        if ((plusConstX >= minusCheckX) && (minusConstX <= plusCheckX)
-                && (minusConstY <= plusCheckY) && (plusConstY >= minusCheckY))
-        {
-            return 1;
-        }
-    }
-    else if ((minusConstY == plusCheckY) || (plusConstY == minusCheckY))
-    {
-        if ((plusConstX >= minusCheckX) && (minusConstX <= plusCheckX)
-                && (plusConstZ >= minusCheckZ) && (minusConstZ <= plusCheckZ))
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
+// int IsBorder(Node * constructListFor, Node * toCheck)
+// {
+// 
+//     float toCheckMidX, toCheckMidY, toCheckMidZ, constructMidX, constructMidY, constructMidZ,
+//     minusCheckX, plusCheckX, minusCheckY, plusCheckY, minusCheckZ, plusCheckZ, minusConstX,
+//     plusConstX, minusConstY, plusConstY, minusConstZ, plusConstZ;
+//     double toCheckBisect, constructBisect;
+// 
+//     int toReturn;
+// 
+//     toCheckMidX = toCheck->mid_x;
+//     toCheckMidY = toCheck->mid_y;
+//     toCheckMidZ = toCheck->mid_z;
+//     toCheckBisect = octree.edge_length[toCheck->level] * 0.5;
+// 
+//     minusCheckX = toCheckMidX - toCheckBisect;
+//     plusCheckX = toCheckMidX + toCheckBisect;
+//     minusCheckY = toCheckMidY - toCheckBisect;
+//     plusCheckY = toCheckMidY + toCheckBisect;
+//     minusCheckZ = toCheckMidZ - toCheckBisect;
+//     plusCheckZ = toCheckMidZ + toCheckBisect;
+// 
+//     constructMidX = constructListFor->mid_x;
+//     constructMidY = constructListFor->mid_y;
+//     constructMidZ = constructListFor->mid_z;
+//     constructBisect = octree.edge_length[constructListFor->level] * 0.5;
+// 
+//     minusConstX = constructMidX - constructBisect;
+//     plusConstX = constructMidX + constructBisect;
+//     minusConstY = constructMidY - constructBisect;
+//     plusConstY = constructMidY + constructBisect;
+//     minusConstZ = constructMidZ - constructBisect;
+//     plusConstZ = constructMidZ + constructBisect;
+// 
+//     if ((minusConstX == plusCheckX) || (plusConstX == minusCheckX))
+//     {
+//         if ((1e-6 >= minusCheckY-plusConstY) && (minusConstY - plusCheckY <= 1e-6)
+//                 && (minusConstZ - plusCheckZ <= 1e-6) && ( 1e-6>= minusCheckZ-plusConstZ))
+//         {
+//             return 1;
+//         }
+//     }
+//     else if ((minusConstZ == plusCheckZ) || (plusConstZ == minusCheckZ))
+//     {
+//         if (( >= minusCheckX-plusConstX) && (minusConstX - plusCheckX)
+//                 && (minusConstY - plusCheckY) && (plusConstY >= minusCheckY))
+//         {
+//             return 1;
+//         }
+//     }
+//     else if ((minusConstY == plusCheckY) || (plusConstY == minusCheckY))
+//     {
+//         if ((plusConstX >= minusCheckX) && (minusConstX <= plusCheckX)
+//                 && (plusConstZ >= minusCheckZ) && (minusConstZ <= plusCheckZ))
+//         {
+//             return 1;
+//         }
+//     }
+//     return 0;
+// }
 
 /***********************************************************************
  *

@@ -41,8 +41,8 @@
 #define Epsilon 1.0e-5
 #define MinRange  0.0
 #define MaxRange  255.9999999
-#define MEMORY_ALIGNMENT  4096
-#define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
+// #define MEMORY_ALIGNMENT  4096
+// #define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
 #define Min(x,y)  (((x) < (y)) ? (x) : (y))
 #ifndef RAND_MAX
 #define RAND_MAX  32767
@@ -59,6 +59,7 @@
 typedef struct _Particle
 {
   float position[3], force[3];
+  unsigned int index;
 } Particle;
 
 
@@ -203,7 +204,8 @@ typedef struct _Octree
     void PushDownDirectWork(Node*);
     void FreeOctree();
     void RebuildTree(unsigned long number_particles, int precision, double maximum_extent, double minimum_extent);
-
+    void updateOctree();
+    
     /*******************************************************************
      *
      * For expansions.c

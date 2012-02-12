@@ -40,7 +40,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             std::vector<size_t> /*&*/col_ptr/* = this->fluid_solver().col_ptr*/;// sparse matrix (CSR-format) holding
             std::vector<size_t> /*&*/col_idx/* = this->fluid_solver().col_idx*/;// sparse matrix (CSR-format) holding
             std::vector<value_type> strenght;            // interactions between particles
-            size_t num_springs = this->particles_size() * 9; // estimate total number of springs
+            size_t num_springs = this->particles_size() * 9; // estimate total number of springs            
             col_ptr.reserve(this->particles_size() + 1); // Reserve
             col_idx.reserve(num_springs);                // Reserve
             strenght.reserve(num_springs);               // Reserve

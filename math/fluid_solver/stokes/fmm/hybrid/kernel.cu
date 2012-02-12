@@ -1,22 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include<cuda_runtime.h>
 #include <cuda.h>
 #include <sys/time.h>
 
 //*****************************USE THESE PARAMETERS TO CHANGE THE BEHAVIOR********************************
 
 // #define IGNORE_FIRST_DEVICE             //ignore first device, (on systems where first device might be hooked to display) or might not be a faster GPU
-// #define LOAD_BALANCING                  //to enable or disable load balancing, if disabled each GPU executes same amount of CUDA blocks, which might change actual load
+#define LOAD_BALANCING                  //to enable or disable load balancing, if disabled each GPU executes same amount of CUDA blocks, which might change actual load
 
-// #define CUDA_LOG                        //enable logs (minimal)
+#define CUDA_LOG                        //enable logs (minimal)
 // #define GPU_INFO                        //print which GPUs are being used
 
 // #define ENABLE_BLOCKING                 //CPU thread that invokes cuda gets blocked
 // #define CPU_EXECUTE                     //execute on CPU as well, just for validating GPU results with CPU
 // #define CUDA_DEBUG                      //detailed GPU logging
-
-// #define MEMORY_ALIGNMENT  4096
-// #define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
 
 //globals
 FILE *fp;
@@ -28,20 +26,20 @@ double startTime;
 
 __device__ float3 evaluate(float3 a, float3 b, float3 force, float3 velocity, float delta)
 {
-    float3 dx = {b.x - a.x,b.y - a.y,b.z - a.z};
+    float3 dx = {b.x - a.x, b.y - a.y, b.z - a.z};
 
     float r2 = dx.x * dx.x + dx.y * dx.y + dx.z * dx.z;
     float d2 = delta * delta;
     float R1 = r2 + d2;
     float R2 = R1 + d2;
-    float invR = 1.0f/R1;
-    float H = sqrtf(invR)*invR * 0.039788735772974;
+    float invR = 1.0f / R1;
+    float H = sqrtf(invR) * invR * 0.039788735772974;
 
-    float fdx = (force.x*dx.x+force.y*dx.y+force.z*dx.z);
+    float fdx = (force.x * dx.x + force.y * dx.y + force.z * dx.z);
 
-    velocity.x += H*(force.x*R2+fdx*dx.x);
-    velocity.y += H*(force.y*R2+fdx*dx.y);
-    velocity.z += H*(force.z*R2+fdx*dx.z);
+    velocity.x += H * (force.x * R2 + fdx * dx.x);
+    velocity.y += H * (force.y * R2 + fdx * dx.y);
+    velocity.z += H * (force.z * R2 + fdx * dx.z);
 
     return velocity;
 }
@@ -54,7 +52,7 @@ __device__ float3 TileCalculate(float3 pos, float3 velocity, int numBody, int NU
 #else
     unsigned long i = 0;
 #endif
-    for (unsigned int counter = 0; counter < numBody; i++, counter++ )
+    for (unsigned int counter = 0; counter < numBody; i++, counter++)
     {
         velocity = evaluate(pos, sharedPos[i], sharedPos[i+NUM_THREADS], velocity, delta);
     }
@@ -62,14 +60,14 @@ __device__ float3 TileCalculate(float3 pos, float3 velocity, int numBody, int NU
 }
 
 
-__device__ float3 compute_velocity( float3 current_target_pos,
-                                    float3 * positions,
-                                    unsigned int * source_list,
-                                    int num_source_pairs_to_interact_with,
-                                    int source_start,
-                                    int total_num_sources_for_this_loop,
-                                    int num_targets_for_this_loop,
-                                    int NUM_THREADS, float delta)
+__device__ float3 compute_velocity(float3 current_target_pos,
+                                   float3 * positions,
+                                   unsigned int * source_list,
+                                   int num_source_pairs_to_interact_with,
+                                   int source_start,
+                                   int total_num_sources_for_this_loop,
+                                   int num_targets_for_this_loop,
+                                   int NUM_THREADS, float delta)
 {
     int num_threads_in_this_block = blockDim.x * blockDim.y;
     extern __shared__ float3 sharedPos[];
@@ -90,10 +88,10 @@ __device__ float3 compute_velocity( float3 current_target_pos,
         subtract_offset = 0;
         for (int i = 0; i < num_source_pairs_to_interact_with; i++)
         {
-            num_sources_completed_for_this_loop += source_list[source_start + (2*i+1) ];
+            num_sources_completed_for_this_loop += source_list[source_start + (2*i+1)];
             if (current_source < num_sources_completed_for_this_loop)
             {
-                index_to_load_source_from = source_list[source_start + (2*i) ] + current_source - subtract_offset;
+                index_to_load_source_from = source_list[source_start + (2*i)] + current_source - subtract_offset;
                 break;
             }
             subtract_offset += source_list[source_start + (2*i+1)];
@@ -122,10 +120,10 @@ __device__ float3 compute_velocity( float3 current_target_pos,
             subtract_offset = 0;
             for (int i = 0; i < num_source_pairs_to_interact_with; i++)
             {
-                num_sources_completed_for_this_loop += source_list[source_start + (2*i+1) ];
+                num_sources_completed_for_this_loop += source_list[source_start + (2*i+1)];
                 if (current_source < num_sources_completed_for_this_loop)
                 {
-                    index_to_load_source_from = source_list[source_start + (2*i) ] + current_source - subtract_offset;
+                    index_to_load_source_from = source_list[source_start + (2*i)] + current_source - subtract_offset;
                     break;
                 }
                 subtract_offset += source_list[source_start + (2*i+1)];
@@ -144,14 +142,14 @@ __device__ float3 compute_velocity( float3 current_target_pos,
     return vel;
 }
 
-__global__ void kernel(    int block_offset,
-                           float3 * positions,
-                           float3 * velocities,
-                           unsigned int * target_list,
-                           unsigned int * source_list,
-                           unsigned int * num_interaction_pairs,
-                           unsigned int * source_start_array,
-                           int NUM_THREADS, float delta)
+__global__ void kernel(int block_offset,
+                       float3 * positions,
+                       float3 * velocities,
+                       unsigned int * target_list,
+                       unsigned int * source_list,
+                       unsigned int * num_interaction_pairs,
+                       unsigned int * source_start_array,
+                       int NUM_THREADS, float delta)
 {
     int blockId = block_offset + blockIdx.x;
     int target_start = target_list[blockId * 2];
@@ -164,7 +162,7 @@ __global__ void kernel(    int block_offset,
 
 
     for (int i = 0; i < num_source_pairs_to_interact_with; i++)
-        total_num_sources += source_list[source_start_for_this_block + (2*i+1) ];
+        total_num_sources += source_list[source_start_for_this_block + (2*i+1)];
 
     int num_vertical_tiles = num_targets / (blockDim.x  * blockDim.y);
     float3 current_target;
@@ -172,7 +170,7 @@ __global__ void kernel(    int block_offset,
 
     for (int i = 0; i < num_vertical_tiles; i++)
     {
-        current_target = positions[ 2*(target_start + i*blockDim.x + threadIdx.x) ];
+        current_target = positions[ 2*(target_start + i*blockDim.x + threadIdx.x)];
 
         velocities[ target_start + i*blockDim.x + threadIdx.x ] = compute_velocity(current_target,
                 positions,
@@ -188,7 +186,7 @@ __global__ void kernel(    int block_offset,
     if (targetsLeft)
     {
         if (threadIdx.x < targetsLeft)
-            current_target = positions[ 2*(target_start + num_vertical_tiles*blockDim.x + threadIdx.x) ];
+            current_target = positions[ 2*(target_start + num_vertical_tiles*blockDim.x + threadIdx.x)];
 
         //call for all threads as they have to load data in shared memory
         vel = compute_velocity(current_target,
@@ -220,7 +218,7 @@ inline double wcTime()
 inline void checkError(cudaError_t err)
 {
 #ifdef CUDA_DEBUG
-    if (err != cudaSuccess )
+    if (err != cudaSuccess)
         printf("CUDA_DEBUG:: cudaError = %s\n", cudaGetErrorString(err));
 #endif
 }
@@ -298,14 +296,14 @@ extern "C"
     }
 
 
-    void gpuVelocitiesEval( const unsigned int NUM_BODIES,
-                            const unsigned int NUM_LEAF_NODES,
-                            const unsigned int TOTAL_NUM_SOURCES,
-                            float * positions,
-                            float * gpuVelocities,
-                            unsigned int * target_list,
-                            unsigned int * num_interaction_pairs,
-                            unsigned int * interaction_pairs, float delta)
+    void gpuVelocitiesEval(const unsigned int NUM_BODIES,
+                           const unsigned int NUM_LEAF_NODES,
+                           const unsigned int TOTAL_NUM_SOURCES,
+                           float * positions,
+                           float * gpuVelocities,
+                           unsigned int * target_list,
+                           unsigned int * num_interaction_pairs,
+                           unsigned int * interaction_pairs, float delta)
     {
 
         startTime = wcTime();
@@ -333,7 +331,7 @@ extern "C"
         {
             for (int j = target_list[2*i]; j < (target_list[2*i] + target_list[2*i+1]) ; j++)
             {
-                if ( overlap_check[j] )
+                if (overlap_check[j])
                 {
                     printf("CUDA_DEBUG::Overlap found.. Terminating\n");
                     return;
@@ -347,9 +345,8 @@ extern "C"
 
 #ifdef CPU_EXECUTE
         FILE *cfp;
-        cfp = fopen("LogCPUhost.txt", "w");
 
-        cpu_velocities  = (float *) malloc (sizeof(float) * 3 * NUM_BODIES);
+        cpu_velocities  = (float *) malloc(sizeof(float) * 3 * NUM_BODIES);
         memset(cpu_velocities, 0, sizeof(float)*3*NUM_BODIES);
 
         int counter = 0 ;
@@ -402,13 +399,12 @@ extern "C"
             }
         }
 
-        fprintf(cfp, "\n\nCPU Velocities: \n");
-        for (int i = 0; i < (3*NUM_BODIES);i += 3)
+        printf("cpu_velocities = [");
+        for (int i = 0; i < (3*NUM_BODIES);++i)
         {
-            fprintf(cfp, "Velocity %d: %.10f %.10f %.10f\n", i / 3, cpu_velocities[i], cpu_velocities[i+1], cpu_velocities[i+2]);
+            printf("%f ", cpu_velocities[i]);
         }
-
-        fclose(cfp);
+        printf("]\n");
 
 #endif
 
@@ -420,11 +416,11 @@ extern "C"
 #ifdef CUDA_DEBUG
         printf("CUDA_DEBUG::Malloc on CPU for source_list : %f MB and source_start_indices_for_blocks = %f MB\n",
                (float)sizeof(unsigned int)*2.0f* TOTAL_NUM_SOURCES / (1024.0f*1024.0f),
-               (float)sizeof(unsigned int)* NUM_LEAF_NODES / (1024.0f*1024.0f) );
+               (float)sizeof(unsigned int)* NUM_LEAF_NODES / (1024.0f*1024.0f));
 #endif
 
-        source_start_indices_for_blocks_temp = (unsigned int *) malloc (sizeof(unsigned int) * (NUM_LEAF_NODES + 1) /*+ MEMORY_ALIGNMENT*/ );
-        source_list_temp = (unsigned int *) malloc (sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES/* + MEMORY_ALIGNMENT*/ );
+        source_start_indices_for_blocks_temp = (unsigned int *) malloc(sizeof(unsigned int) * (NUM_LEAF_NODES + 1) /*+ MEMORY_ALIGNMENT*/);
+        source_list_temp = (unsigned int *) malloc(sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES/* + MEMORY_ALIGNMENT*/);
         if (source_list_temp == NULL || source_start_indices_for_blocks_temp == NULL)
         {
             printf("CUDA ::Not enough memory on CPU.. Exiting\n");
@@ -467,7 +463,7 @@ extern "C"
             for (int j = 0; j < num_interaction_pairs[i] ; j++)
             {
                 printf(/*fp,*/ "\nInteracting target (%d): %d %d  with source (%d) %d %d",
-                               i, target_list[2*i], target_list[2*i+1], interaction_pairs[max_count] , source_list[source_pair_offset], source_list[source_pair_offset+1] );
+                               i, target_list[2*i], target_list[2*i+1], interaction_pairs[max_count] , source_list[source_pair_offset], source_list[source_pair_offset+1]);
                 source_pair_offset += 2;
                 max_count++;
             }
@@ -492,18 +488,18 @@ extern "C"
 
         //check all memory is aligned
 #ifdef CUDA_DEBUG
-        if ((ulong) positions % MEMORY_ALIGNMENT != 0)
-            printf("CUDA_DEBUG::Positions not aligned correctly \n");
-        if ((ulong)gpuVelocities % MEMORY_ALIGNMENT != 0)
-            printf("CUDA_DEBUG::gpuVelocities not aligned correctly \n");
-        if ((ulong)target_list % MEMORY_ALIGNMENT != 0)
-            printf("CUDA_DEBUG::target_list not aligned correctly \n");
-        if ((ulong)num_interaction_pairs % MEMORY_ALIGNMENT != 0)
-            printf("CUDA_DEBUG::num_interaction_pairs not aligned correctly \n");
-        if ((ulong)source_list % MEMORY_ALIGNMENT != 0)
-            printf("CUDA_DEBUG::source_list not aligned correctly \n");
-        if ((ulong)source_start_indices_for_blocks % MEMORY_ALIGNMENT != 0)
-            printf("CUDA_DEBUG::source_start_indices_for_blocks not aligned correctly \n");
+//         if ((ulong) positions % MEMORY_ALIGNMENT != 0)
+//             printf("CUDA_DEBUG::Positions not aligned correctly \n");
+//         if ((ulong)gpuVelocities % MEMORY_ALIGNMENT != 0)
+//             printf("CUDA_DEBUG::gpuVelocities not aligned correctly \n");
+//         if ((ulong)target_list % MEMORY_ALIGNMENT != 0)
+//             printf("CUDA_DEBUG::target_list not aligned correctly \n");
+//         if ((ulong)num_interaction_pairs % MEMORY_ALIGNMENT != 0)
+//             printf("CUDA_DEBUG::num_interaction_pairs not aligned correctly \n");
+//         if ((ulong)source_list % MEMORY_ALIGNMENT != 0)
+//             printf("CUDA_DEBUG::source_list not aligned correctly \n");
+//         if ((ulong)source_start_indices_for_blocks % MEMORY_ALIGNMENT != 0)
+//             printf("CUDA_DEBUG::source_start_indices_for_blocks not aligned correctly \n");
 #endif
 
         //register memory
@@ -554,7 +550,7 @@ extern "C"
         cudaGetDeviceCount(&num_gpus);
 
 #ifdef IGNORE_FIRST_DEVICE
-        if (num_gpus > 1) // BUG: rortiz - Make sure num_gpus > 1 before doing this
+        if (num_gpus > 1) // WARNING: rortiz - Make sure num_gpus > 1 before doing this
             num_gpus--;         //ignore the default (0th) device that is hooked to display
 #endif
 
@@ -564,9 +560,9 @@ extern "C"
 #endif
 
         //load balancing of work on GPUs
-        // BUG: rortiz - Initialize to zero
-        int *load_balance_offset = (int *)malloc (sizeof(int) * num_gpus);
-        int *load_balance_length = (int *)malloc (sizeof(int) * num_gpus);
+        // WARNING: rortiz - Initialize to zero
+        int *load_balance_offset = (int *)malloc(sizeof(int) * num_gpus);
+        int *load_balance_length = (int *)malloc(sizeof(int) * num_gpus);
         for (int i = 0; i < num_gpus; ++i)
         {
             load_balance_offset[i] = 0;
@@ -651,7 +647,6 @@ extern "C"
             printf("GPU_INFO:: canMapHostMemory : %d \n", p[current_gpu].canMapHostMemory);
             printf("GPU_INFO:: computeMode : %d \n", p[current_gpu].computeMode);*/
 #endif
-
             int j = 0;
             while (load_balance_length[current_gpu] > MAX_BLOCK_SIZE)
             {
@@ -667,11 +662,9 @@ extern "C"
 #ifdef GPU_INFO
                 printf("(%s)", p[current_gpu].name);
 #endif
-
                 printf("\n");
 #endif
-
-                kernel <<< grid, threads, SHARED_MEM_SIZE>>>( j*MAX_BLOCK_SIZE + load_balance_offset[current_gpu],
+                kernel <<< grid, threads, SHARED_MEM_SIZE>>>(j*MAX_BLOCK_SIZE + load_balance_offset[current_gpu],
                         (float3 *)dpositions,
                         (float3 *)dvelocities,
                         (unsigned int *)dtarget_list,
@@ -682,7 +675,6 @@ extern "C"
                 j++;
                 load_balance_length[current_gpu] -= MAX_BLOCK_SIZE;
             }
-
             dim3 grid(load_balance_length[current_gpu], 1, 1);
 #ifdef CUDA_LOG
 
@@ -699,7 +691,7 @@ extern "C"
             printf("\n");
 #endif
 
-            kernel <<< grid, threads, SHARED_MEM_SIZE>>>( j*MAX_BLOCK_SIZE + load_balance_offset[current_gpu],
+            kernel <<< grid, threads, SHARED_MEM_SIZE>>>(j*MAX_BLOCK_SIZE + load_balance_offset[current_gpu],
                     (float3 *)dpositions,
                     (float3 *)dvelocities,
                     (unsigned int *)dtarget_list,
@@ -710,7 +702,7 @@ extern "C"
         }
 
 #ifdef ENABLE_BLOCKING
-        cudaMemcpy(gpuVelocities, (float *)dvelocities, 100*sizeof(float), cudaMemcpyDeviceToHost);
+        cudaDeviceSynchronize();
         fprintf(stdout, "CUDA_LOG::Total GPU Time(Blocking call): %f\n,", wcTime() - startTime);
 #endif
 //         err = cudaDeviceSynchronize();

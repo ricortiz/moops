@@ -22,14 +22,14 @@ class OctreeRenderer : public QGLWidget
             m_rotationY = -58.0;
             m_rotationZ = 0.0;
             m_scaling = .3;
-
-
         }
+        
         ~OctreeRenderer()
         {
             makeCurrent();
             glDeleteLists(m_glObject, 1);
         }
+        
         template<typename box_array_type>
         void init(box_array_type &boxes)
         {
@@ -120,28 +120,28 @@ class OctreeRenderer : public QGLWidget
                     createBoxes(box->child[i], particles, extent);
                 }
             }
-            if(leaf || box->parent == box)
+            if((leaf && box->pArrayLow >= 0 && box->pArrayHigh >= 0) || box->parent == box)
             {
                 glBegin(GL_LINES);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z + extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z + extent[box->level+1]);
                 glEnd();
 
                 glBegin(GL_LINE_LOOP);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
-                glVertex3f(box->mid_x + extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z - extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y - extent[box->level], box->mid_z + extent[box->level]);
-                glVertex3f(box->mid_x - extent[box->level], box->mid_y + extent[box->level], box->mid_z + extent[box->level]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z + extent[box->level+1]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z + extent[box->level+1]);
+                glVertex3f(box->mid_x + extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z + extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z + extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z - extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y - extent[box->level+1], box->mid_z + extent[box->level+1]);
+                glVertex3f(box->mid_x - extent[box->level+1], box->mid_y + extent[box->level+1], box->mid_z + extent[box->level+1]);
                 glEnd();
             }
                 

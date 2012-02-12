@@ -1,7 +1,7 @@
 
 #FindCUDA
 FIND_PACKAGE(CUDA REQUIRED)
-set(NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
+set(NVCC_FLAGS -ccbin /usr/bin/gcc-4.4 -gencode arch=compute_20,code=sm_20)
 SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${NVCC_FLAGS})
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
   SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} )
@@ -23,6 +23,7 @@ target_link_libraries(main hybridfmm)
 IF(USE_QT_GUI)
     QT4_WRAP_CPP(renderer_HEADERS_MOC tree_renderer.hpp)
     add_library(octreerenderer ${renderer_HEADERS_MOC})
-    target_link_libraries(octreerenderer ${QT_LIBRARIES} GL GLU hybridfmm)
+    target_link_libraries(octreerenderer ${QT_LIBRARIES} GL GLU)
 ENDIF(USE_QT_GUI)
+
 

@@ -1,7 +1,7 @@
 #include "hybridfmm.h"
 
 /***********************************************************************
- * NOTE 1: 
+ * NOTE 1:
  *
  * A simplification is used throughout this code. Note that if a outer
  * to inner shift is performed as described by Lemma 3.2.2 on pg 23 then
@@ -35,7 +35,7 @@
  *
  * To understand this note that when we shift into the
  * inner expansion of an interior node ShiftOuterToInnerForNonLeaf()
- * we did not multiply by 1/i!j!k! as 
+ * we did not multiply by 1/i!j!k! as
  *
  *
  **********************************************************************/
@@ -53,11 +53,11 @@
 void FormOuterExpansion(Node *node)
 {
     double x_distance, y_distance, z_distance, sum;
-    unsigned long i,j,k,n; 
+    unsigned long i, j, k, n;
     Particle *p;
     int low, high, pNum, l;
     float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *ijk,
-        *phi;
+    *phi;
 
     low = node->pArrayLow;
     high = node->pArrayHigh;
@@ -66,33 +66,34 @@ void FormOuterExpansion(Node *node)
       Form multipole expansions of potential field due to particles
       in each cube about the cube center at the leaf nodes.
     */
-    
-    for(l=0;l<4;l++)
+
+
+    for (pNum = low; pNum <= high; pNum++)
     {
-        for (pNum = low; pNum<=high; pNum++)
+        p = &octree.bodies[pNum];
+        x_distance = p->position[0] - node->mid_x + Epsilon;
+        y_distance = p->position[1] - node->mid_y + Epsilon;
+        z_distance = p->position[2] - node->mid_z + Epsilon;
+        for (i = 0; i <= octree.precision; i++)
         {
-            p = &octree.bodies[pNum];
-            x_distance = p->position[0]-node->mid_x + Epsilon;
-            y_distance = p->position[1]-node->mid_y + Epsilon;
-            z_distance = p->position[2]-node->mid_z + Epsilon;
-            for (i=0; i <= octree.precision; i++)
+            x_power[i] = pow(x_distance, (double) i);
+            y_power[i] = pow(y_distance, (double) i);
+            z_power[i] = pow(z_distance, (double) i);
+        }
+
+        float fdotx = p->position[0] * p->force[0] + p->position[1] * p->force[1] + p->position[2] * p->force[2];
+        float charges[4] = {p->force[0], p->force[1], p->force[2], fdotx};
+        for (l = 0;l < 4;l++)
+        {
+            phi = node->phi[l];
+            ijk = octree.ijk_factorial;
+            for (i = 0; i <= octree.precision; i++)
             {
-                x_power[i]=pow(x_distance,(double) i);
-                y_power[i]=pow(y_distance,(double) i);
-                z_power[i]=pow(z_distance,(double) i);
-            }
-            
-            float fdotx = p->position[0]*p->force[0]+p->position[1]*p->force[1]+p->position[2]*p->force[2];
-            float charges[4] = {p->force[0],p->force[1],p->force[2],fdotx};
-            phi=node->phi[l];
-            ijk=octree.ijk_factorial;
-            for (i=0; i <= octree.precision; i++)
-            {
-                for (j=0; j <= (octree.precision-i); j++)
+                for (j = 0; j <= (octree.precision - i); j++)
                 {
-                    for (k=0; k <= (octree.precision-i-j); k++)
+                    for (k = 0; k <= (octree.precision - i - j); k++)
                     {
-                        *phi += charges[l]*x_power[i]*y_power[j]*z_power[k]*(i+j+k&1?-1:1)*(*ijk++);
+                        *phi += charges[l] * x_power[i] * y_power[j] * z_power[k] * (i + j + k & 1 ? -1 : 1) * (*ijk++);
                         phi++;
                     }
                 }
@@ -117,39 +118,39 @@ void FormOuterExpansion(Node *node)
 void ShiftFromChildToParent(Node *node)
 {
     double sum;
-    unsigned long i,j,k, a, b, g;
+    unsigned long i, j, k, a, b, g;
     float *phi;
     int id, l;
-    
+
     //temp coefficients
     float phi_tilde[octree.coefficients];
 
 
-    for(l=0;l<4;++l)
+    for (l = 0;l < 4;++l)
     {
         /*
             for each child of this node, which is a parent by if statement,
             shift the child's phi to parent and add to parent
         */
-        for (id=0; id < MaxChildren; id++) 
+        for (id = 0; id < MaxChildren; id++)
         {
-            if(node->child[id]->pArrayLow!=-1)
+            if (node->child[id]->pArrayLow != -1)
             {
-                MultipoleExpansion(node->child[id],node,phi_tilde); 
-                phi=node->phi[l];
-                for (i=0; i <= (long) octree.precision; i++)
-                  for (j=0; j <= (long) (octree.precision-i); j++)
-                    for (k=0; k <= (long) (octree.precision-i-j); k++)
-                      {
-                         for (a=0; a <= i; a++)
-                           for (b=0; b <= j; b++)
-                             for (g=0; g <= k; g++)
-                             {
-                               *phi+=ArrayLookup(node->child[id]->phi[l],a,b,g)*
-                                   ArrayLookup(phi_tilde,i-a,j-b,k-g);
-                             }
-                             phi++;
-                       }
+                MultipoleExpansion(node->child[id], node, phi_tilde);
+                phi = node->phi[l];
+                for (i = 0; i <= (long) octree.precision; i++)
+                    for (j = 0; j <= (long) (octree.precision - i); j++)
+                        for (k = 0; k <= (long) (octree.precision - i - j); k++)
+                        {
+                            for (a = 0; a <= i; a++)
+                                for (b = 0; b <= j; b++)
+                                    for (g = 0; g <= k; g++)
+                                    {
+                                        *phi += ArrayLookup(node->child[id]->phi[l], a, b, g) *
+                                                ArrayLookup(phi_tilde, i - a, j - b, k - g);
+                                    }
+                            phi++;
+                        }
             }
         }
     }
@@ -175,37 +176,40 @@ void OuterToInner(Node *source, Node *target, float *target_psi[4], int isLeaf)
     float psi_tilde[octree.coefficients], *psi, *phi, *ijk;
     double sum;
 
-    for(l=0;l<4;++l)
+    for (l = 0;l < 4;++l)
     {
         /*
          * Dump some coefficients into psi_tilde
          * See FormLocalExpansion for description of coefficients
          */
-        FormLocalExpansion(source,target,psi_tilde);
-        psi=target_psi[l];
-        phi=source->phi[l];
-        ijk=octree.ijk_factorial;
-        for (i=0; i <= (long) octree.precision; i++)
-          for (j=0; j <= (long) (octree.precision-i); j++)
-            for (k=0; k <= (long) (octree.precision-i-j); k++)
-            {
-              sum=0.0;
-              n=i+j+k;
-              for (a=0; a <= (long) (octree.precision-n); a++){
-                for (b=0; b <= (long) (octree.precision-n-a); b++){
-                  for (g=0; g <= (long) (octree.precision-n-a-b); g++){
-                    sum+=ArrayLookup(phi,a,b,g)*
-                      ArrayLookup(psi_tilde,i+a,j+b,k+g);
-                  }
+        FormLocalExpansion(source, target, psi_tilde);
+        psi = target_psi[l];
+        phi = source->phi[l];
+        ijk = octree.ijk_factorial;
+        for (i = 0; i <= (long) octree.precision; i++)
+            for (j = 0; j <= (long) (octree.precision - i); j++)
+                for (k = 0; k <= (long) (octree.precision - i - j); k++)
+                {
+                    sum = 0.0;
+                    n = i + j + k;
+                    for (a = 0; a <= (long) (octree.precision - n); a++)
+                    {
+                        for (b = 0; b <= (long) (octree.precision - n - a); b++)
+                        {
+                            for (g = 0; g <= (long) (octree.precision - n - a - b); g++)
+                            {
+                                sum += ArrayLookup(phi, a, b, g) *
+                                       ArrayLookup(psi_tilde, i + a, j + b, k + g);
+                            }
+                        }
+                    }
+                    if (isLeaf)
+                        *psi += sum * (*ijk++);
+                    else
+                        *psi += sum;
+
+                    psi++;
                 }
-              }
-              if(isLeaf)
-                *psi+=sum*(*ijk++);
-              else
-                *psi+=sum;
-                
-              psi++;
-            }
     }
 }
 
@@ -216,7 +220,7 @@ void OuterToInner(Node *source, Node *target, float *target_psi[4], int isLeaf)
  * 3.2.3 page 25. The "c" coefficients are the psi coefficients of the
  * @Parent. Note that this is not in the exact form as the paper defines
  * in 3.42 as no binomial coefficients are calculated. For explaination
- * of this see Note 1 at the top of the page.  
+ * of this see Note 1 at the top of the page.
  *
  * Depending on whether or not the target is a leaf node, multiply by
  * 1/i!j!k!. This differs from the definition in the paper, for an
@@ -225,47 +229,47 @@ void OuterToInner(Node *source, Node *target, float *target_psi[4], int isLeaf)
  **********************************************************************/
 void DownShift(Node *Child, int isLeaf)
 {
-    float x_power[MaxPow+1],y_power[MaxPow+1],z_power[MaxPow+1], *ijk,
-        *psi;  
+    float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *ijk,
+    *psi;
     double x_distance, y_distance, z_distance, sum;
     int i, j, k, n, a, b, g, l;
     Node *Parent = Child->parent;
-    
-    x_distance=Child->mid_x-Parent->mid_x + Epsilon;
-    y_distance=Child->mid_y-Parent->mid_y + Epsilon;
-    z_distance=Child->mid_z-Parent->mid_z + Epsilon;
-    for (i=0; i <= (long) octree.precision; i++)
+
+    x_distance = Child->mid_x - Parent->mid_x + Epsilon;
+    y_distance = Child->mid_y - Parent->mid_y + Epsilon;
+    z_distance = Child->mid_z - Parent->mid_z + Epsilon;
+    for (i = 0; i <= (long) octree.precision; i++)
     {
-        x_power[i]=pow(x_distance,(double) i);
-        y_power[i]=pow(y_distance,(double) i);
-        z_power[i]=pow(z_distance,(double) i);
+        x_power[i] = pow(x_distance, (double) i);
+        y_power[i] = pow(y_distance, (double) i);
+        z_power[i] = pow(z_distance, (double) i);
     }
 
-    for(l=0;l<4;++l)
+    for (l = 0;l < 4;++l)
     {
-        psi=Child->psi[l];
-        ijk=octree.ijk_factorial;
-        for (i=0; i <= (long) octree.precision; i++)
-          for (j=0; j <= (long) (octree.precision-i); j++)
-            for (k=0; k <= (long) (octree.precision-i-j); k++)
-            {
-              sum=0.0;
-              n=i+j+k;
-              for (a=0; a <= (long) (octree.precision-n); a++)
-                for (b=0; b <= (long) (octree.precision-n-a); b++)
-                  for (g=0; g <= (long) (octree.precision-n-a-b); g++)
-                  {
-                    sum+=ArrayLookup(Parent->psi[l],i+a,j+b,k+g)*
-                      ArrayLookup(octree.ijk_factorial,a,b,g)*
-                      x_power[a]*y_power[b]*z_power[g];
-                  }
-                if(isLeaf)
-                    *psi+=sum*(*ijk++);
-                else
-                    *psi+=sum;
-               psi++;
-             }
-     }
+        psi = Child->psi[l];
+        ijk = octree.ijk_factorial;
+        for (i = 0; i <= (long) octree.precision; i++)
+            for (j = 0; j <= (long) (octree.precision - i); j++)
+                for (k = 0; k <= (long) (octree.precision - i - j); k++)
+                {
+                    sum = 0.0;
+                    n = i + j + k;
+                    for (a = 0; a <= (long) (octree.precision - n); a++)
+                        for (b = 0; b <= (long) (octree.precision - n - a); b++)
+                            for (g = 0; g <= (long) (octree.precision - n - a - b); g++)
+                            {
+                                sum += ArrayLookup(Parent->psi[l], i + a, j + b, k + g) *
+                                       ArrayLookup(octree.ijk_factorial, a, b, g) *
+                                       x_power[a] * y_power[b] * z_power[g];
+                            }
+                    if (isLeaf)
+                        *psi += sum * (*ijk++);
+                    else
+                        *psi += sum;
+                    psi++;
+                }
+    }
 }
 
 /***********************************************************************
@@ -273,36 +277,36 @@ void DownShift(Node *Child, int isLeaf)
  * ApplyLocalExpansion(Node *node)
  * @brief - to be called on leaf nodes. Evaluates @node's local
  * expansion at every particle in the node
- * 
+ *
  **********************************************************************/
 void ApplyLocalExpansion(Node *node)
 {
     double dx, dy, dz;
     Particle *p;
-    int i,j,k,pNum;
-    float x_power[MaxPow+1],y_power[MaxPow+1],z_power[MaxPow+1], *psi_0,
-        *psi_1, *psi_2, *psi_3, dx_power[MaxPow+1],dy_power[MaxPow+1],
-        dz_power[MaxPow+1];
+    int i, j, k, pNum;
+    float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *psi_0,
+    *psi_1, *psi_2, *psi_3, dx_power[MaxPow+1], dy_power[MaxPow+1],
+    dz_power[MaxPow+1];
 
-    for (pNum = node->pArrayLow; pNum<= node->pArrayHigh; pNum++)
+    for (pNum = node->pArrayLow; pNum <= node->pArrayHigh; pNum++)
     {
         p = &octree.bodies[pNum];
-        
-        dx=p->position[0]-node->mid_x + Epsilon;
-        dy=p->position[1]-node->mid_y + Epsilon;
-        dz=p->position[2]-node->mid_z + Epsilon;
-        for (i=0; i <= octree.precision; i++)
+
+        dx = p->position[0] - node->mid_x + Epsilon;
+        dy = p->position[1] - node->mid_y + Epsilon;
+        dz = p->position[2] - node->mid_z + Epsilon;
+        for (i = 0; i <= octree.precision; i++)
         {
-            x_power[i]=pow(dx,(double) i);
-            y_power[i]=pow(dy,(double) i);
-            z_power[i]=pow(dz,(double) i);
-            
-            dx_power[i] = i*pow(dx,(double) i-1.0);
-            dy_power[i] = i*pow(dy,(double) i-1.0);
-            dz_power[i] = i*pow(dz,(double) i-1.0);
-            
-            if(isnanf(dx_power[i])||isnanf(dy_power[i])||isnanf(dz_power[i])
-                ||isnanf(x_power[i])||isnanf(y_power[i])||isnanf(z_power[i]))
+            x_power[i] = pow(dx, (double) i);
+            y_power[i] = pow(dy, (double) i);
+            z_power[i] = pow(dz, (double) i);
+
+            dx_power[i] = i * pow(dx, (double) i - 1.0);
+            dy_power[i] = i * pow(dy, (double) i - 1.0);
+            dz_power[i] = i * pow(dz, (double) i - 1.0);
+
+            if (isnanf(dx_power[i]) || isnanf(dy_power[i]) || isnanf(dz_power[i])
+                    || isnanf(x_power[i]) || isnanf(y_power[i]) || isnanf(z_power[i]))
             {
                 printf("****************NaN\n");
                 exit(4);
@@ -312,29 +316,31 @@ void ApplyLocalExpansion(Node *node)
         psi_1 = node->psi[1];
         psi_2 = node->psi[2];
         psi_3 = node->psi[3];
-        for (i=0; i <= octree.precision; i++){
-            for (j=0; j <= (octree.precision-i); j++){
-                for (k=0; k <= (octree.precision-i-j); k++)
+        for (i = 0; i <= octree.precision; i++)
+        {
+            for (j = 0; j <= (octree.precision - i); j++)
+            {
+                for (k = 0; k <= (octree.precision - i - j); k++)
                 {
-                    octree.potentials[pNum].x+=(*psi_0)*x_power[i]*y_power[j]*z_power[k];
-                    octree.potentials[pNum].y+=(*psi_1)*x_power[i]*y_power[j]*z_power[k];
-                    octree.potentials[pNum].z+=(*psi_2)*x_power[i]*y_power[j]*z_power[k];
+                    octree.potentials[pNum].x += (*psi_0) * x_power[i] * y_power[j] * z_power[k];
+                    octree.potentials[pNum].y += (*psi_1) * x_power[i] * y_power[j] * z_power[k];
+                    octree.potentials[pNum].z += (*psi_2) * x_power[i] * y_power[j] * z_power[k];
 
-                    octree.fields[pNum].field[0][0] += (*psi_0)*dx_power[i]*y_power[j]*z_power[k];
-                    octree.fields[pNum].field[1][0] += (*psi_0)*x_power[i]*dy_power[j]*z_power[k];
-                    octree.fields[pNum].field[2][0] += (*psi_0)*x_power[i]*y_power[j]*dz_power[k];
+                    octree.fields[pNum].field[0][0] += (*psi_0) * dx_power[i] * y_power[j] * z_power[k];
+                    octree.fields[pNum].field[1][0] += (*psi_0) * x_power[i] * dy_power[j] * z_power[k];
+                    octree.fields[pNum].field[2][0] += (*psi_0) * x_power[i] * y_power[j] * dz_power[k];
 
-                    octree.fields[pNum].field[0][1] += (*psi_1)*dx_power[i]*y_power[j]*z_power[k];
-                    octree.fields[pNum].field[1][1] += (*psi_1)*x_power[i]*dy_power[j]*z_power[k];
-                    octree.fields[pNum].field[2][1] += (*psi_1)*x_power[i]*y_power[j]*dz_power[k];
+                    octree.fields[pNum].field[0][1] += (*psi_1) * dx_power[i] * y_power[j] * z_power[k];
+                    octree.fields[pNum].field[1][1] += (*psi_1) * x_power[i] * dy_power[j] * z_power[k];
+                    octree.fields[pNum].field[2][1] += (*psi_1) * x_power[i] * y_power[j] * dz_power[k];
 
-                    octree.fields[pNum].field[0][2] += (*psi_2)*dx_power[i]*y_power[j]*z_power[k];
-                    octree.fields[pNum].field[1][2] += (*psi_2)*x_power[i]*dy_power[j]*z_power[k];
-                    octree.fields[pNum].field[2][2] += (*psi_2)*x_power[i]*y_power[j]*dz_power[k];
+                    octree.fields[pNum].field[0][2] += (*psi_2) * dx_power[i] * y_power[j] * z_power[k];
+                    octree.fields[pNum].field[1][2] += (*psi_2) * x_power[i] * dy_power[j] * z_power[k];
+                    octree.fields[pNum].field[2][2] += (*psi_2) * x_power[i] * y_power[j] * dz_power[k];
 
-                    octree.fields[pNum].field[0][3] += (*psi_3)*dx_power[i]*y_power[j]*z_power[k];
-                    octree.fields[pNum].field[1][3] += (*psi_3)*x_power[i]*dy_power[j]*z_power[k];
-                    octree.fields[pNum].field[2][3] += (*psi_3)*x_power[i]*y_power[j]*dz_power[k];
+                    octree.fields[pNum].field[0][3] += (*psi_3) * dx_power[i] * y_power[j] * z_power[k];
+                    octree.fields[pNum].field[1][3] += (*psi_3) * x_power[i] * dy_power[j] * z_power[k];
+                    octree.fields[pNum].field[2][3] += (*psi_3) * x_power[i] * y_power[j] * dz_power[k];
 
                     psi_0++;
                     psi_1++;
@@ -343,10 +349,10 @@ void ApplyLocalExpansion(Node *node)
                 }
             }
         }
-        int idx = 3*pNum;
-        octree.CPU_Veloc[idx]   += 0.039788735772974*(octree.potentials[pNum].x - p->position[0]*octree.fields[pNum].field[0][0] - p->position[1]*octree.fields[pNum].field[0][1] - p->position[2]*octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3]);
-        octree.CPU_Veloc[idx+1] += 0.039788735772974*(octree.potentials[pNum].y - p->position[0]*octree.fields[pNum].field[1][0] - p->position[1]*octree.fields[pNum].field[1][1] - p->position[2]*octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3]);
-        octree.CPU_Veloc[idx+1] += 0.039788735772974*(octree.potentials[pNum].z - p->position[0]*octree.fields[pNum].field[2][0] - p->position[1]*octree.fields[pNum].field[2][1] - p->position[2]*octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3]);
+        int idx = 3 * pNum;
+        octree.CPU_Veloc[idx]   += 0.039788735772974 * (octree.potentials[pNum].x - p->position[0] * octree.fields[pNum].field[0][0] - p->position[1] * octree.fields[pNum].field[0][1] - p->position[2] * octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3]);
+        octree.CPU_Veloc[idx+1] += 0.039788735772974 * (octree.potentials[pNum].y - p->position[0] * octree.fields[pNum].field[1][0] - p->position[1] * octree.fields[pNum].field[1][1] - p->position[2] * octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3]);
+        octree.CPU_Veloc[idx+2] += 0.039788735772974 * (octree.potentials[pNum].z - p->position[0] * octree.fields[pNum].field[2][0] - p->position[1] * octree.fields[pNum].field[2][1] - p->position[2] * octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3]);
     }
 }
 
@@ -357,15 +363,15 @@ void ApplyLocalExpansion(Node *node)
  * within leaf node while taking into acount newton's third law
  *
  **********************************************************************/
-void PerformDirectWithinNode(Node *node,double delta)
+void PerformDirectWithinNode(Node *node, double delta)
 {
     int pNum, qNum;
 
-    for (pNum = node->pArrayLow; pNum<= node->pArrayHigh; pNum++)
+    for (pNum = node->pArrayLow; pNum <= node->pArrayHigh; pNum++)
     {
         for (qNum = node->pArrayLow; qNum <= node->pArrayHigh; qNum++)
         {
-            ComputeVelocityDirect(pNum,qNum,delta);
+            ComputeVelocityDirect(pNum, qNum, delta);
         }
     }
 }
@@ -382,45 +388,47 @@ void PerformDirectWithinNode(Node *node,double delta)
  * 3.38 specifies. See Note 1 at top of page
  *
  **********************************************************************/
-void FormLocalExpansion(Node *interactive_neighbor,Node *node, float *psi_tilde)
+void FormLocalExpansion(Node *interactive_neighbor, Node *node, float *psi_tilde)
 {
-    double distance,tau_x,tau_y,tau_z,dx, dy, dz, sum;
-    long i,j,k,n,a,b,g;
-    float r_zero[MaxPow+1],x_power[MaxPow+1],y_power[MaxPow+1],
-        z_power[MaxPow+1], *ijk;
+    double distance, tau_x, tau_y, tau_z, dx, dy, dz, sum;
+    long i, j, k, n, a, b, g;
+    float r_zero[MaxPow+1], x_power[MaxPow+1], y_power[MaxPow+1],
+    z_power[MaxPow+1], *ijk;
 
-    dx=interactive_neighbor->mid_x-node->mid_x + Epsilon;
-    dy=interactive_neighbor->mid_y-node->mid_y + Epsilon;
-    dz=interactive_neighbor->mid_z-node->mid_z + Epsilon;
-    distance=sqrt(dx*dx + dy*dy + dz*dz);
-    tau_x=2.0*(dx/distance);
-    tau_y=2.0*(dy/distance);
-    tau_z=2.0*(dz/distance);
-    for (i=0; i <= (long) octree.precision; i++)
+    dx = interactive_neighbor->mid_x - node->mid_x + Epsilon;
+    dy = interactive_neighbor->mid_y - node->mid_y + Epsilon;
+    dz = interactive_neighbor->mid_z - node->mid_z + Epsilon;
+    distance = sqrt(dx * dx + dy * dy + dz * dz);
+    tau_x = 2.0 * (dx / distance);
+    tau_y = 2.0 * (dy / distance);
+    tau_z = 2.0 * (dz / distance);
+    for (i = 0; i <= (long) octree.precision; i++)
     {
-        x_power[i]=pow(tau_x,(double) i);
-        y_power[i]=pow(tau_y,(double) i);
-        z_power[i]=pow(tau_z,(double) i);
-        r_zero[i]=1.0/pow(distance,(double) i+1);
+        x_power[i] = pow(tau_x, (double) i);
+        y_power[i] = pow(tau_y, (double) i);
+        z_power[i] = pow(tau_z, (double) i);
+        r_zero[i] = 1.0 / pow(distance, (double) i + 1);
     }
-    ijk=octree.ijk_factorial;
-    for (i=0; i <= (long) octree.precision; i++){
-      for (j=0; j <= (long) (octree.precision-i); j++){
-        for (k=0; k <= (long) (octree.precision-i-j); k++)
+    ijk = octree.ijk_factorial;
+    for (i = 0; i <= (long) octree.precision; i++)
+    {
+        for (j = 0; j <= (long) (octree.precision - i); j++)
         {
-          sum=0.0;
-          for (a=0; a <= (i/2); a++)
-            for (b=0; b <= (j/2); b++)
-              for (g=0; g <= (k/2); g++)
-                sum+=ArrayLookup(octree.ijk_binomial,i-a,j-b,k-g)*
-                  octree.binomial[i-a][a]*octree.binomial[j-b][b]*
-                  octree.binomial[k-g][g]*x_power[i-2*a]*y_power[j-2*b]*
-                  z_power[k-2*g];
-          n=i+j+k;
-          sum*=(n & 1 ? -1 : 1)*r_zero[n]/(*ijk++);
-          *psi_tilde++=sum;
+            for (k = 0; k <= (long) (octree.precision - i - j); k++)
+            {
+                sum = 0.0;
+                for (a = 0; a <= (i / 2); a++)
+                    for (b = 0; b <= (j / 2); b++)
+                        for (g = 0; g <= (k / 2); g++)
+                            sum += ArrayLookup(octree.ijk_binomial, i - a, j - b, k - g) *
+                                   octree.binomial[i-a][a] * octree.binomial[j-b][b] *
+                                   octree.binomial[k-g][g] * x_power[i-2*a] * y_power[j-2*b] *
+                                   z_power[k-2*g];
+                n = i + j + k;
+                sum *= (n & 1 ? -1 : 1) * r_zero[n] / (*ijk++);
+                *psi_tilde++ = sum;
+            }
         }
-      }
     }
 }
 /***********************************************************************
@@ -431,26 +439,26 @@ void FormLocalExpansion(Node *interactive_neighbor,Node *node, float *psi_tilde)
  * 3.30 on pg 21. The "a'" coefficients are places into phi_tilde
  *
  **********************************************************************/
-void MultipoleExpansion(Node *node,Node *parent, float *phi_tilde)
+void MultipoleExpansion(Node *node, Node *parent, float *phi_tilde)
 {
-    double dx, dy, dz;   
+    double dx, dy, dz;
     long i, j, k;
-    float x_power[MaxPow+1],y_power[MaxPow+1],z_power[MaxPow+1], *ijk;
+    float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *ijk;
 
-    dx=node->mid_x-parent->mid_x + Epsilon;
-    dy=node->mid_y-parent->mid_y + Epsilon;
-    dz=node->mid_z-parent->mid_z + Epsilon;
-    for (i=0; i <= (long) octree.precision; i++)
+    dx = node->mid_x - parent->mid_x + Epsilon;
+    dy = node->mid_y - parent->mid_y + Epsilon;
+    dz = node->mid_z - parent->mid_z + Epsilon;
+    for (i = 0; i <= (long) octree.precision; i++)
     {
-    x_power[i]=pow(-dx,(double) i);
-    y_power[i]=pow(-dy,(double) i);
-    z_power[i]=pow(-dz,(double) i);
+        x_power[i] = pow(-dx, (double) i);
+        y_power[i] = pow(-dy, (double) i);
+        z_power[i] = pow(-dz, (double) i);
     }
-    ijk=octree.ijk_factorial;
-    for (i=0; i <= (long) octree.precision; i++)
-      for (j=0; j <= (long) (octree.precision-i); j++)
-        for (k=0; k <= (long) (octree.precision-i-j); k++)
-          *phi_tilde++=x_power[i]*y_power[j]*z_power[k]*(*ijk++);
+    ijk = octree.ijk_factorial;
+    for (i = 0; i <= (long) octree.precision; i++)
+        for (j = 0; j <= (long) (octree.precision - i); j++)
+            for (k = 0; k <= (long) (octree.precision - i - j); k++)
+                *phi_tilde++ = x_power[i] * y_power[j] * z_power[k] * (*ijk++);
 }
 /***********************************************************************
  *
@@ -461,20 +469,21 @@ void ComputeVelocityDirect(int target, int source, double delta)
 {
     double dx[] = {octree.bodies[target].position[0] - octree.bodies[source].position[0],
                    octree.bodies[target].position[1] - octree.bodies[source].position[1],
-                   octree.bodies[target].position[2] - octree.bodies[source].position[2]};
+                   octree.bodies[target].position[2] - octree.bodies[source].position[2]
+                  };
 
     double r2 = dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2];
-    double d2 = delta*delta;
+    double d2 = delta * delta;
     double R1 = r2 + d2;
     double R2 = R1 + d2;
-    double invR = 1.0/R1;
-    double H = sqrt(invR)*invR*0.039788735772974;
+    double invR = 1.0 / R1;
+    double H = sqrt(invR) * invR * 0.039788735772974;
 
-    double fdx = octree.bodies[source].force[0]*dx[0]+
-                 octree.bodies[source].force[1]*dx[1]+
-                 octree.bodies[source].force[2]*dx[2];
-    int idx = 3*target;
-    octree.GPU_Veloc[idx] += H*(octree.bodies[source].force[0]*R2+fdx*dx[0]);
-    octree.GPU_Veloc[idx+1] += H*(octree.bodies[source].force[1]*R2+fdx*dx[1]);
-    octree.GPU_Veloc[idx+2] += H*(octree.bodies[source].force[2]*R2+fdx*dx[2]);
+    double fdx = octree.bodies[source].force[0] * dx[0] +
+                 octree.bodies[source].force[1] * dx[1] +
+                 octree.bodies[source].force[2] * dx[2];
+    int idx = 3 * target;
+    octree.GPU_Veloc[idx] += H * (octree.bodies[source].force[0] * R2 + fdx * dx[0]);
+    octree.GPU_Veloc[idx+1] += H * (octree.bodies[source].force[1] * R2 + fdx * dx[1]);
+    octree.GPU_Veloc[idx+2] += H * (octree.bodies[source].force[2] * R2 + fdx * dx[2]);
 }

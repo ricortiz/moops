@@ -11,6 +11,7 @@ make_tests("${linear_solvers}" "TestLinearSolvers")
 make_tests("${nonlinear_solvers}" "TestNonLinearSolvers")
 make_tests("${ode_solvers}" "TestOdeSolvers")
 
+target_link_libraries(TestFluidSolvers hybridfmm vtkIO)
 IF(USE_QT_GUI)
     target_link_libraries(TestFluidSolvers octreerenderer)
 ENDIF(USE_QT_GUI)
