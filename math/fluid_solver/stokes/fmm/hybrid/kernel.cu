@@ -13,7 +13,7 @@
 // #define GPU_INFO                        //print which GPUs are being used
 
 // #define ENABLE_BLOCKING                 //CPU thread that invokes cuda gets blocked
-// #define CPU_EXECUTE                     //execute on CPU as well, just for validating GPU results with CPU
+#define CPU_EXECUTE                     //execute on CPU as well, just for validating GPU results with CPU
 // #define CUDA_DEBUG                      //detailed GPU logging
 
 //globals
@@ -311,10 +311,11 @@ extern "C"
         fprintf(stdout, "--------------------------------------------------\n");
         fprintf(stdout, "CUDA_LOG::GPU Start time: %f\n", wcTime() - startTime);
 #endif
-
-        cudaSetDevice(0);
-        cudaSetDeviceFlags(cudaDeviceMapHost);
-
+        cudaError_t err;
+        err = cudaSetDevice(0);
+        checkError(err);
+        err = cudaSetDeviceFlags(cudaDeviceMapHost);
+        checkError(err);
 #ifdef CUDA_LOG
         fprintf(stdout, "CUDA_LOG::Actual GPU start time: %f\n", wcTime() - startTime);
         startTime = wcTime();
@@ -401,10 +402,8 @@ extern "C"
 
         printf("cpu_velocities = [");
         for (int i = 0; i < (3*NUM_BODIES);++i)
-        {
             printf("%f ", cpu_velocities[i]);
-        }
-        printf("]\n");
+        printf("];\n");
 
 #endif
 
@@ -458,11 +457,11 @@ extern "C"
         printf("Total Work = %lu\n", total_work);
         for (int i = 0; i < NUM_LEAF_NODES; i++)
         {
-            printf(/*fp,*/ "\n\nLeaf node: %d", i);
+            fprintf(fp, "\n\nLeaf node: %d", i);
             int source_pair_offset = 2 * source_start_indices_for_blocks[i];
             for (int j = 0; j < num_interaction_pairs[i] ; j++)
             {
-                printf(/*fp,*/ "\nInteracting target (%d): %d %d  with source (%d) %d %d",
+                fprintf(fp, "\nInteracting target (%d): %d %d  with source (%d) %d %d",
                                i, target_list[2*i], target_list[2*i+1], interaction_pairs[max_count] , source_list[source_pair_offset], source_list[source_pair_offset+1]);
                 source_pair_offset += 2;
                 max_count++;
@@ -480,7 +479,6 @@ extern "C"
             printf("CUDA_DEBUG::Copied Sources Correctly...\n");
 #endif
         }
-
 
         //GPU Execution begin - create GPU pointers
         float *dpositions, *dvelocities;
@@ -503,7 +501,6 @@ extern "C"
 #endif
 
         //register memory
-        cudaError_t err;
         err =   cudaHostRegister(positions, sizeof(float) * 6 * NUM_BODIES, cudaHostRegisterMapped);
         checkError(err);
         err =   cudaHostRegister(gpuVelocities, sizeof(float) * 3 * NUM_BODIES, cudaHostRegisterMapped);
@@ -611,10 +608,11 @@ extern "C"
         {
 
 #ifdef IGNORE_FIRST_DEVICE
-            cudaSetDevice(current_gpu + 1);
+            err = cudaSetDevice(current_gpu + 1);
 #else
-            cudaSetDevice(current_gpu);
+            err = cudaSetDevice(current_gpu);
 #endif
+            checkError(err);
 
 #ifdef GPU_INFO
             const int num_gpu = num_gpus;
@@ -624,7 +622,6 @@ extern "C"
 #else
             err = cudaGetDeviceProperties(&p[current_gpu], current_gpu);
 #endif
-
             checkError(err);
             /*
             #ifdef IGNORE_FIRST_DEVICE
@@ -702,11 +699,11 @@ extern "C"
         }
 
 #ifdef ENABLE_BLOCKING
-        cudaDeviceSynchronize();
+        err = cudaDeviceSynchronize();
+        checkError(err);
         fprintf(stdout, "CUDA_LOG::Total GPU Time(Blocking call): %f\n,", wcTime() - startTime);
 #endif
-//         err = cudaDeviceSynchronize();
-//         checkError(err);
+
         //assign globals
         GL_positions              = positions;
         GL_gpuVelocities          = gpuVelocities;
