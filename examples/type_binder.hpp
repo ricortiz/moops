@@ -64,7 +64,7 @@ struct TypeBinder
     typedef explicit_sdc                                        time_integrator;
 
     typedef HeartPump<value_type, fluid_solver, time_integrator>  heart_pump_surface;
-    typedef Swarm<value_type, fmm_fluid_solver, time_integrator>      swarm_surface;
+    typedef Swarm<value_type, fluid_solver, time_integrator>      swarm_surface;
 
     typedef vtkStorageWrapper<swarm_surface,vtkFloatArray>                      swarm_vtk_storage;
     typedef vtkStorageWrapper<heart_pump_surface>                 heart_vtk_storage;

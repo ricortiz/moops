@@ -346,7 +346,7 @@ void ApplyLocalExpansion(Node *node)
         int idx = 3*pNum;
         octree.CPU_Veloc[idx]   += 0.039788735772974*(octree.potentials[pNum].x - p->position[0]*octree.fields[pNum].field[0][0] - p->position[1]*octree.fields[pNum].field[0][1] - p->position[2]*octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3]);
         octree.CPU_Veloc[idx+1] += 0.039788735772974*(octree.potentials[pNum].y - p->position[0]*octree.fields[pNum].field[1][0] - p->position[1]*octree.fields[pNum].field[1][1] - p->position[2]*octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3]);
-        octree.CPU_Veloc[idx+1] += 0.039788735772974*(octree.potentials[pNum].z - p->position[0]*octree.fields[pNum].field[2][0] - p->position[1]*octree.fields[pNum].field[2][1] - p->position[2]*octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3]);
+        octree.CPU_Veloc[idx+2] += 0.039788735772974*(octree.potentials[pNum].z - p->position[0]*octree.fields[pNum].field[2][0] - p->position[1]*octree.fields[pNum].field[2][1] - p->position[2]*octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3]);
     }
 }
 
