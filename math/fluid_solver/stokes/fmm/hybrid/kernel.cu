@@ -7,9 +7,9 @@
 //*****************************USE THESE PARAMETERS TO CHANGE THE BEHAVIOR********************************
 
 // #define IGNORE_FIRST_DEVICE             //ignore first device, (on systems where first device might be hooked to display) or might not be a faster GPU
-#define LOAD_BALANCING                  //to enable or disable load balancing, if disabled each GPU executes same amount of CUDA blocks, which might change actual load
+// #define LOAD_BALANCING                  //to enable or disable load balancing, if disabled each GPU executes same amount of CUDA blocks, which might change actual load
 
-#define CUDA_LOG                        //enable logs (minimal)
+// #define CUDA_LOG                        //enable logs (minimal)
 // #define GPU_INFO                        //print which GPUs are being used
 
 // #define ENABLE_BLOCKING                 //CPU thread that invokes cuda gets blocked

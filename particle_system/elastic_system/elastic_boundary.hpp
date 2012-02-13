@@ -39,7 +39,6 @@ class ElasticBoundary : public SpringSystem<Derived>
         inline void setSprings(std::vector<size_t> &col_ptr, std::vector<size_t> &col_idx, std::vector<value_type> &strength)
         {
             particle_type *particles = derived().particles();
-//             this->springs().reserve(col_idx.size()/2);
             for(size_t p = 0; p < col_ptr.size() - 1; ++p)
                 for(size_t i = col_ptr[p], end = col_ptr[p + 1]; i < end; ++i)
                     if(!this->existSpring(&particles[p], &particles[col_idx[i]]))

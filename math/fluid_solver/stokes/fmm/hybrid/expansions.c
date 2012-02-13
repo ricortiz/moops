@@ -67,24 +67,24 @@ void FormOuterExpansion(Node *node)
       in each cube about the cube center at the leaf nodes.
     */
 
-
-    for (pNum = low; pNum <= high; pNum++)
+    for (l = 0;l < 4;l++)
     {
-        p = &octree.bodies[pNum];
-        x_distance = p->position[0] - node->mid_x + Epsilon;
-        y_distance = p->position[1] - node->mid_y + Epsilon;
-        z_distance = p->position[2] - node->mid_z + Epsilon;
-        for (i = 0; i <= octree.precision; i++)
+        for (pNum = low; pNum <= high; pNum++)
         {
-            x_power[i] = pow(x_distance, (double) i);
-            y_power[i] = pow(y_distance, (double) i);
-            z_power[i] = pow(z_distance, (double) i);
-        }
+            p = &octree.bodies[pNum];
+            x_distance = p->position[0] - node->mid_x + Epsilon;
+            y_distance = p->position[1] - node->mid_y + Epsilon;
+            z_distance = p->position[2] - node->mid_z + Epsilon;
+            for (i = 0; i <= octree.precision; i++)
+            {
+                x_power[i] = pow(x_distance, (double) i);
+                y_power[i] = pow(y_distance, (double) i);
+                z_power[i] = pow(z_distance, (double) i);
+            }
 
-        float fdotx = p->position[0] * p->force[0] + p->position[1] * p->force[1] + p->position[2] * p->force[2];
-        float charges[4] = {p->force[0], p->force[1], p->force[2], fdotx};
-        for (l = 0;l < 4;l++)
-        {
+            float fdotx = p->position[0] * p->force[0] + p->position[1] * p->force[1] + p->position[2] * p->force[2];
+            float charges[4] = {p->force[0], p->force[1], p->force[2], fdotx};
+
             phi = node->phi[l];
             ijk = octree.ijk_factorial;
             for (i = 0; i <= octree.precision; i++)
@@ -139,8 +139,8 @@ void ShiftFromChildToParent(Node *node)
                 MultipoleExpansion(node->child[id], node, phi_tilde);
                 phi = node->phi[l];
                 for (i = 0; i <= (long) octree.precision; i++)
-                    for (j = 0; j <= (long) (octree.precision - i); j++)
-                        for (k = 0; k <= (long) (octree.precision - i - j); k++)
+                    for (j = 0; j <= (long)(octree.precision - i); j++)
+                        for (k = 0; k <= (long)(octree.precision - i - j); k++)
                         {
                             for (a = 0; a <= i; a++)
                                 for (b = 0; b <= j; b++)
@@ -187,16 +187,16 @@ void OuterToInner(Node *source, Node *target, float *target_psi[4], int isLeaf)
         phi = source->phi[l];
         ijk = octree.ijk_factorial;
         for (i = 0; i <= (long) octree.precision; i++)
-            for (j = 0; j <= (long) (octree.precision - i); j++)
-                for (k = 0; k <= (long) (octree.precision - i - j); k++)
+            for (j = 0; j <= (long)(octree.precision - i); j++)
+                for (k = 0; k <= (long)(octree.precision - i - j); k++)
                 {
                     sum = 0.0;
                     n = i + j + k;
-                    for (a = 0; a <= (long) (octree.precision - n); a++)
+                    for (a = 0; a <= (long)(octree.precision - n); a++)
                     {
-                        for (b = 0; b <= (long) (octree.precision - n - a); b++)
+                        for (b = 0; b <= (long)(octree.precision - n - a); b++)
                         {
-                            for (g = 0; g <= (long) (octree.precision - n - a - b); g++)
+                            for (g = 0; g <= (long)(octree.precision - n - a - b); g++)
                             {
                                 sum += ArrayLookup(phi, a, b, g) *
                                        ArrayLookup(psi_tilde, i + a, j + b, k + g);
@@ -250,14 +250,14 @@ void DownShift(Node *Child, int isLeaf)
         psi = Child->psi[l];
         ijk = octree.ijk_factorial;
         for (i = 0; i <= (long) octree.precision; i++)
-            for (j = 0; j <= (long) (octree.precision - i); j++)
-                for (k = 0; k <= (long) (octree.precision - i - j); k++)
+            for (j = 0; j <= (long)(octree.precision - i); j++)
+                for (k = 0; k <= (long)(octree.precision - i - j); k++)
                 {
                     sum = 0.0;
                     n = i + j + k;
-                    for (a = 0; a <= (long) (octree.precision - n); a++)
-                        for (b = 0; b <= (long) (octree.precision - n - a); b++)
-                            for (g = 0; g <= (long) (octree.precision - n - a - b); g++)
+                    for (a = 0; a <= (long)(octree.precision - n); a++)
+                        for (b = 0; b <= (long)(octree.precision - n - a); b++)
+                            for (g = 0; g <= (long)(octree.precision - n - a - b); g++)
                             {
                                 sum += ArrayLookup(Parent->psi[l], i + a, j + b, k + g) *
                                        ArrayLookup(octree.ijk_factorial, a, b, g) *
@@ -412,9 +412,9 @@ void FormLocalExpansion(Node *interactive_neighbor, Node *node, float *psi_tilde
     ijk = octree.ijk_factorial;
     for (i = 0; i <= (long) octree.precision; i++)
     {
-        for (j = 0; j <= (long) (octree.precision - i); j++)
+        for (j = 0; j <= (long)(octree.precision - i); j++)
         {
-            for (k = 0; k <= (long) (octree.precision - i - j); k++)
+            for (k = 0; k <= (long)(octree.precision - i - j); k++)
             {
                 sum = 0.0;
                 for (a = 0; a <= (i / 2); a++)
@@ -456,8 +456,8 @@ void MultipoleExpansion(Node *node, Node *parent, float *phi_tilde)
     }
     ijk = octree.ijk_factorial;
     for (i = 0; i <= (long) octree.precision; i++)
-        for (j = 0; j <= (long) (octree.precision - i); j++)
-            for (k = 0; k <= (long) (octree.precision - i - j); k++)
+        for (j = 0; j <= (long)(octree.precision - i); j++)
+            for (k = 0; k <= (long)(octree.precision - i - j); k++)
                 *phi_tilde++ = x_power[i] * y_power[j] * z_power[k] * (*ijk++);
 }
 /***********************************************************************

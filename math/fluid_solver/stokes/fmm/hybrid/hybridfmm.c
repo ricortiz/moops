@@ -60,30 +60,25 @@ unsigned int Binomial(int n, int k)
 void UpSweep(Node *node)
 {
     int id;
-    double stime;
-
-    if (node->isParent)
-    {
-        for (id = 0; id < MaxChildren; id++)
-        {
-            if (node->child[id]->pArrayLow != -1)
+      
+    if (node->isParent) {
+        for (id=0; id < MaxChildren; id++) {
+            if(node->child[id]->pArrayLow >= 0)
             {
-#pragma omp task firstprivate(id)
+                #pragma omp task firstprivate(id)
                 UpSweep(node->child[id]);
             }
         }
-#pragma omp taskwait
-    }
-    stime = wcTime();
-    if (!node->isParent)
+        #pragma omp taskwait
+        if(node->level > 0)
+        {
+            ShiftFromChildToParent(node);
+        }
+    } 
+    else
     {
-        FormOuterExpansion(node);
+       FormOuterExpansion(node);
     }
-    if (node->isParent && (node->level > 0))
-    {
-        ShiftFromChildToParent(node);
-    }
-    upTime += wcTime() - stime;
 }
 
 /***********************************************************************
@@ -93,48 +88,59 @@ void UpSweep(Node *node)
  **********************************************************************/
 void DownSweep(Node *node)
 {
-    int id, i;
+    int id,i;
     double stime;
 
     stime = wcTime();
     if (!node->isParent)
     {
         //shift in list 2
-        for (i = 0; i < *(node->list2Count); i++)
+        for(i = 0; i < *(node->list2Count); i++)
         {
-            OuterToInner(node->list2[i], node, node->psi, True);
+            if(node->list2[i]->pArrayLow>=0){
+                //Direct(node, node->list2[i]);
+                OuterToInner(node->list2[i], node, node->psi, True);
+                //number_interactions+=(node->pArrayHigh-node->pArrayLow+1)*(node->list2[i]->pArrayHigh-node->list2[i]->pArrayLow+1);
+            }
         }
         DownShift(node, True);
-        for (i = 0;i < *node->list3Count;i++)
+        for(i=0;i<*node->list3Count;i++)
         {
-            if (node->list3[i]->isParent)
+            if((node->list3[i]->isParent)&&(node->list3[i]->pArrayLow>=0)){
+                //Direct(node, node->list3[i]);
                 OuterToInner(node->list3[i], node, node->psi, True);
+                //number_interactions+=(node->pArrayHigh-node->pArrayLow+1)*(node->list3[i]->pArrayHigh-node->list3[i]->pArrayLow+1);
+            }
         }
         ApplyLocalExpansion(node);
     }
     else if (node->level > 1)
     {
-        for (i = 0; i < *(node->list2Count); i++)
+        for(i = 0; i < *(node->list2Count); i++)
         {
-            OuterToInner(node->list2[i], node, node->psi, False);
+            if(node->list2[i]->pArrayLow>=0){
+                //Direct(node, node->list2[i]);
+                OuterToInner(node->list2[i], node, node->psi, False);
+                //number_interactions+=(node->pArrayHigh-node->pArrayLow+1)*(node->list2[i]->pArrayHigh-node->list2[i]->pArrayLow+1);
+            }
         }
         DownShift(node, False);
     }
-    downTime += wcTime() - stime;
+    downTime+= wcTime() - stime;
     //recurse
     if (node->isParent)
     {
-        for (id = 0; id < MaxChildren; id++)
+        for (id=0; id < MaxChildren; id++)
         {
-            if (node->child[id]->pArrayLow != -1)
+            if(node->child[id]->pArrayLow!=-1)
             {
-#pragma omp task firstprivate(id)
+                #pragma omp task firstprivate(id)
                 DownSweep(node->child[id]);
             }
         }
-#pragma omp taskwait
+        #pragma omp taskwait
     }
-
+    
 }
 
 void CheckColleagues(Node *node, Node *candidate)

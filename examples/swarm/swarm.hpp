@@ -118,7 +118,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
 
         void getStrengths(const std::vector<size_t> &, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
         {
-            strengths.resize(col_idx.size(), 100.0);
+            strengths.resize(col_idx.size(), 1);
         }
 
         void updateForceGradient()
@@ -144,7 +144,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 gradient[2] /= head_offset;
 //                 value_type norm = std::sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]);
 
-                value_type scale = (1.0 / std::sqrt(particles[0].position[0] * particles[0].position[0] * particles[0].position[1] * particles[0].position[1] * particles[0].position[2] * particles[0].position[2]));
+                value_type scale = .001;//(1.0 / std::sqrt(particles[0].position[0] * particles[0].position[0] * particles[0].position[1] * particles[0].position[1] * particles[0].position[2] * particles[0].position[2]));
 
                 if (scale > 1)
                     return;

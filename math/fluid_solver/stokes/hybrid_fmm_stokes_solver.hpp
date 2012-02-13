@@ -149,13 +149,16 @@ class HybridFmmStokesSolver
 		m_initialized = true;
 	    }
             else
-                updateOctree();
+	    {
+		if(ReSort(octree.root, octree.rootInfo))
+		  RebuildTree(m_num_particles, precision, 255.9999, 0);
+            }
             logger.stopTimer("CreateOctree");
         }
 
         void copyVelocities(value_type *v)
         {
-            std::transform(m_gpu_velocity.begin(), m_gpu_velocity.end(), v, m_gpu_velocity.begin(), std::plus<value_type>());
+            std::transform(m_gpu_velocity.begin(), m_gpu_velocity.end(), v, m_gpu_velocity.end(), std::plus<value_type>());
 	    for (size_t p = 0, idx = 0; p < m_num_particles; ++p, idx += 3)
             {    
 		size_t idx_p = 3*octree.bodies[p].index;
@@ -181,6 +184,7 @@ class HybridFmmStokesSolver
 
         void allPairs()
         {
+	  std::fill(m_gpu_velocity.begin(), m_gpu_velocity.end(), 0.0);
             AllPairs(m_num_particles, 0, m_delta);
             std::cout << "ap_velocities = [";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
         }

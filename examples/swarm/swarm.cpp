@@ -38,14 +38,14 @@ class SwarmApp
 
         SwarmApp(std::string &data_path) :
                 m_swarm(Mt, Nt, Mh, Nh, num_sperms),
-                m_time_step(0.01),
+                m_time_step(0.001),
                 m_vtk_storage(m_swarm),
                 m_surface_writer(data_path + "/surface/swarm", true),
                 m_octree_writer(data_path + "/octree/octree", true),
                 m_record(true)
         {
             m_swarm.fluid_solver().setDelta(.02);
-            m_swarm.geometry().setWaveSpeed(0.1);
+            m_swarm.geometry().setWaveSpeed(0.01);
             for (int i = 0; i < num_sperms; ++i)
                 setCells(i*total_particles);
             m_swarm.fluid_solver().initOctree(m_swarm.positions(), m_swarm.velocities(), m_swarm.forces());

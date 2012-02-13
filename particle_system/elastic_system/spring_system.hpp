@@ -14,9 +14,9 @@ class SpringSystem
         typedef typename Traits<Derived>::particle_type particle_type;
         typedef typename Traits<Derived>::value_type    value_type;
         typedef Spring<particle_type>                           spring_type;
-        typedef typename std::vector<spring_type>                 spring_container;
+        typedef typename std::list<spring_type>                 spring_container;
         typedef typename spring_container::iterator             spring_iterator;
-        typedef typename std::vector<spring_type*>              spring_ptr_container;
+        typedef typename std::list<spring_type*>              spring_ptr_container;
         typedef typename std::map <particle_type*,spring_ptr_container>      spring_lut_type;
 
     private:
@@ -37,7 +37,8 @@ class SpringSystem
         inline spring_iterator addSpring(particle_type *A, particle_type *B, value_type k = 1)
         {
             m_springs.push_back(spring_type());
-            spring_iterator s = m_springs.end()-1;
+            spring_iterator s = m_springs.end();
+	    --s;
 
             s->init(A, B);
             s->stiffness() = k;
