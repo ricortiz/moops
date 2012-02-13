@@ -38,7 +38,7 @@
 #define MaxList1Stack 500
 #define MaxList2Stack 500
 #define MaxTreeDepth  30
-#define Epsilon 1.0e-5
+#define Epsilon 1.0e-10
 #define MinRange  0.0
 #define MaxRange  255.9999999
 // #define MEMORY_ALIGNMENT  4096

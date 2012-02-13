@@ -143,11 +143,6 @@ void CreateOctree(unsigned long number_particles, int precision, double maximum_
 //     printf("Tree depth: %lu\n", octree.depth);
 }
 
-void updateOctree()
-{
-    ReSort(octree.root, octree.rootInfo);
-}
-
 void FreeOctree()
 {
     int i;

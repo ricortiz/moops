@@ -7,7 +7,7 @@
 #include<sstream>
 #include<algorithm>
 #include<iterator>
-
+#include<iterator>
 #ifdef USE_QT_GUI
 #include <QVTKApplication.h>
 #include "gui/gui.hpp"
@@ -35,7 +35,7 @@ struct Traits;
 #include "math/fluid_solver/stokes/gpu_stokes_solver.hpp"
 #endif
 
-template<typename _value_type, int _sdc_nodes = 5, int _sdc_corrections = 5>
+template<typename _value_type, int _sdc_nodes = 3, int _sdc_corrections = 2>
 struct TypeBinder
 {
     enum
@@ -50,8 +50,8 @@ struct TypeBinder
     typedef GpuStokesSolver<float>                              fluid_solver;
 #else
     typedef CpuStokesSolver<value_type>                         fluid_solver;
+    #endif
     typedef HybridFmmStokesSolver<value_type>                   fmm_fluid_solver;
-#endif
 
     typedef ForwardEuler                                        forward_euler;
     typedef BackwardEuler<value_type>                           backward_euler;
@@ -60,7 +60,7 @@ struct TypeBinder
     typedef SemiImplicitSDC<value_type, spectral_integrator, sdc_corrections>   implicit_sdc;
     typedef explicit_sdc                                        	time_integrator;
     typedef HeartPump<value_type, fluid_solver, time_integrator>  	heart_pump_surface;
-    typedef Swarm<value_type, fmm_fluid_solver, time_integrator>      	swarm_surface;
+    typedef Swarm<value_type, fluid_solver, time_integrator>      	swarm_surface;
     typedef vtkStorageWrapper<swarm_surface,vtkFloatArray>              swarm_vtk_storage;
     typedef vtkStorageWrapper<heart_pump_surface>                 	heart_vtk_storage;
     typedef IO::VtkWriter<vtkXMLPolyDataWriter>      			vtk_poly_writer;

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include<iterator>
 #include "nbody_cpu/cpu_compute_velocity.hpp"
 
 template<typename value_type>
@@ -36,6 +37,7 @@ class CpuStokesSolver
             for ( size_t i = 0; i < size_targets; i += 3 )
                 for ( size_t j = 0; j < size_sources; j += 3 )
                     compute_velocity ( &x[i], &v[i], &y[j], &f[j], m_delta );
+//             std::cout << "direct_velocities = [";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
         }
 
         inline void Implicit( value_type t, const value_type *x, value_type *v, const value_type *f )

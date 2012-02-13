@@ -11,7 +11,7 @@ class SwarmApp
 {
         enum
         {
-            num_sperms = 1,
+            num_sperms = 16,
             Mt = 6,
             Nt = 100,
             Mh = 12,
@@ -38,7 +38,7 @@ class SwarmApp
 
         SwarmApp(std::string &data_path) :
                 m_swarm(Mt, Nt, Mh, Nh, num_sperms),
-                m_time_step(0.001),
+                m_time_step(0.01),
                 m_vtk_storage(m_swarm),
                 m_surface_writer(data_path + "/surface/swarm", true),
                 m_octree_writer(data_path + "/octree/octree", true),
@@ -48,8 +48,7 @@ class SwarmApp
             m_swarm.geometry().setWaveSpeed(0.01);
             for (int i = 0; i < num_sperms; ++i)
                 setCells(i*total_particles);
-            m_swarm.fluid_solver().initOctree(m_swarm.positions(), m_swarm.velocities(), m_swarm.forces());
-            m_vtk_storage.setOctree(octree);
+//             m_vtk_storage.setOctree(octree);
         }
 
         void run()
@@ -120,7 +119,7 @@ class SwarmApp
         void write()
         {
             m_surface_writer.write(m_vtk_storage.grid(), m_swarm.time());
-            m_octree_writer.write(m_vtk_storage.box(), m_swarm.time());
+//             m_octree_writer.write(m_vtk_storage.box(), m_swarm.time());
         }
     public:
         types::swarm_surface &boundary()
