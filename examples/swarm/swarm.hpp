@@ -79,7 +79,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
             }
             this->clear_forces();
             base_type::computeForces();
-            updateForceGradient();
+//             updateForceGradient();
         }
 
     private:
@@ -118,7 +118,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
 
         void getStrengths(const std::vector<size_t> &, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
         {
-            strengths.resize(col_idx.size(), 100.0);
+            strengths.resize(col_idx.size(), 10.0);
         }
 
         void updateForceGradient()

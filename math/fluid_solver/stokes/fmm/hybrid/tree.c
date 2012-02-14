@@ -905,6 +905,8 @@ void ParticleSwap(int from, int to)
 //   temp.force = octree.bodies[from].force;
   float position[3];
   float force[3];
+  unsigned int index;
+  
   //copy data
   position[0] = octree.bodies[from].position[0];
   position[1] = octree.bodies[from].position[1];
@@ -925,8 +927,7 @@ void ParticleSwap(int from, int to)
   octree.bodies[from].force[0] = octree.bodies[to].force[0];
   octree.bodies[from].force[1] = octree.bodies[to].force[1];
   octree.bodies[from].force[2] = octree.bodies[to].force[2];
-//   
-// 
+  
 //   //copy over
 //   octree.bodies[to].position = position;
 //   octree.bodies[to].force = force;
@@ -937,6 +938,10 @@ void ParticleSwap(int from, int to)
   octree.bodies[to].force[0] = force[0];
   octree.bodies[to].force[1] = force[1];
   octree.bodies[to].force[2] = force[2];
+  
+  index = octree.particle_idx[from];
+  octree.particle_idx[from] = octree.particle_idx[to];
+  octree.particle_idx[to] = index;
 
 }
 

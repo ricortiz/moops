@@ -7,6 +7,8 @@
 /// Author: Ricardo Ortiz <ortiz@unc.edu>, (C) 2008
 /// $Id $
 #include <iostream>
+#include <sstream>
+#include <cassert>
 #include <vtkXMLUnstructuredGridWriter.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkPointData.h>
@@ -15,6 +17,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkXMLPolyDataWriter.h>
 #include <vtksys/SystemTools.hxx>
+
+#include<cmath>
 
 namespace IO
 {
@@ -34,7 +38,7 @@ namespace IO
         }
     }
     template<typename vtk_writer_type>
-    class VtkWriter/*<vtkXMLPolyDataWriter>*/
+    class VtkWriter
     {
             size_t m_file_counter;
             std::string m_data_path;
@@ -43,7 +47,7 @@ namespace IO
 
         public:
             VtkWriter() : m_file_counter(0), m_write_binary(true) {}
-            VtkWriter(const std::string &data_path, bool write_binary = true) :
+            VtkWriter(const std::string &data_path, bool write_binary = false) :
                     m_file_counter(0),
                     m_data_path(data_path),
                     m_writer(vtkSmartPointer<vtk_writer_type>::New()),
@@ -56,16 +60,20 @@ namespace IO
             }
 
             template<typename input_type>
-            void setInput(input_type &poly_data, int i = 0)
+            void write(std::vector<input_type> &poly_data)
             {
-                m_writer->SetInput(poly_data, i);
+                for(size_t i = 0; i < poly_data.size(); ++i)
+                    write(poly_data[i],0);
             }
-
+            
             template<typename data_set_type>
-            void write(data_set_type &grid, double timestep, bool print = true)
+            void write(data_set_type &data_set, double timestep, bool set_number = true, bool print = true)
             {
-                m_writer->SetInput(grid);
-                std::string file_name = m_data_path + "data_" + detail::file_number(m_file_counter++, 10) + "." + m_writer->GetDefaultFileExtension();
+                m_writer->SetInput(data_set);
+                std::string file_name = m_data_path;
+                if(set_number) file_name += "_" + detail::file_number(m_file_counter++, 10);
+                file_name += ".";
+                file_name += m_writer->GetDefaultFileExtension();
                 m_writer->SetFileName(file_name.c_str());
                 if (print) std::cout << "Saving " << file_name << " ... ";
                 m_writer->WriteNextTime(timestep);

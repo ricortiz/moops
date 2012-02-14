@@ -61,7 +61,6 @@ typedef struct _Particle
   float position[3], force[3];
 } Particle;
 
-
 typedef struct _Interval
 {
     int low, high;
@@ -126,6 +125,7 @@ typedef struct _Octree
     FILE *output;
     float *GPU_Veloc;
     float *CPU_Veloc;
+    unsigned int *particle_idx;
 //     GPU_Velocities *GPU_Veloc;
 //     CPU_Velocities *CPU_Veloc;
     Potential *potentials;
