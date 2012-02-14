@@ -68,22 +68,21 @@ class HybridFmmStokesSolver
                     logger.startTimer("DownSweep");
                     DownSweep(octree.root);
                     logger.stopTimer("DownSweep");
-//                     std::cout << "fmm_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+                    std::cout << "fmm_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
                 }
 		#pragma omp barrier
 		#pragma omp single
                 {
                     gpuGetVelocities();
+		    std::cout << "gpu_velocities = [";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;           
                 }
 		#pragma omp barrier
 
             }
             logger.startTimer("copyVelocities");
-            gpuGetVelocities();
-            std::cout << "gpu_velocities = [";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
             copyVelocities(v);
             logger.stopTimer("copyVelocities");
-            std::cout << "hv_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+            std::cout << "hv_velocities = [";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
         }
 
         void initData(const value_type *x, const value_type *f)
@@ -142,6 +141,7 @@ class HybridFmmStokesSolver
 	    std::fill(m_gpu_velocity.begin(), m_gpu_velocity.end(), 0.0);
         }
 
+        void setDelta(value_type delta) { m_delta = delta; } 
 
         void allPairs()
         {
@@ -152,7 +152,7 @@ class HybridFmmStokesSolver
                 for (size_t j = 0; j < m_num_particles; ++j)
                     compute_velocity(octree.bodies[i].position, &velocity[i_idx], octree.bodies[j].position, octree.bodies[j].force,m_delta);
             }
-//             std::cout << "ap_velocities = [";std::copy(velocity.begin(), velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
+            std::cout << "ap_velocities = [";std::copy(velocity.begin(), velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
         }
 
 };

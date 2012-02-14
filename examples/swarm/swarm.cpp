@@ -11,11 +11,7 @@ class SwarmApp
 {
         enum
         {
-<<<<<<< HEAD
-            num_sperms = 16,
-=======
             num_sperms = 1,
->>>>>>> old_branch
             Mt = 6,
             Nt = 100,
             Mh = 12,

@@ -54,11 +54,8 @@ void FormOuterExpansion(Node *node)
 {
     assert(node->pArrayLow >= 0);
     double x_distance, y_distance, z_distance, sum;
-<<<<<<< HEAD
     unsigned long i, j, k, n;
-=======
-    unsigned long i,j,k,n;
->>>>>>> old_branch
+
     Particle *p;
     int low, high, pNum, l;
     float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *ijk,
@@ -68,19 +65,11 @@ void FormOuterExpansion(Node *node)
     high = node->pArrayHigh;
 
     /*
-<<<<<<< HEAD
      *     Form multipole expansions of potential field due to particles
      *     in each cube about the cube center at the leaf nodes.
      */
-
     for (l = 0;l < 4;l++)
-=======
-      Form multipole expansions of potential field due to particles
-      in each cube about the cube center at the leaf nodes.
-    */
 
-    for (l=0;l<4;l++)
->>>>>>> old_branch
     {
         for (pNum = low; pNum <= high; pNum++)
         {
@@ -95,19 +84,11 @@ void FormOuterExpansion(Node *node)
                 z_power[i] = pow(z_distance, (double) i);
             }
 
-<<<<<<< HEAD
             float fdotx = p->position[0] * p->force[0] + p->position[1] * p->force[1] + p->position[2] * p->force[2];
             float charges[4] = {p->force[0], p->force[1], p->force[2], fdotx};
             phi = node->phi[l];
             ijk = octree.ijk_factorial;
             for (i = 0; i <= octree.precision; i++)
-=======
-            float fdotx = p->position[0]*p->force[0]+p->position[1]*p->force[1]+p->position[2]*p->force[2];
-            float charges[4] = {p->force[0],p->force[1],p->force[2],fdotx};
-            phi=node->phi[l];
-            ijk=octree.ijk_factorial;
-            for (i=0; i <= octree.precision; i++)
->>>>>>> old_branch
             {
                 for (j = 0; j <= (octree.precision - i); j++)
                 {
@@ -146,8 +127,6 @@ void ShiftFromChildToParent(Node *node)
     //temp coefficients
     float phi_tilde[octree.coefficients];
 
-
-<<<<<<< HEAD
     for (l = 0;l < 4;++l)
     {
         /*
@@ -170,30 +149,6 @@ void ShiftFromChildToParent(Node *node)
                                     {
                                         *phi += ArrayLookup(node->child[id]->phi[l], a, b, g) *
                                                 ArrayLookup(phi_tilde, i - a, j - b, k - g);
-=======
-    for (l=0;l<4;++l)
-    {
-        /*
-            for each child of this node, which is a parent by if statement,
-            shift the child's phi to parent and add to parent
-        */
-        for (id=0; id < MaxChildren; id++)
-        {
-            if (node->child[id]->pArrayLow!=-1)
-            {
-                MultipoleExpansion(node->child[id],node,phi_tilde);
-                phi=node->phi[l];
-                for (i=0; i <= (long) octree.precision; i++)
-                    for (j=0; j <= (long) (octree.precision-i); j++)
-                        for (k=0; k <= (long) (octree.precision-i-j); k++)
-                        {
-                            for (a=0; a <= i; a++)
-                                for (b=0; b <= j; b++)
-                                    for (g=0; g <= k; g++)
-                                    {
-                                        *phi+=ArrayLookup(node->child[id]->phi[l],a,b,g)*
-                                              ArrayLookup(phi_tilde,i-a,j-b,k-g);
->>>>>>> old_branch
                                     }
                             phi++;
                         }

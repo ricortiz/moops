@@ -59,7 +59,6 @@
 typedef struct _Particle
 {
   float position[3], force[3];
-  unsigned int index;
 } Particle;
 
 typedef struct _Interval
