@@ -54,7 +54,11 @@ void FormOuterExpansion(Node *node)
 {
     assert(node->pArrayLow >= 0);
     double x_distance, y_distance, z_distance, sum;
+<<<<<<< HEAD
     unsigned long i, j, k, n;
+=======
+    unsigned long i,j,k,n;
+>>>>>>> old_branch
     Particle *p;
     int low, high, pNum, l;
     float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *ijk,
@@ -64,11 +68,19 @@ void FormOuterExpansion(Node *node)
     high = node->pArrayHigh;
 
     /*
+<<<<<<< HEAD
      *     Form multipole expansions of potential field due to particles
      *     in each cube about the cube center at the leaf nodes.
      */
 
     for (l = 0;l < 4;l++)
+=======
+      Form multipole expansions of potential field due to particles
+      in each cube about the cube center at the leaf nodes.
+    */
+
+    for (l=0;l<4;l++)
+>>>>>>> old_branch
     {
         for (pNum = low; pNum <= high; pNum++)
         {
@@ -83,11 +95,19 @@ void FormOuterExpansion(Node *node)
                 z_power[i] = pow(z_distance, (double) i);
             }
 
+<<<<<<< HEAD
             float fdotx = p->position[0] * p->force[0] + p->position[1] * p->force[1] + p->position[2] * p->force[2];
             float charges[4] = {p->force[0], p->force[1], p->force[2], fdotx};
             phi = node->phi[l];
             ijk = octree.ijk_factorial;
             for (i = 0; i <= octree.precision; i++)
+=======
+            float fdotx = p->position[0]*p->force[0]+p->position[1]*p->force[1]+p->position[2]*p->force[2];
+            float charges[4] = {p->force[0],p->force[1],p->force[2],fdotx};
+            phi=node->phi[l];
+            ijk=octree.ijk_factorial;
+            for (i=0; i <= octree.precision; i++)
+>>>>>>> old_branch
             {
                 for (j = 0; j <= (octree.precision - i); j++)
                 {
@@ -127,6 +147,7 @@ void ShiftFromChildToParent(Node *node)
     float phi_tilde[octree.coefficients];
 
 
+<<<<<<< HEAD
     for (l = 0;l < 4;++l)
     {
         /*
@@ -149,6 +170,30 @@ void ShiftFromChildToParent(Node *node)
                                     {
                                         *phi += ArrayLookup(node->child[id]->phi[l], a, b, g) *
                                                 ArrayLookup(phi_tilde, i - a, j - b, k - g);
+=======
+    for (l=0;l<4;++l)
+    {
+        /*
+            for each child of this node, which is a parent by if statement,
+            shift the child's phi to parent and add to parent
+        */
+        for (id=0; id < MaxChildren; id++)
+        {
+            if (node->child[id]->pArrayLow!=-1)
+            {
+                MultipoleExpansion(node->child[id],node,phi_tilde);
+                phi=node->phi[l];
+                for (i=0; i <= (long) octree.precision; i++)
+                    for (j=0; j <= (long) (octree.precision-i); j++)
+                        for (k=0; k <= (long) (octree.precision-i-j); k++)
+                        {
+                            for (a=0; a <= i; a++)
+                                for (b=0; b <= j; b++)
+                                    for (g=0; g <= k; g++)
+                                    {
+                                        *phi+=ArrayLookup(node->child[id]->phi[l],a,b,g)*
+                                              ArrayLookup(phi_tilde,i-a,j-b,k-g);
+>>>>>>> old_branch
                                     }
                             phi++;
                         }
@@ -202,6 +247,7 @@ void OuterToInner(Node *source, Node *target, float *target_psi[4], int isLeaf)
                             {
                                 sum += ArrayLookup(phi, a, b, g) *
                                        ArrayLookup(psi_tilde, i + a, j + b, k + g);
+
                             }
                         }
                     }
@@ -209,7 +255,6 @@ void OuterToInner(Node *source, Node *target, float *target_psi[4], int isLeaf)
                         *psi += sum * (*ijk++);
                     else
                         *psi += sum;
-
                     psi++;
                 }
     }
@@ -233,6 +278,7 @@ void DownShift(Node *Child, int isLeaf)
 {
     assert(Child->pArrayLow >= 0);
     float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *ijk,
+
     *psi;
     double x_distance, y_distance, z_distance, sum;
     int i, j, k, n, a, b, g, l;
@@ -242,6 +288,7 @@ void DownShift(Node *Child, int isLeaf)
     y_distance = Child->mid_y - Parent->mid_y + Epsilon;
     z_distance = Child->mid_z - Parent->mid_z + Epsilon;
     for (i = 0; i <= (long) octree.precision; i++)
+
     {
         x_power[i] = pow(x_distance, (double) i);
         y_power[i] = pow(y_distance, (double) i);
@@ -290,27 +337,36 @@ void ApplyLocalExpansion(Node *node)
     int i, j, k, pNum;
     float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *psi_0,
     *psi_1, *psi_2, *psi_3, dx_power[MaxPow+1], dy_power[MaxPow+1],
+
     dz_power[MaxPow+1];
 
     for (pNum = node->pArrayLow; pNum <= node->pArrayHigh; pNum++)
     {
         p = &octree.bodies[pNum];
 
-        dx = p->position[0] - node->mid_x + Epsilon;
-        dy = p->position[1] - node->mid_y + Epsilon;
-        dz = p->position[2] - node->mid_z + Epsilon;
-        for (i = 0; i <= octree.precision; i++)
+        dx=p->position[0]-node->mid_x;
+        dy=p->position[1]-node->mid_y;
+        dz=p->position[2]-node->mid_z;
+
+        x_power[0]=1;
+        y_power[0]=1;
+        z_power[0]=1;
+
+        dx_power[0] = 0;
+        dy_power[0] = 0;
+        dz_power[0] = 0;
+        for (i=1; i <= octree.precision; i++)
         {
-            x_power[i] = pow(dx, (double) i);
-            y_power[i] = pow(dy, (double) i);
-            z_power[i] = pow(dz, (double) i);
+            x_power[i]=pow(dx,(double) i);
+            y_power[i]=pow(dy,(double) i);
+            z_power[i]=pow(dz,(double) i);
 
-            dx_power[i] = i * pow(dx, (double) i - 1.0);
-            dy_power[i] = i * pow(dy, (double) i - 1.0);
-            dz_power[i] = i * pow(dz, (double) i - 1.0);
+            dx_power[i] = i*pow(dx,(double) i-1.0);
+            dy_power[i] = i*pow(dy,(double) i-1.0);
+            dz_power[i] = i*pow(dz,(double) i-1.0);
 
-            if (isnanf(dx_power[i]) || isnanf(dy_power[i]) || isnanf(dz_power[i])
-                    || isnanf(x_power[i]) || isnanf(y_power[i]) || isnanf(z_power[i]))
+            if (isnanf(dx_power[i])||isnanf(dy_power[i])||isnanf(dz_power[i])
+                    ||isnanf(x_power[i])||isnanf(y_power[i])||isnanf(z_power[i]))
             {
                 printf("****************NaN\n");
                 exit(4);
@@ -325,6 +381,7 @@ void ApplyLocalExpansion(Node *node)
             for (j = 0; j <= (octree.precision - i); j++)
             {
                 for (k = 0; k <= (octree.precision - i - j); k++)
+
                 {
                     octree.potentials[pNum].x += (*psi_0) * x_power[i] * y_power[j] * z_power[k];
                     octree.potentials[pNum].y += (*psi_1) * x_power[i] * y_power[j] * z_power[k];
@@ -357,6 +414,7 @@ void ApplyLocalExpansion(Node *node)
         octree.CPU_Veloc[idx]   +=  0.039788735772974 * (octree.potentials[pNum].x - p->position[0] * octree.fields[pNum].field[0][0] - p->position[1] * octree.fields[pNum].field[0][1] - p->position[2] * octree.fields[pNum].field[0][2] + octree.fields[pNum].field[0][3]);
         octree.CPU_Veloc[idx+1] +=  0.039788735772974 * (octree.potentials[pNum].y - p->position[0] * octree.fields[pNum].field[1][0] - p->position[1] * octree.fields[pNum].field[1][1] - p->position[2] * octree.fields[pNum].field[1][2] + octree.fields[pNum].field[1][3]);
         octree.CPU_Veloc[idx+2] += 0.039788735772974 * (octree.potentials[pNum].z - p->position[0] * octree.fields[pNum].field[2][0] - p->position[1] * octree.fields[pNum].field[2][1] - p->position[2] * octree.fields[pNum].field[2][2] + octree.fields[pNum].field[2][3]);
+
     }
 }
 
@@ -378,6 +436,7 @@ void FormLocalExpansion(Node *interactive_neighbor, Node *node, float *psi_tilde
     double distance, tau_x, tau_y, tau_z, dx, dy, dz, sum;
     long i, j, k, n, a, b, g;
     float r_zero[MaxPow+1], x_power[MaxPow+1], y_power[MaxPow+1],
+
     z_power[MaxPow+1], *ijk;
 
     dx = interactive_neighbor->mid_x - node->mid_x + Epsilon;
@@ -412,6 +471,7 @@ void FormLocalExpansion(Node *interactive_neighbor, Node *node, float *psi_tilde
                 n = i + j + k;
                 sum *= (n & 1 ? -1 : 1) * r_zero[n] / (*ijk++);
                 *psi_tilde++ = sum;
+
             }
         }
     }
@@ -427,6 +487,7 @@ void FormLocalExpansion(Node *interactive_neighbor, Node *node, float *psi_tilde
 void MultipoleExpansion(Node *node, Node *parent, float *phi_tilde)
 {
     assert((parent->pArrayLow >= 0) && (node->pArrayLow >= 0));
+
     double dx, dy, dz;
     long i, j, k;
     float x_power[MaxPow+1], y_power[MaxPow+1], z_power[MaxPow+1], *ijk;
@@ -446,4 +507,5 @@ void MultipoleExpansion(Node *node, Node *parent, float *phi_tilde)
             for (k = 0; k <= (long) (octree.precision - i - j); k++)
                 *phi_tilde++ = x_power[i] * y_power[j] * z_power[k] * (*ijk++);
 }
+
 

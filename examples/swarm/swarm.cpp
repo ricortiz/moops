@@ -11,7 +11,11 @@ class SwarmApp
 {
         enum
         {
+<<<<<<< HEAD
             num_sperms = 16,
+=======
+            num_sperms = 1,
+>>>>>>> old_branch
             Mt = 6,
             Nt = 100,
             Mh = 12,
@@ -48,7 +52,6 @@ class SwarmApp
             m_swarm.geometry().setWaveSpeed(0.01);
             for (int i = 0; i < num_sperms; ++i)
                 setCells(i*total_particles);
-//             m_vtk_storage.setOctree(octree);
         }
 
         void run()

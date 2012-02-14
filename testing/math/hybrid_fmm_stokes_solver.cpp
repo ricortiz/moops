@@ -23,8 +23,6 @@ struct random_generator
         return rand() / ((value_type)RAND_MAX + 1);
     }
 };
-
-
 void write_vtk_node(Node &node, const std::string &name)
 {
 
@@ -46,13 +44,13 @@ void write_vtk_node_points(Node &node, const std::string &name)
     vtkSmartPointer<vtkCellArray>       cells = vtkSmartPointer<vtkCellArray>::New();
     IO::VtkWriter<vtkXMLPolyDataWriter> writer(name);
     // TODO THis is wrong
-    data_points->SetArray(octree.bodies[node.pArrayLow].position, 3*(node.pArrayHigh-node.pArrayLow+1), 1);
+    data_points->SetArray(octree.bodies[node.pArrayLow].position, 3*(node.pArrayHigh - node.pArrayLow + 1), 1);
     data_points->SetNumberOfComponents(3);
     data_points->SetName("positions");
-    
+
     points->SetData(data_points);
     poly_data->SetPoints(points);
-    for (vtkIdType i = 0; i <= node.pArrayHigh-node.pArrayLow; ++i)
+    for (vtkIdType i = 0; i <= node.pArrayHigh - node.pArrayLow; ++i)
         cells->InsertNextCell(VTK_VERTEX, &i);
     poly_data->SetVerts(cells);
     writer.write(poly_data, 0, false);
@@ -70,7 +68,7 @@ void write_vtk_octree()
             write_vtk_node(octree.nodes[i], s.str());
             for (int j = 0; j < *octree.nodes[i].list1Count; ++j)
             {
-                std::stringstream n,p;
+                std::stringstream n, p;
                 n << "data/list1_" << "node_" << i << "_id_" << j;
                 write_vtk_node(*octree.nodes[i].list1[j], n.str());
                 n << "_points";
@@ -153,7 +151,6 @@ int hybrid_fmm_stokes_solver(int ac, char **av)
         writer.write(poly_data, 0, false);
         write_vtk_octree();
     }
-
 #ifdef USE_QT_GUI
     QApplication app(ac, av);
 

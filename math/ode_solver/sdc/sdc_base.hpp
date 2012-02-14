@@ -124,7 +124,6 @@ class SDCBase
 //                 }
                 std::fill(fdiff.begin(), fdiff.end(), value_type(0));
             }
-//             sdc_method().update();
             for ( size_t i = 0; i < sdc_corrections; ++i )
             {
                 for ( size_t k = 0; k < sdc_nodes - 1; ++k )
@@ -141,17 +140,17 @@ class SDCBase
             std::transform(sdc_method().X(k), sdc_method().X(k) + ode_size, &sdc_method().Immk(k, 0), tmp.begin(), std::plus<value_type>());
             std::transform(sdc_method().X(k + 1), sdc_method().X(k + 1) + ode_size, tmp.begin(), tmp.begin(), std::minus<value_type>());
             m_residuals[i][k] = std::sqrt(std::inner_product(tmp.begin(), tmp.end(), tmp.begin(), 0.0));
-            if(m_residuals[i][k] > 5)
-            {
-                std::cout << "correction = " << i << ", iteration = " << k << std::endl;
-                for(int j = 0; j <= i; ++j)
-                {
-                    for(int l = 0; l <= k; ++l)
-                        std::cout << m_residuals[j][l] << " ";
-                    std::cout << std::endl;
-                }
-                throw std::out_of_range("sdc residual is out of bound: SDC_BASE::CHECK_CONVERGENCE");
-            }
+//             if(m_residuals[i][k] > 5)
+//             {
+//                 std::cout << "correction = " << i << ", iteration = " << k << std::endl;
+//                 for(int j = 0; j <= i; ++j)
+//                 {
+//                     for(int l = 0; l <= k; ++l)
+//                         std::cout << m_residuals[j][l] << " ";
+//                     std::cout << std::endl;
+//                 }
+//                 throw std::out_of_range("sdc residual is out of bound: SDC_BASE::CHECK_CONVERGENCE");
+//             }
         }
 
 };

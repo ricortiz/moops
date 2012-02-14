@@ -516,6 +516,7 @@ extern "C"
         err =   cudaHostRegister(source_list, /*getAlignedSize(*/sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES/*)*/, cudaHostRegisterMapped);
         checkError(err);
         err =   cudaHostRegister(source_start_indices_for_blocks, /*getAlignedSize(*/sizeof(unsigned int) * (NUM_LEAF_NODES + 1)/*)*/, cudaHostRegisterMapped);
+
         checkError(err);
 
         err =   cudaHostGetDevicePointer((void **) & dpositions, (void *)positions, 0);
