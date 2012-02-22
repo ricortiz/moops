@@ -5,11 +5,11 @@
 #include "examples/type_binder.hpp"
 
 class SwarmApp
-#ifdef USE_QT_GUI
+#if defined USE_QT_GUI
             : public Gui<SwarmApp>
-#elseif USE_PV_COPROCESSOR
+#elif defined USE_PV_COPROCESSOR
             : public ParaviewCoprocessor<SwarmApp>
-#endif
+#endif  
 {
     public:
         std::string name() { return "Swarm"; }

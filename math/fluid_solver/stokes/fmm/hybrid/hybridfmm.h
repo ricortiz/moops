@@ -21,20 +21,13 @@
 /*
   Define declarations for the N-body program.
 */
-#define AbsoluteValue(x)  ((x) < 0 ? -(x) : (x))
-#ifndef False
-#define False  0
-#endif
-#define GravitationalConstant   6.673e-11
 #define MaxPow  20
-#define Max(x,y)  (((x) > (y)) ? (x) : (y))
-#define MaxChildren  8
 #define MaxNodesInteractiveField  189 
 #define MaxNodesNearField  26  
 #define MaxList3 500
 #define MaxList4 2000
 #define MaxList1 500
-#define MaxColleagues 500
+#define MaxColleagues 27
 #define MaxList1Stack 500
 #define MaxList2Stack 500
 #define MaxTreeDepth  30
@@ -72,14 +65,14 @@ typedef struct _NodeInfo
     int low, high, level, subtree_size;
     unsigned int isParent;
     float mid_x, mid_y, mid_z;
-    struct _NodeInfo *childInfo[MaxChildren];
-    struct _Interval childInts[MaxChildren];
+    struct _NodeInfo *childInfo[8];
+    struct _Interval childInts[8];
     
 } NodeInfo;
 
 typedef struct _Node
 {
-  struct _Node *parent, *child[MaxChildren], *Colleagues[MaxColleagues],
+  struct _Node *parent, *child[8], *Colleagues[MaxColleagues],
     *list1[MaxList1], *list2[MaxList3], *list3[MaxList3], *list4[MaxList4];
   unsigned long id,level;
   unsigned int DI_tag;
@@ -126,8 +119,6 @@ typedef struct _Octree
     float *GPU_Veloc;
     float *CPU_Veloc;
     unsigned int *particle_idx;
-//     GPU_Velocities *GPU_Veloc;
-//     CPU_Velocities *CPU_Veloc;
     Potential *potentials;
     Field *fields;    
 
@@ -137,6 +128,8 @@ typedef struct _Octree
     unsigned long ref_two[MaxPow+3], ref_three[MaxPow+3], precision,
         coefficients;
     Particle *bodies;
+    float *positions;
+    float *forces;
 
     int maxBodiesPerNode, numThreads, nodeInfoCoeff, nodeInfoDistribution
         ,*threadFailures, threads, treeRebuilds, DI_nodeTCount;

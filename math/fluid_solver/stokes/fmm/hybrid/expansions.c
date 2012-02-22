@@ -133,7 +133,7 @@ void ShiftFromChildToParent(Node *node)
          *           for each child of this node, which is a parent by if statement,
          *           shift the child's phi to parent and add to parent
          */
-        for (id = 0; id < MaxChildren; id++)
+        for (id = 0; id < 8; id++)
         {
             if (node->child[id]->pArrayLow != -1)
             {

@@ -137,7 +137,7 @@ void UpSweep(Node *node)
     int id;
     
     if (node->isParent) {
-        for (id=0; id < MaxChildren; id++) {
+        for (id=0; id < 8; id++) {
             if(node->child[id]->pArrayLow >= 0)
             {
                 #pragma omp task firstprivate(id)
@@ -195,17 +195,17 @@ void DownSweep(Node *node)
         {
             if(node->list2[i]->pArrayLow>=0){
                 //Direct(node, node->list2[i]);
-                OuterToInner(node->list2[i], node, node->psi, False);
+                OuterToInner(node->list2[i], node, node->psi, 0);
                 //number_interactions+=(node->pArrayHigh-node->pArrayLow+1)*(node->list2[i]->pArrayHigh-node->list2[i]->pArrayLow+1);
             }
         }
-        DownShift(node, False);
+        DownShift(node, 0);
     }
     downTime+= wcTime() - stime;
     //recurse
     if (node->isParent)
     {
-        for (id=0; id < MaxChildren; id++)
+        for (id=0; id < 8; id++)
         {
             if(node->child[id]->pArrayLow!=-1)
             {
@@ -221,7 +221,7 @@ void DownSweep(Node *node)
 void CheckColleagues(Node *node, Node *candidate){
     int j;
     if((candidate->level < node->level) && candidate->isParent){
-        for(j=0; j<MaxChildren; j++){
+        for(j=0; j<8; j++){
             if((candidate->child[j]!=NULL)&&(IsBorder(node, candidate->child[j])==1)){
                 CheckColleagues(node, candidate->child[j]);
             }
@@ -240,20 +240,20 @@ void CheckColleagues(Node *node, Node *candidate){
  *    Node **colleaguesList, **srcColleaguesList;
  *    if(node == octree.root)
  *    {
- *        for(i = 0; i < MaxChildren; i++)
+ *        for(i = 0; i < 8; i++)
  *        {
  *            count = 0;
  *            if(octree.root->child[i]!=NULL)
  *            {
  *                colleaguesList = octree.root->child[i]->Colleagues;
- *                for(j=0; j<MaxChildren; j++)
+ *                for(j=0; j<8; j++)
  *                {
  *                    if((octree.root->child[j]!=NULL)
  *                    &&(octree.root->child[j]!=octree.root->child[i])){
  *                        colleaguesList[count++] = octree.root->child[j];
  }
  }
- for(k=0;k<MaxChildren;k++){
+ for(k=0;k<8;k++){
      if(octree.root->child[i]->child[k]!=NULL){
          BuildColleagues(octree.root->child[i]->child[k]);
  }
@@ -271,7 +271,7 @@ void CheckColleagues(Node *node, Node *candidate){
      && (IsBorder(node, node->parent->Colleagues[i])==1)
      && (node->parent->Colleagues[i]->level < node->level))
      {
-         for(j=0;j<MaxChildren;j++){
+         for(j=0;j<8;j++){
              if((node->parent->Colleagues[i]->child[j]!=NULL)
                  &&(IsBorder(node, node->parent->Colleagues[i]->child[j])==1))
                  {
@@ -285,7 +285,7 @@ void CheckColleagues(Node *node, Node *candidate){
              *node->colleagueCount = *node->colleagueCount + 1;
          }
          }
-         for(i=0;i<MaxChildren;i++){
+         for(i=0;i<8;i++){
              if((node->parent->child[i]!=NULL)&&(node->parent->child[i]!=node))
              {
                  node->Colleagues[*node->colleagueCount] = node->parent->child[i];
@@ -294,7 +294,7 @@ void CheckColleagues(Node *node, Node *candidate){
          }
  }
  if((node->level<(octree.depth-1))&&(node->isParent)){
-     for(k=0;k<MaxChildren;k++){
+     for(k=0;k<8;k++){
          if(node->child[k]!=NULL){
              //#pragma omp task firstprivate(k)
              BuildColleagues(node->child[k]);
@@ -320,20 +320,20 @@ void BuildColleagues(Node * node){
     
     if(node == octree.root)
     {
-        for(i = 0; i < MaxChildren; i++)
+        for(i = 0; i < 8; i++)
         {
             count = 0;
             if(octree.root->child[i]!=NULL)
             {
                 colleaguesList = octree.root->child[i]->Colleagues;
-                for(j=0; j<MaxChildren; j++)
+                for(j=0; j<8; j++)
                 {
                     if((octree.root->child[j]!=NULL)
                         &&(octree.root->child[j]!=octree.root->child[i])){
                         colleaguesList[count++] = octree.root->child[j];
                         }
                 }
-                for(k=0;k<MaxChildren;k++){
+                for(k=0;k<8;k++){
                     if(octree.root->child[i]->child[k]!=NULL){
                         BuildColleagues(octree.root->child[i]->child[k]);
                     }
@@ -375,7 +375,7 @@ void BuildColleagues(Node * node){
             {
                 //take off stack since only interested in its children now
                 temp = stack[top--];
-                for(j=0;j<MaxChildren;j++)
+                for(j=0;j<8;j++)
                 {
                     if(temp->child[j]!=NULL)
                     {
@@ -395,7 +395,7 @@ void BuildColleagues(Node * node){
             }
             
         }
-        for(i=0; i<MaxChildren; i++)
+        for(i=0; i<8; i++)
         {
             if((node->parent->child[i]!=NULL)&&(node->parent->child[i]!=node)){
                 colleaguesList[count++] = node->parent->child[i];
@@ -403,7 +403,7 @@ void BuildColleagues(Node * node){
             }
         }
         if((node->level<(octree.depth-1))&&(node->isParent)){
-            for(k=0;k<MaxChildren;k++){
+            for(k=0;k<8;k++){
                 #pragma omp task firstprivate(k)
                 BuildColleagues(node->child[k]);
             }
@@ -422,7 +422,7 @@ void BuildColleagues(Node * node){
 void CheckList1(Node *node, Node *candidate){
     int j;
     if(candidate->isParent){
-        for(j=0; j<MaxChildren; j++){
+        for(j=0; j<8; j++){
             if(IsBorder(node, candidate->child[j])==1){
                 CheckList1(node, candidate->child[j]);
             }
@@ -460,7 +460,7 @@ void BuildList1(Node *node){
     
     if(node->isParent)
     {
-        for(i = 0; i<MaxChildren; i++)
+        for(i = 0; i<8; i++)
         {
             #pragma omp task firstprivate(i)
             BuildList1(node->child[i]);
@@ -482,7 +482,7 @@ void BuildList2(Node *node){
         }
         else if(node->parent->level == node->parent->Colleagues[i]->level){ //then true colleague
             if(node->parent->Colleagues[i]->isParent){
-                for(j=0;j<MaxChildren;j++){
+                for(j=0;j<8;j++){
                     if(IsBorder(node,node->parent->Colleagues[i]->child[j])!=1)
                     {
                         node->list2[*node->list2Count] = node->parent->Colleagues[i]->child[j];
@@ -496,7 +496,7 @@ void BuildList2(Node *node){
     //descend
     if(node->isParent)
     {
-        for(i = 0; i<MaxChildren; i++)
+        for(i = 0; i<8; i++)
         {
             #pragma omp task firstprivate(i)
             BuildList2(node->child[i]);
@@ -518,7 +518,7 @@ void CheckList3(Node * node, Node * candidate){
         assert((*node->list4Count)<MaxList4);
     }
     else if(candidate->isParent){
-        for(j = 0; j<MaxChildren; j++){
+        for(j = 0; j<8; j++){
             CheckList3(node, candidate->child[j]);
         }
     }
@@ -545,7 +545,7 @@ void BuildList3And4(Node * node)
                 break;
             }
             else if(node->Colleagues[i]->isParent){ //each child of colleague is potential list3 node
-                for(j = 0; j<MaxChildren; j++){
+                for(j = 0; j<8; j++){
                     CheckList3(node, node->Colleagues[i]->child[j]);
                 }
             }
@@ -554,7 +554,7 @@ void BuildList3And4(Node * node)
     
     if(node->isParent)//then has at least one child
     {
-        for(i = 0; i<MaxChildren; i++)
+        for(i = 0; i<8; i++)
         {
             //#pragma omp task firstprivate(i)
             BuildList3And4(node->child[i]);

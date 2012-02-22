@@ -39,7 +39,7 @@ void CreateOctree(unsigned long number_particles, int precision, double maximum_
         octree.treeRebuilds++;
         octree.nodeInfoCoeff = octree.nodeInfoCoeff + 1;
         constructTreeInfo(number_particles, minimum_extent);
-        failure = False;
+        failure = 0;
         for (i = 0; i < octree.threads; i++)
         {
             failure = failure || octree.threadFailures[i];
@@ -123,7 +123,7 @@ void CreateOctree(unsigned long number_particles, int precision, double maximum_
         octree.DI_coeff *= 2.0;
         constructDINodes(number_particles, (double)octree.rootInfo->subtree_size);
 
-        failure = False;
+        failure = 0;
         for (i = 0; i < octree.threads; i++)
         {
             failure = failure || octree.threadFailures[i];
@@ -195,7 +195,7 @@ void constructDINodes(unsigned long number_particles, double numNodes)
             exit(4);
         }
         nextDI_node = 0;
-        octree.threadFailures[threadId] = False;
+        octree.threadFailures[threadId] = 0;
 #pragma omp barrier
 #pragma omp single
         {
@@ -224,7 +224,7 @@ void PushDownDirectWork(Node * parent)
         //if > maxBodies then done as expansion on CPU
         if ((!parent->list4[i]->isParent) && (parent->list4[i]->pArrayLow != -1))
         {
-            for (id = 0;id < MaxChildren;id++)
+            for (id = 0;id < 8;id++)
             {
                 if (parent->child[id]->pArrayLow != -1)
                 {
@@ -237,7 +237,7 @@ void PushDownDirectWork(Node * parent)
         }
     }
 
-    for (id = 0;id < MaxChildren;id++)
+    for (id = 0;id < 8;id++)
     {
         //if child is parent and not a DI node, then continue to push
         if ((parent->child[id]->isParent) && (parent->child[id]->DI_tag == -1))
@@ -443,7 +443,7 @@ void ConstructDINodesRec(Node *node)
             {
                 DI_nodes[nextDI_node++] = node;
             }
-            for (id = 0;id < MaxChildren;id++)
+            for (id = 0;id < 8;id++)
             {
                 if (node->child[id]->pArrayLow != -1)
                 {
@@ -478,10 +478,10 @@ void ConstructDINodesRec(Node *node)
  **********************************************************************/
 void CreateSubtree(Node * parent, NodeInfo * parentInfo, int s)
 {
-    int i, childS_values[MaxChildren];
+    int i, childS_values[8];
 
     //setup table of s indexes for children
-    for (i = 0; i < MaxChildren; i++)
+    for (i = 0; i < 8; i++)
     {
         childS_values[i] = s;
         if (parentInfo->childInfo[i] != NULL)
@@ -491,7 +491,7 @@ void CreateSubtree(Node * parent, NodeInfo * parentInfo, int s)
     }
 
     //initialize and recurse
-    for (i = 0; i < MaxChildren; i++)
+    for (i = 0; i < 8; i++)
     {
         if (parentInfo->childInfo[i] == NULL)
         {
@@ -531,7 +531,7 @@ NodeInfo * AnalyzeTree(int numParticles, int minimum_extent)
     root_info->mid_x = minimum_extent + octree.edge_length[0] * 0.5;
     root_info->mid_y = minimum_extent + octree.edge_length[0] * 0.5;
     root_info->mid_z = minimum_extent + octree.edge_length[0] * 0.5;
-    root_info->isParent = False;
+    root_info->isParent = 0;
     PartitionInfo(root_info);
     return root_info;
 }
@@ -550,7 +550,7 @@ void PartitionInfo(NodeInfo * info)
     double bisect;
 
     info->subtree_size = 1;
-    for (c = 0; c < MaxChildren; c++)
+    for (c = 0; c < 8; c++)
     {
         info->childInfo[c] = NULL;
     }
@@ -571,7 +571,7 @@ void PartitionInfo(NodeInfo * info)
             exit(4);
         }
         //set children info pointers, recursing as needed
-        for (c = 0; c < MaxChildren; c++)
+        for (c = 0; c < 8; c++)
         {
             //-1 was a marker set in subdivide --> size of 0
 #pragma omp task firstprivate(c,info)
@@ -610,14 +610,14 @@ void PartitionInfo(NodeInfo * info)
                         info->mid_y + (c & 2 ? bisect : -bisect);
                     child_info->mid_z =
                         info->mid_z + (c & 4 ? bisect : -bisect);
-                    child_info->isParent = False;
+                    child_info->isParent = 0;
                     info->childInfo[c] = child_info;
                     PartitionInfo(child_info);
                 }
             }
         }
 #pragma omp taskwait
-        for (c = 0; c < MaxChildren; c++)
+        for (c = 0; c < 8; c++)
         {
             info->subtree_size += info->childInfo[c]->subtree_size;
         }
@@ -686,7 +686,7 @@ void subdivide(int low, int high, float mid_x, float mid_y, float mid_z, Interva
 
     int divisions[9] = {low, xDiv1, yDiv1, xDiv2, zDiv, xDiv3, yDiv2, xDiv4, high};
 
-    for (i = 0;i < MaxChildren;i++)
+    for (i = 0;i < 8;i++)
     {
         childrenInts[i].low = -1;
         childrenInts[i].high = -2;
@@ -694,7 +694,7 @@ void subdivide(int low, int high, float mid_x, float mid_y, float mid_z, Interva
     int localLow = low;
 
     int COUNT = 0;
-    for (i = 0; i < MaxChildren; i++)
+    for (i = 0; i < 8; i++)
     {
         if ((divisions[i+1] >= localLow) && (divisions[i+1] <= high))
         {
@@ -725,11 +725,11 @@ void RebuildTree(unsigned long number_particles, int precision, double maximum_e
 }
 int ReSort(Node *node, NodeInfo *info)
 {
-    int i, rebuild = False;
+    int i, rebuild = 0;
     if (node->isParent)
     {
         subdivide(node->pArrayLow, node->pArrayHigh, node->mid_x, node->mid_y, node->mid_z, info->childInts);
-        for (i = 0;i < MaxChildren;i++)
+        for (i = 0;i < 8;i++)
         {
 #pragma omp task firstprivate(i)
             {
@@ -768,7 +768,7 @@ void threadSetup()
         exit(4);
     }
     threadId = omp_get_thread_num();
-    octree.threadFailures[threadId] = False;
+    octree.threadFailures[threadId] = 0;
 }
 
 /***********************************************************************
@@ -870,7 +870,7 @@ Node *InitializeNode(int id, int level, Node *parent, double mid_x,
     Node * nodeToInit =  &octree.nodes[index];
     nodeToInit->parent = parent;
 
-    for (i = 0; i < MaxChildren; i++)
+    for (i = 0; i < 8; i++)
         nodeToInit->child[i] = (Node *) NULL;
     nodeToInit->id = id;
     nodeToInit->level = level;
