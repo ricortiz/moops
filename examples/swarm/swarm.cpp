@@ -7,8 +7,14 @@
 class SwarmApp
 #ifdef USE_QT_GUI
             : public Gui<SwarmApp>
+#elseif USE_PV_COPROCESSOR
+            : public ParaviewCoprocessor<SwarmApp>
 #endif
 {
+    public:
+        std::string name() { return "Swarm"; }
+
+    protected:
         enum
         {
             num_sperms = 1,
@@ -22,11 +28,9 @@ class SwarmApp
             num_particles = num_sperms * total_particles,
             data_size = 3 * num_particles
         };
-    protected:
         typedef float value_type;
         typedef TypeBinder<value_type> types;
 
-    private:
         types::swarm_surface m_swarm;
         types::value_type m_time_step;
         types::swarm_vtk_storage m_vtk_storage;
@@ -36,12 +40,10 @@ class SwarmApp
 
     public:
 
-        SwarmApp(std::string &data_path) :
+        SwarmApp() :
                 m_swarm(Mt, Nt, Mh, Nh, num_sperms),
                 m_time_step(0.01),
                 m_vtk_storage(m_swarm),
-                m_surface_writer(data_path + "/surface/swarm", true),
-                m_octree_writer(data_path + "/octree/octree", true),
                 m_record(true)
         {
             m_swarm.fluid_solver().setDelta(.02);
@@ -49,6 +51,19 @@ class SwarmApp
             for (int i = 0; i < num_sperms; ++i)
                 setCells(i*total_particles);
         }
+
+        int init(int ac, char **av)
+        {
+            if (ac < 2)
+            {
+                std::cout << "Usage: " << av[0] << " <data path>" << std::endl;
+                return 1;
+            }
+            m_surface_writer.setDataPath(av[1]);
+            m_octree_writer.setDataPath(av[1]);
+        }
+
+        types::swarm_surface &surface() { m_swarm; }
 
         void run()
         {
@@ -112,9 +127,9 @@ class SwarmApp
                     m_vtk_storage.cells()->InsertNextCell(3, cells[k]);
             }
         }
-        
+
         types::swarm_vtk_storage &vtk_storage() { return m_vtk_storage; }
-        
+
         void write()
         {
             m_surface_writer.write(m_vtk_storage.grid(), m_swarm.time());
@@ -130,27 +145,17 @@ class SwarmApp
 
 int main(int ac, char **av)
 {
+    SwarmApp swarm;
+    swarm.init(ac, av);
 #ifdef USE_QT_GUI
-    QVTKApplication app(ac, av);
+    return runGui(swarm);
 #endif
-
-    std::string data_dir;
-    if (ac == 2)
-        data_dir = av[1];
-    else
-        return 0;
-
-    SwarmApp swarm(data_dir);
-#ifdef USE_QT_GUI
-//     swarm.vtk_storage().grid()->PrintSelf(std::cout, vtkIndent());
-    //     swarm.vtk_storage().box()->PrintSelf(std::cout, vtkIndent());
-    swarm.write();
-    swarm.setGridActor(true);
-    swarm.setBoxActor();
-    swarm.show();
-    return app.exec();
+#ifdef USE_PV_COPROCESSOR
+    swarm.initCoprocessor(ac, av);
+    return runCoprocessor(swarm);
 #else
     while (1)
         swarm.run();
 #endif
+    return 0;
 }

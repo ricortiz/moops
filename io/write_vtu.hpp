@@ -46,7 +46,7 @@ namespace IO
             bool m_write_binary;
 
         public:
-            VtkWriter() : m_file_counter(0), m_write_binary(true) {}
+            VtkWriter() : m_file_counter(0), m_data_path("./"), m_writer(vtkSmartPointer<vtk_writer_type>::New()), m_write_binary(false)  {}
             VtkWriter(const std::string &data_path, bool write_binary = false) :
                     m_file_counter(0),
                     m_data_path(data_path),
@@ -78,6 +78,11 @@ namespace IO
                 if (print) std::cout << "Saving " << file_name << " ... ";
                 m_writer->WriteNextTime(timestep);
                 if (print) std::cout << "done." << std::endl;
+            }
+
+            void setDataPath(std::string data_path)
+            {
+                m_data_path = data_path;
             }
 
     };

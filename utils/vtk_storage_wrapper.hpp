@@ -250,37 +250,38 @@ class vtk_octree_storage
         template<typename node_type>
         void getPoints(node_type *node, float *extent, float points[8][3])
         {
-            points[0][0] = node->mid_x - extent[node->level+1];
-            points[0][1] = node->mid_y - extent[node->level+1];
-            points[0][2] = node->mid_z - extent[node->level+1];
+            float e = extent[node->level+1];
+            points[0][0] = node->mid_x - e;
+            points[0][1] = node->mid_y - e;
+            points[0][2] = node->mid_z - e;
             
-            points[1][0] = node->mid_x + extent[node->level+1];
-            points[1][1] = node->mid_y - extent[node->level+1];
-            points[1][2] = node->mid_z - extent[node->level+1];
+            points[1][0] = node->mid_x + e;
+            points[1][1] = node->mid_y - e;
+            points[1][2] = node->mid_z - e;
             
-            points[2][0] = node->mid_x + extent[node->level+1];
-            points[2][1] = node->mid_y + extent[node->level+1];
-            points[2][2] = node->mid_z - extent[node->level+1];
+            points[2][0] = node->mid_x + e;
+            points[2][1] = node->mid_y + e;
+            points[2][2] = node->mid_z - e;
             
-            points[3][0] = node->mid_x - extent[node->level+1];
-            points[3][1] = node->mid_y + extent[node->level+1];
-            points[3][2] = node->mid_z - extent[node->level+1];
+            points[3][0] = node->mid_x - e;
+            points[3][1] = node->mid_y + e;
+            points[3][2] = node->mid_z - e;
             
-            points[4][0] = node->mid_x - extent[node->level+1];
-            points[4][1] = node->mid_y - extent[node->level+1];
-            points[4][2] = node->mid_z + extent[node->level+1];
+            points[4][0] = node->mid_x - e;
+            points[4][1] = node->mid_y - e;
+            points[4][2] = node->mid_z + e;
             
-            points[5][0] = node->mid_x + extent[node->level+1];
-            points[5][1] = node->mid_y - extent[node->level+1];
-            points[5][2] = node->mid_z + extent[node->level+1];
+            points[5][0] = node->mid_x + e;
+            points[5][1] = node->mid_y - e;
+            points[5][2] = node->mid_z + e;
             
-            points[6][0] = node->mid_x + extent[node->level+1];
-            points[6][1] = node->mid_y + extent[node->level+1];
-            points[6][2] = node->mid_z + extent[node->level+1];
+            points[6][0] = node->mid_x + e;
+            points[6][1] = node->mid_y + e;
+            points[6][2] = node->mid_z + e;
             
-            points[7][0] = node->mid_x - extent[node->level+1];
-            points[7][1] = node->mid_y + extent[node->level+1];
-            points[7][2] = node->mid_z + extent[node->level+1];                    
+            points[7][0] = node->mid_x - e;
+            points[7][1] = node->mid_y + e;
+            points[7][2] = node->mid_z + e;                    
         }
         
         void addBox(float points[8][3])

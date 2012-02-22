@@ -1,6 +1,7 @@
 #ifndef GUI_HPP
 #define GUI_HPP
 
+#include <QVTKApplication.h>
 #include "gui_base.hpp"
 
 class vtkPolyData;
@@ -36,5 +37,15 @@ class Gui : public GuiBase
 };
 
 #include "gui.tpp"
+
+template<typename app_type>
+int runGui(Gui<app_type> &app)
+{
+    QVTKApplication app_window(ac, av);
+    app.setGridActor(true);
+    app.setBoxActor();
+    app.show();
+    return app_window.exec();
+}
 
 #endif

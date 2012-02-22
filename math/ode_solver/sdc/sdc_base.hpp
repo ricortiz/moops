@@ -1,5 +1,5 @@
-#ifndef SDC_BASE_RAW_HPP
-#define SDC_BASE_RAW_HPP
+#ifndef SDC_BASE_HPP
+#define SDC_BASE_HPP
 /**
  * @brief C++ Class.
  * Author: Ricardo Ortiz <ortiz@unc.edu>
