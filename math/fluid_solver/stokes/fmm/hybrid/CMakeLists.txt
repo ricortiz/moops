@@ -1,22 +1,14 @@
 
 #FindCUDA
-FIND_PACKAGE(CUDA REQUIRED)
-set(NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
-
-SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${NVCC_FLAGS})
-if(${CMAKE_BUILD_TYPE} MATCHES "Release")
-  SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} )
-endif()
-
-SET(CUDA_TARGETS_SOURCES kernel.cu)
-cuda_add_library(kernel STATIC ${CUDA_TARGETS_SOURCES})
-TARGET_LINK_LIBRARIES(kernel ${CUDA_LIBRARIES})
-
-add_library(hybridfmm hybridfmm.c expansions.c tree.c)
-target_link_libraries(hybridfmm kernel)
-
-add_executable(main main.cpp)
-target_link_libraries(main hybridfmm)
+IF(USE_CUDA)
+  SET(CUDA_TARGETS_SOURCES kernel.cu)
+  cuda_add_library(kernel STATIC ${CUDA_TARGETS_SOURCES})
+  TARGET_LINK_LIBRARIES(kernel ${CUDA_LIBRARIES})
+  add_library(hybridfmm hybridfmm.c expansions.c tree.c)
+  target_link_libraries(hybridfmm kernel)
+ENDIF(USE_CUDA)
+# add_executable(main main.cpp)
+# target_link_libraries(main hybridfmm)
 
 # FIND_PACKAGE(Qt4 REQUIRED)
 # SET(QT_USE_QTOPENGL TRUE)

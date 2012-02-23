@@ -8,7 +8,9 @@
 /// $Id $
 #include <iostream>
 #include <sstream>
-#include <cassert>
+#include<cmath>
+#include <stdexcept>
+
 #include <vtkXMLUnstructuredGridWriter.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkPointData.h>
@@ -18,7 +20,6 @@
 #include <vtkXMLPolyDataWriter.h>
 #include <vtksys/SystemTools.hxx>
 
-#include<cmath>
 
 namespace IO
 {
@@ -29,7 +30,8 @@ namespace IO
             std::stringstream filename;
 
             size_t digits = (size_t)std::floor(counter > 9 ? std::log10(counter) + 1 : 1);
-            assert(digits <= total_digits || !"Number of digits is bigger than allowed.");
+            if(digits > total_digits)
+                throw std::range_error("file_number(): Number of digits is bigger than allowed.");
             std::string zeros(total_digits - digits, '0');
 
             // concatenate zeros + counter

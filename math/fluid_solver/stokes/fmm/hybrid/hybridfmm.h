@@ -81,12 +81,6 @@ typedef struct _Node
     *list4Count,*list3Count, isParent;
 } Node;
 
-typedef struct _Synch
-{
-    int flag;
-    char pad[120]; 
-} Synch;
-
 typedef struct _GPU_Velocities
 {
     float x,y,z;

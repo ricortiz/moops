@@ -57,13 +57,13 @@ class SwarmApp
             if (ac < 2)
             {
                 std::cout << "Usage: " << av[0] << " <data path>" << std::endl;
-                return 1;
+                return 0;
             }
-            m_surface_writer.setDataPath(av[1]);
-            m_octree_writer.setDataPath(av[1]);
+            std::string path = av[1];
+            m_surface_writer.setDataPath(path + "surface/swarm");
+            m_octree_writer.setDataPath(path + "octree/swarm");
+            return 1;
         }
-
-        types::swarm_surface &surface() { m_swarm; }
 
         void run()
         {
@@ -147,10 +147,9 @@ int main(int ac, char **av)
 {
     SwarmApp swarm;
     swarm.init(ac, av);
-#ifdef USE_QT_GUI
+#if defined USE_QT_GUI
     return runGui(swarm);
-#endif
-#ifdef USE_PV_COPROCESSOR
+#elif defined USE_PV_COPROCESSOR
     swarm.initCoprocessor(ac, av);
     return runCoprocessor(swarm);
 #else

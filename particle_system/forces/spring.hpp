@@ -18,6 +18,7 @@
 /// @section See also also SpringSystem
 
 #include<cmath>
+#include <stdexcept>
 
 template<typename particle_type>
 class Spring
@@ -61,9 +62,10 @@ class Spring
         */
         void init(particle_type * A, particle_type * B)
         {
-            assert(A != B || !"Spring::init(): Particle A and B were the same");
-            assert(A    || !"Spring::init(): Particle A was null");
-            assert(B    || !"Spring::init(): Particle B was null");
+            if(A == B)
+                throw std::invalid_argument("Spring::init(): Particle A and B were the same");
+            if(!A || !B)
+                throw std::invalid_argument("Spring::init(): Particle was null");
 
             this->m_A = A;
             this->m_B = B;
@@ -89,7 +91,8 @@ class Spring
         {
             value_type dx[3] = {x1[0] - x2[0], x1[1] - x2[1], x1[2] - x2[2]};
             value_type l = std::sqrt(dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2]);
-            assert(l > 0 || !"Spring::apply(): Non-positive spring length");
+            if(l == 0)
+                throw std::domain_error("Spring::apply(): Non-positive spring length");
             value_type L = m_k * (1.0 - m_l / l);
             f1[0] -= L * dx[0];
             f1[1] -= L * dx[1];

@@ -31,7 +31,7 @@ struct Traits;
 #include "examples/valveless_heart/valveless_heart.hpp"
 #include "examples/swarm/swarm.hpp"
 
-#ifdef USE_CUDA_FLUID_SOLVER
+#ifdef USE_CUDA
 #include "math/fluid_solver/stokes/gpu_stokes_solver.hpp"
 #include "math/fluid_solver/stokes/hybrid_fmm_stokes_solver.hpp"
 #endif
@@ -47,7 +47,7 @@ struct TypeBinder
     typedef TypeBinder<_value_type>                             Types;
     typedef _value_type                                         value_type;
     typedef ParticleWrapper<value_type>                         particle_type;
-#ifdef USE_CUDA_FLUID_SOLVER
+#ifdef USE_CUDA
     typedef GpuStokesSolver<float>                              cuda_fluid_solver;
     typedef HybridFmmStokesSolver<value_type>                   fmm_fluid_solver;
 #endif
