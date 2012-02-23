@@ -12,7 +12,7 @@
  * @param delta regularization parameter
  * @return updated velocity vector
  **/
-template<typename vector3_type, typename real_type> __device__
+template<typename vector3_type, typename real_type> __host__ __device__
 void ComputeStokeslets(const vector3_type &target, vector3_type &velocity, const vector3_type &source, const vector3_type &force, real_type delta)
 {
     vector3_type dx = {target.x - source.x,target.y - source.y,target.z - source.z};
@@ -22,7 +22,7 @@ void ComputeStokeslets(const vector3_type &target, vector3_type &velocity, const
     real_type R1 = r2 + d2;
     real_type R2 = R1 + d2;
     real_type invR = 1.0f/R1;
-    real_type H = 0.5f * sqrtf(invR)*invR * 7.957747154594767e-02f;
+    real_type H = sqrtf(invR)*invR * 0.039788735772974f;
 
     real_type fdx = (force.x*dx.x+force.y*dx.y+force.z*dx.z);
 
@@ -41,7 +41,7 @@ void ComputeStokeslets(const vector3_type &target, vector3_type &velocity, const
  * @param delta regularization parameter
  * @return updated velocity vector
  **/
-template<typename vector3_type, typename real_type> __device__
+template<typename vector3_type, typename real_type> __host__ __device__
 void ComputeImages(const vector3_type &target, vector3_type &velocity, const vector3_type &source, const vector3_type &force, real_type delta)
 {
     real_type h0 = source.z;
@@ -111,7 +111,6 @@ void ComputeImages(const vector3_type &target, vector3_type &velocity, const vec
     A22 = A22 + dx.z*Hr1;
     A31 = A31-dx.x*Hr1;
     A32 = A32-dx.y*Hr1;
-// TODO: check the constant term correctness!
     velocity.x += (A11 * force.x + A12 * force.y + A13 * force.z) * 7.957747154594767e-02f;
     velocity.y += (A21 * force.x + A22 * force.y + A23 * force.z) * 7.957747154594767e-02f;
     velocity.z += (A31 * force.x + A32 * force.y + A33 * force.z) * 7.957747154594767e-02f;

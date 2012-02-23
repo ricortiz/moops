@@ -1,8 +1,8 @@
 #ifndef CPU_STOKES_SOLVER_HPP
 #define CPU_STOKES_SOLVER_HPP
 
-#include <vector>
-#include <algorithm>
+#include<vector>
+#include<algorithm>
 #include<iterator>
 #include "nbody_cpu/cpu_compute_velocity.hpp"
 
@@ -36,7 +36,7 @@ class CpuStokesSolver
             #pragma omp parallel for shared(x,v,y,f)
             for ( size_t i = 0; i < size_targets; i += 3 )
                 for ( size_t j = 0; j < size_sources; j += 3 )
-                    compute_velocity ( &x[i], &v[i], &y[j], &f[j], m_delta );
+                    computeStokeslet( &x[i], &v[i], &y[j], &f[j], m_delta );
 //             std::cout << "direct_velocities = [";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
         }
 
@@ -57,11 +57,11 @@ class CpuStokesSolver
             for ( size_t p = 0; p < col_ptr.size()-1; ++p )
             {
                 size_t sidx = 3*p;
-                compute_velocity ( &x[sidx], &v[sidx], &y[sidx], &f[sidx], m_delta );
+                computeStokeslet( &x[sidx], &v[sidx], &y[sidx], &f[sidx], m_delta );
                 for(size_t j = col_ptr[p], end = col_ptr[p+1]; j != end; ++j)
                 {
                     size_t tidx = 3*col_idx[j];
-                    compute_velocity ( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
+                    computeStokeslet( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
                 }
             }
         }
@@ -84,7 +84,7 @@ class CpuStokesSolver
                 {
                     if (j == p) continue;
                     size_t tidx = 3*j;
-                    compute_velocity ( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
+                    computeStokeslet ( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
                 }
                 
                 std::vector<size_t> tmp(max-min+1), idx(max-min+1-(col_ptr[p+1]-col_ptr[p]));
@@ -94,14 +94,14 @@ class CpuStokesSolver
                 {
                     if (idx[j] == p) continue;
                     size_t tidx = 3*idx[j];
-                    compute_velocity ( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
+                    computeStokeslet ( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
                 }
                 
                 for(size_t j = max+1; j < m_num_particles; ++j)
                 {
                     if (j == p) continue;
                     size_t tidx = 3*j;
-                    compute_velocity ( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
+                    computeStokeslet ( &x[tidx], &v[tidx], &y[sidx], &f[sidx], m_delta );
                 }
             }
         }
