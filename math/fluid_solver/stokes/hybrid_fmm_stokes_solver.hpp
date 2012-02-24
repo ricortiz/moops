@@ -43,7 +43,7 @@ class HybridFmmStokesSolver
         }
         inline void operator()(value_type, value_type *x, value_type *v, value_type *f)
         {
-            initOctree(x, v, f);
+            updateOctree(x, v, f);
 // #pragma omp parallel
             {
 #pragma omp single
@@ -68,13 +68,13 @@ class HybridFmmStokesSolver
                     logger.startTimer("DownSweep");
                     DownSweep(octree.root);
                     logger.stopTimer("DownSweep");
-                    std::cout << "fmm_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
+//                     std::cout << "fmm_velocities = ";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << std::endl;
                 }
 #pragma omp barrier
 #pragma omp single
                 {
                     gpuGetVelocities();
-                    std::cout << "gpu_velocities = [";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
+//                     std::cout << "gpu_velocities = [";std::copy(m_gpu_velocity.begin(), m_gpu_velocity.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
                 }
 #pragma omp barrier
 
@@ -82,7 +82,7 @@ class HybridFmmStokesSolver
             logger.startTimer("copyVelocities");
             copyVelocities(v);
             logger.stopTimer("copyVelocities");
-            std::cout << "hv_velocities = [";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
+//             std::cout << "hv_velocities = [";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
         }
 
         void initData(const value_type *x, const value_type *f)
@@ -99,7 +99,7 @@ class HybridFmmStokesSolver
             }
         }
 
-        inline void initOctree(const value_type *x, value_type *v, const value_type *f)
+        inline void updateOctree(const value_type *x, value_type *v, const value_type *f)
         {
             logger.startTimer("initData");
             initData(x, f);
@@ -117,7 +117,7 @@ class HybridFmmStokesSolver
             {
                 logger.startTimer("UpdateOctree");
 //                 if (ReSort(octree.root, octree.rootInfo))
-                RebuildTree(m_num_particles, precision, 255.9999, 0);
+                    RebuildTree(m_num_particles, precision, 255.9999, 0);
                 logger.stopTimer("UpdateOctree");
             }
 //             print_particle_index();

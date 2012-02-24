@@ -175,6 +175,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
                 {
                     this->add_plane_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset + offset);
                     this->add_cylinder_connections(i, j, m_dims[0], m_dims[1], col_idx, head_offset + offset);
+                    reinforce_tail(i, j, m_dims[0], m_dims[1], col_idx, head_offset + offset);
                     col_ptr.push_back(col_idx.size());
                 }
         }
@@ -205,6 +206,13 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
         {
             getHeadConnections(col_ptr,col_idx,offset);
             getTailConnections(col_ptr,col_idx,offset);
+        }
+
+        template<typename array_type>
+        inline void reinforce_tail(int i, int j, int M, int N, array_type &col_idx, size_t offset = 0)
+        {
+            int connections[1][2] = {{i+M/2,j}};
+            col_idx.push_back(connections[0][1]*M + (connections[0][0] + M) % M + offset);
         }
 
         template <typename particle_type>

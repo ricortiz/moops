@@ -1,0 +1,8 @@
+syntax: glob
+
+*.a
+*.dat
+*.o
+*.out
+*.swp
+.Apple*

@@ -15,8 +15,6 @@
 #define CPU_EXECUTE                     //execute on CPU as well, just for validating GPU results with CPU
 //#define CUDA_DEBUG                      //detailed GPU logging
 
-#define MEMORY_ALIGNMENT  4096
-#define ALIGN_UP(x,size) ( ((size_t)x+(size-1))&(~(size-1)) )
 
 //globals
 FILE *fp;
@@ -212,10 +210,6 @@ __global__ void kernel(    int block_offset,
     }
 }
 
-inline unsigned int getAlignedSize(unsigned int size)
-{
-    return (size + MEMORY_ALIGNMENT - (size % MEMORY_ALIGNMENT));
-}
 
 inline double wcTime()
 {
@@ -436,18 +430,13 @@ extern "C"
                (float)sizeof(unsigned int)* NUM_LEAF_NODES / (1024.0f*1024.0f) );
 #endif
 
-        source_start_indices_for_blocks_temp = (unsigned int *) malloc (sizeof(unsigned int) * (NUM_LEAF_NODES + 1) + MEMORY_ALIGNMENT );
-        source_list_temp = (unsigned int *) malloc (sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES + MEMORY_ALIGNMENT );
-        if (source_list_temp == NULL || source_start_indices_for_blocks_temp == NULL)
+        source_list = (unsigned int *) malloc (sizeof(unsigned int) * 2 * TOTAL_NUM_SOURCES );
+        source_start_indices_for_blocks = (unsigned int *) malloc (sizeof(unsigned int) * (NUM_LEAF_NODES + 1) );
+        if (source_list == NULL || source_start_indices_for_blocks == NULL)
         {
             printf("CUDA ::Not enough memory on CPU.. Exiting\n");
             return;
         }
-
-        //align
-        source_list = (unsigned int *) ALIGN_UP( source_list_temp, MEMORY_ALIGNMENT );
-        source_start_indices_for_blocks = (unsigned int *) ALIGN_UP( source_start_indices_for_blocks_temp, MEMORY_ALIGNMENT );
-
         //copy source_list and source_indices array
         unsigned int j = 0, k = 0, num_sources_to_interact_with = 0;
         unsigned int nodeID_to_interact_with = 0;

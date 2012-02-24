@@ -81,34 +81,6 @@ class BaseGeometry
                     col_idx.push_back((connections[k][1] + N) % N * M + (connections[k][0]+M)%M + offset);
 
         }
-/*
-        void set_plane_cells(int i, int j, int M, int N, size_t offset = 0)
-        {
-            if(i < M - 1 && j < N - 1)
-            {
-                vtkIdType cell[4] = {j *M + i + offset, j *M + i + 1 + offset, (j + 1) *M + i + 1 + offset, (j + 1) *M + i + offset};
-                m_cells->InsertNextCell(4, cell);
-            }
-        }
-
-        void set_corner_cells(int i, int j, int M, int N, size_t offset = 0)
-        {
-            if(i == M - 1 && j < N - 1)
-            {
-                vtkIdType cell[4] = {j *M + i + offset, j *M + offset, (j + 1) *M + offset, (j + 1) *M + i + offset};
-                m_cells->InsertNextCell(4, cell);
-            }
-        }
-
-        void set_top_cells(int i, int j, int M, int N, size_t offset = 0)
-        {
-
-            if(i < M - 1 && j == N - 1)
-            {
-                vtkIdType cell[4] = {j *M + i + offset, j *M + i + 1 + offset, i + 1 + offset, i + offset};
-                m_cells->InsertNextCell(4, cell);
-            }
-        }*/
 
         value_type getDistance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type scale)
         {

@@ -96,8 +96,8 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,spectral_integrator_ty
         inline void predictor_step(function_type &G, const int k, value_type &t, const value_type &dt)
         {
             assert(k < spectral_integrator_type::sdc_nodes);
-            t += dt;
             m_euler_solver(X(k + 1), X(k), F(k), dt);
+            t += dt;
             G(t, X(k + 1), F(k + 1));
         }
 
@@ -120,8 +120,8 @@ class ExplicitSDC : public SDCBase<ExplicitSDC<value_type,spectral_integrator_ty
             assert(k < spectral_integrator_type::sdc_nodes);
             std::vector<value_type> Fold(m_storage.ode_size, 0.0);
             std::copy(F(k + 1), F(k + 1) + m_storage.ode_size, Fold.begin());
-            t += dt;
             m_euler_solver(X(k + 1), X(k), fdiff, dt);
+            t += dt;
             G(t, X(k + 1), F(k + 1));
             std::transform(F(k + 1), F(k + 1) + m_storage.ode_size, Fold.begin(), fdiff, std::minus<value_type>());
         }
