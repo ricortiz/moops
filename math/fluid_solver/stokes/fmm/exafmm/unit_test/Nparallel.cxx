@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include "vtk.h"
 #endif
 
-int main() {
+int Nparallel(int,char**) {
   int numBodies = 10000;                                        // Number of bodies
   int numTarget = 100;                                          // Number of target points to be used for error eval.
   IMAGES = 0;                                                   // Level of periodic image tree (0 for non-periodic FMM)

@@ -1,6 +1,6 @@
 #include "serialfmm.h"
 
-int main() {
+int ewald_fmm(int,char**) {
   const int numBodies = 1000;
   const real xmax = 100.0;
   const real ksize = 11.0;

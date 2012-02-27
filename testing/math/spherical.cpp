@@ -1,5 +1,5 @@
 
-#include "../spherical.h"
+#include "math/fluid_solver/stokes/fmm/exafmm/fast/spherical.h"
 
 int spherical(int,char**)
 {

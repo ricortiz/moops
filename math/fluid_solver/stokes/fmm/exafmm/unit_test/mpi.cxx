@@ -22,7 +22,7 @@ THE SOFTWARE.
 #include <mpi.h>
 #include <iostream>
 
-int main(int argc, char **argv) {
+int mpi(int argc, char **argv) {
   char hostname[256];
   int size,rank;
   MPI_Init(&argc,&argv);

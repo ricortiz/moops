@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include "vtk.h"
 #endif
 
-int main() {
+int poisson(int,char**) {
   const int k = 4;
   const int level = 4;
   const int numGrid = k * (1 << level);

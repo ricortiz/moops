@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include "vtk.h"
 #endif
 
-int main() {
+int overlap_comm(int,char**) {
   const int numBodies = 10000;
   const int numTarget = 100;
   IMAGES = 0;

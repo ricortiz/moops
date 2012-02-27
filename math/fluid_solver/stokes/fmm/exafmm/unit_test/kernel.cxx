@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 #include "evaluator.h"
 
-int main() {
+int kernel(int,char**) {
   const int numBodies = 100;
   IMAGES = 0;
   THETA = 1 / sqrtf(4);

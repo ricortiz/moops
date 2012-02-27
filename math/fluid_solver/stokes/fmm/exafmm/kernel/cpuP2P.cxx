@@ -25,14 +25,13 @@ THE SOFTWARE.
 #include "math/fluid_solver/stokes/nbody_cpu/cpu_compute_velocity.hpp"
 
 template<>
-void Kernel<Stokes>::P2P(C_iter Ci, C_iter Cj) const           // Laplace P2P kernel on CPU
+void Kernel<Stokes>::P2P(C_iter Ci, C_iter Cj) const           // Stokes P2P kernel on CPU
 {
-    #ifndef SPARC_SIMD
     for ( B_iter Bi = Ci->LEAF; Bi != Ci->LEAF + Ci->NDLEAF; ++Bi )      // Loop over target bodies
     {
         for ( B_iter Bj = Cj->LEAF; Bj != Cj->LEAF + Cj->NDLEAF; ++Bj )    //  Loop over source bodies
         {
-            computeStokeslet(Bi->X, Bi->V, Bj->X,Bj->SRC, Delta);
+            computeStokeslet(&Bi->X[0], &Bi->TRG[0], &Bj->X[0], &Bj->FORCE[0], Delta);
         }                                                           //  End loop over source bodies
     }                                                             // End loop over target bodies
 }

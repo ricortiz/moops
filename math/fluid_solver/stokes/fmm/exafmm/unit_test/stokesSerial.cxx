@@ -24,14 +24,14 @@ THE SOFTWARE.
 #include "vtk.h"
 #endif
 
-int Nserial(int,char**) {
+int stokesSerial(int, char**) {
   int numBodies = 10000;
   int numTarget = 100;
   IMAGES = 0;
   THETA = 1 / sqrtf(4);
   Bodies bodies, jbodies;
   Cells cells, jcells;
-  SerialFMM<Laplace> FMM;
+  SerialFMM<Stokes> FMM;
   FMM.initialize();
 
   for( int it=0; it!=25; ++it ) {
@@ -72,10 +72,10 @@ int Nserial(int,char**) {
     FMM.writeTime();
     FMM.resetTimer();
 
-    real diff1 = 0, norm1 = 0, diff2 = 0, norm2 = 0;
+    real diff = 0, norm = 0;
     bodies.resize(numTarget);
-    FMM.evalError(bodies,FMM.buffer,diff1,norm1,diff2,norm2);
-    FMM.printError(diff1,norm1,diff2,norm2);
+    FMM.evalError(bodies,FMM.buffer,diff,norm);
+    FMM.printError(diff,norm);
   }
   FMM.finalize();
 }

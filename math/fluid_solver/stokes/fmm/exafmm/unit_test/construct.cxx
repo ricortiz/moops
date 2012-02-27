@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include "vtk.h"
 #endif
 
-int main() {
+int construct(int,char**) {
   const int numBodies = 1000000;
   IMAGES = 0;
   THETA = 1 / sqrtf(4);

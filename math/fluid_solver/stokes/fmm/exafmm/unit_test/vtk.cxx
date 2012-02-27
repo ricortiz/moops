@@ -22,7 +22,7 @@ THE SOFTWARE.
 #include "tree.h"
 #include "vtk.h"
 
-int main() {
+int vtk(int,char**) {
   const int numBodies = 10000;
   IMAGES = 0;
   THETA = 1 / sqrtf(4);

@@ -332,7 +332,7 @@ void writeGraph(std::string fileid, int step) {
 }
 #endif
 
-int main() {
+int fdgl(int,char**) {
   double t0, t[7] = {0,0,0,0,0,0,0};
   IMAGES = 0;
   THETA = 0.6;

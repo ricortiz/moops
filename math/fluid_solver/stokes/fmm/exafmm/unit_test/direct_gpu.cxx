@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 #include "evaluator.h"
 
-int main() {
+int direct_gpu(int,char**) {
   const int numBodies = 10000;
   const int numTarget = 100;
   IMAGES = 0;

@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include "vtk.h"
 #endif
 
-int main() {
+int ijparallelrun(int,char**) {
   const int numBodies = 10000;
   const int numTarget = 100;
   IMAGES = 0;

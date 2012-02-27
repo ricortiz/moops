@@ -77,11 +77,16 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
     ENDIF()
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
+INCLUDE(CTest)
+IF(BUILD_TESTING)
+    ADD_SUBDIRECTORY(testing)
+ENDIF(BUILD_TESTING)
+
 #FindCUDA
 OPTION(USE_CUDA "Use the cuda-based Stokes solver." OFF)
 IF(USE_CUDA)
   FIND_PACKAGE(CUDA REQUIRED)
-  SET(CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
+  SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_11,code=sm_11)
   ADD_SUBDIRECTORY(math/fluid_solver/stokes/nbody_gpu)
   ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid)
   ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/exafmm)
@@ -90,15 +95,8 @@ IF(USE_CUDA)
   MESSAGE(STATUS "Enabling CUDA")
 ENDIF(USE_CUDA)
 
-INCLUDE(CTest)
-IF(BUILD_TESTING)
-    ADD_SUBDIRECTORY(testing)
-ENDIF(BUILD_TESTING)
-
 OPTION(ENABLE_EXAMPLES "Enable examples" ON)
 IF(ENABLE_EXAMPLES)
-    ADD_SUBDIRECTORY(examples)
-
+  ADD_SUBDIRECTORY(examples)
   MESSAGE(STATUS "Enabling Examples")
 ENDIF(ENABLE_EXAMPLES)
-

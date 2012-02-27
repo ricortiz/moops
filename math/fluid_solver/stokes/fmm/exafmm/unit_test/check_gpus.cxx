@@ -22,7 +22,7 @@ THE SOFTWARE.
 #include "mympi.h"
 #include "evaluator.h"
 
-int main() {
+int check_gpus(int,char**) {
   char hostname[256];
   const int numBodies = 1000;
   IMAGES = 0;

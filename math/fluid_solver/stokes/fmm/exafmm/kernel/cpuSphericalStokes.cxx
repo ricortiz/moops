@@ -23,6 +23,7 @@ THE SOFTWARE.
 #include "kernel.h"
 #undef KERNEL
 
+
 namespace
 {
 //! Get r,theta,phi from x,y,z
@@ -50,7 +51,7 @@ namespace
 
 //! Spherical to cartesian coordinates
     template<typename T>
-    void sph2cart(real r, real theta, real phi, T spherical, T &cartesian)
+    void sph2cart(real r, real theta, real phi, const T &spherical, T &cartesian)
     {
         cartesian[0] = sin(theta) * cos(phi) * spherical[0]         // x component (not x itself)
                        + cos(theta) * cos(phi) / r * spherical[1]
@@ -77,17 +78,17 @@ void Kernel<Stokes>::P2M(C_iter Ci) const
         real rho, alpha, beta;
         cart2sph(rho, alpha, beta, dist);
         evalMultipole(rho, alpha, -beta, Ynm, YnmTheta);
-        B->SRC[3] = B->X[0]*B->SRC[0]+B->X[1]*B->SRC[1]+B->X[2]*B->SRC[2];
+        real fdotx = B->X[0] * B->FORCE[0] + B->X[1] * B->FORCE[1] + B->X[2] * B->FORCE[2];
         for (int n = 0; n != P; ++n)
         {
             for (int m = 0; m <= n; ++m)
             {
                 const int nm  = n * n + n + m;
                 const int nms = n * (n + 1) / 2 + m;
-                Ci->M[nms][0] += B->SRC[0] * Ynm[nm];
-                Ci->M[nms][1] += B->SRC[1] * Ynm[nm];
-                Ci->M[nms][2] += B->SRC[2] * Ynm[nm];
-                Ci->M[nms][3] += B->SRC[3] * Ynm[nm];
+                Ci->M[nms] += B->FORCE[0] * Ynm[nm];
+                Ci->M[nms+NTERM] += B->FORCE[1] * Ynm[nm];
+                Ci->M[nms+2*NTERM] += B->FORCE[2] * Ynm[nm];
+                Ci->M[nms+3*NTERM] += fdotx * Ynm[nm];
             }
         }
     }
@@ -118,12 +119,12 @@ void Kernel<Stokes>::M2M(C_iter Ci, C_iter Cj) const
                         const int jnkm  = (j - n) * (j - n) + j - n + k - m;
                         const int jnkms = (j - n) * (j - n + 1) / 2 + k - m;
                         const int nm    = n * n + n + m;
-                        real factor = std::pow(I, real(m - abs(m))) * Ynm[nm]
-                                    * real(ODDEVEN(n) * Anm[nm] * Anm[jnkm] / Anm[jk]);
-                        M[0] += Cj->M[jnkms][0] * factor;
-                        M[1] += Cj->M[jnkms][1] * factor;
-                        M[2] += Cj->M[jnkms][2] * factor;
-                        M[3] += Cj->M[jnkms][3] * factor;
+                        complex factor = std::pow(I, real(m - abs(m))) * Ynm[nm]
+                                         * real(ODDEVEN(n) * Anm[nm] * Anm[jnkm] / Anm[jk]);
+                        M[0] += Cj->M[jnkms] * factor;
+                        M[1] += Cj->M[jnkms+NTERM] * factor;
+                        M[2] += Cj->M[jnkms+2*NTERM] * factor;
+                        M[3] += Cj->M[jnkms+3*NTERM] * factor;
                     }
                 }
                 for (int m = k; m <= n; ++m)
@@ -133,19 +134,19 @@ void Kernel<Stokes>::M2M(C_iter Ci, C_iter Cj) const
                         const int jnkm  = (j - n) * (j - n) + j - n + k - m;
                         const int jnkms = (j - n) * (j - n + 1) / 2 - k + m;
                         const int nm    = n * n + n + m;
-                        real factor = Ynm[nm]
-                                    * real(ODDEVEN(k + n + m) * Anm[nm] * Anm[jnkm] / Anm[jk])
-                        M[0] += std::conj(Cj->M[jnkms][0]) * factor;
-                        M[1] += std::conj(Cj->M[jnkms][1]) * factor;
-                        M[2] += std::conj(Cj->M[jnkms][2]) * factor;
-                        M[3] += std::conj(Cj->M[jnkms][3]) * factor;
+                        complex factor = Ynm[nm]
+                                         * real(ODDEVEN(k + n + m) * Anm[nm] * Anm[jnkm] / Anm[jk]);
+                        M[0] += std::conj(Cj->M[jnkms]) * factor;
+                        M[1] += std::conj(Cj->M[jnkms+NTERM]) * factor;
+                        M[2] += std::conj(Cj->M[jnkms+2*NTERM]) * factor;
+                        M[3] += std::conj(Cj->M[jnkms+3*NTERM]) * factor;
                     }
                 }
             }
-            Ci->M[jks][0] += M[0]* EPS;
-            Ci->M[jks][1] += M[1] * EPS;
-            Ci->M[jks][2] += M[2] * EPS;
-            Ci->M[jks][3] += M[3] * EPS;
+            Ci->M[jks] += M[0] * EPS;
+            Ci->M[jks+NTERM] += M[1] * EPS;
+            Ci->M[jks+2*NTERM] += M[2] * EPS;
+            Ci->M[jks+3*NTERM] += M[3] * EPS;
         }
     }
 }
@@ -164,7 +165,7 @@ void Kernel<Stokes>::M2L(C_iter Ci, C_iter Cj) const
         {
             const int jk = j * j + j + k;
             const int jks = j * (j + 1) / 2 + k;
-            complex L[4] = 0;
+            complex L[4] = {0};
             for (int n = 0; n != P; ++n)
             {
                 for (int m = -n; m < 0; ++m)
@@ -173,10 +174,10 @@ void Kernel<Stokes>::M2L(C_iter Ci, C_iter Cj) const
                     const int nms  = n * (n + 1) / 2 - m;
                     const int jknm = jk * P2 + nm;
                     const int jnkm = (j + n) * (j + n) + j + n + m - k;
-                    L[0] += std::conj(Cj->M[nms][0]) * Cnm[jknm] * Ynm[jnkm];
-                    L[1] += std::conj(Cj->M[nms][1]) * Cnm[jknm] * Ynm[jnkm];
-                    L[2] += std::conj(Cj->M[nms][2]) * Cnm[jknm] * Ynm[jnkm];
-                    L[3] += std::conj(Cj->M[nms][3]) * Cnm[jknm] * Ynm[jnkm];
+                    L[0] += std::conj(Cj->M[nms]) * Cnm[jknm] * Ynm[jnkm];
+                    L[1] += std::conj(Cj->M[nms+NTERM]) * Cnm[jknm] * Ynm[jnkm];
+                    L[2] += std::conj(Cj->M[nms+2*NTERM]) * Cnm[jknm] * Ynm[jnkm];
+                    L[3] += std::conj(Cj->M[nms+3*NTERM]) * Cnm[jknm] * Ynm[jnkm];
                 }
                 for (int m = 0; m <= n; ++m)
                 {
@@ -184,20 +185,20 @@ void Kernel<Stokes>::M2L(C_iter Ci, C_iter Cj) const
                     const int nms  = n * (n + 1) / 2 + m;
                     const int jknm = jk * P2 + nm;
                     const int jnkm = (j + n) * (j + n) + j + n + m - k;
-                    L[0] += Cj->M[nms][0] * Cnm[jknm] * Ynm[jnkm];
-                    L[1] += Cj->M[nms][1] * Cnm[jknm] * Ynm[jnkm];
-                    L[2] += Cj->M[nms][2] * Cnm[jknm] * Ynm[jnkm];
-                    L[3] += Cj->M[nms][3] * Cnm[jknm] * Ynm[jnkm];
+                    L[0] += Cj->M[nms] * Cnm[jknm] * Ynm[jnkm];
+                    L[1] += Cj->M[nms+NTERM] * Cnm[jknm] * Ynm[jnkm];
+                    L[2] += Cj->M[nms+2*NTERM] * Cnm[jknm] * Ynm[jnkm];
+                    L[3] += Cj->M[nms+3*NTERM] * Cnm[jknm] * Ynm[jnkm];
                 }
             }
-            Ci->L[jks][0] += L[0];
-            Ci->L[jks][1] += L[1];
-            Ci->L[jks][2] += L[2];
-            Ci->L[jks][3] += L[3];
+            Ci->L[jks] += L[0];
+            Ci->L[jks+NTERM] += L[1];
+            Ci->L[jks+2*NTERM] += L[2];
+            Ci->L[jks+3*NTERM] += L[3];
         }
     }
 }
-// TODO: I am here, do the appropiate conversions.
+
 template<>
 void Kernel<Stokes>::M2P(C_iter Ci, C_iter Cj) const
 {
@@ -206,32 +207,78 @@ void Kernel<Stokes>::M2P(C_iter Ci, C_iter Cj) const
     for (B_iter B = Ci->LEAF; B != Ci->LEAF + Ci->NDLEAF; ++B)
     {
         vect dist = B->X - Cj->X - Xperiodic;
-        vect spherical = 0;
+        real r, theta, phi, factor;
+        vect spherical[5] = {0};
         vect cartesian = 0;
-        real r, theta, phi;
         cart2sph(r, theta, phi, dist);
         evalLocal(r, theta, phi, Ynm, YnmTheta);
         for (int n = 0; n != P; ++n)
         {
             int nm  = n * n + n;
             int nms = n * (n + 1) / 2;
-            B->TRG[0] += std::real(Cj->M[nms] * Ynm[nm]);
-            spherical[0] -= std::real(Cj->M[nms] * Ynm[nm]) / r * (n + 1);
-            spherical[1] += std::real(Cj->M[nms] * YnmTheta[nm]);
+            spherical[0][0] += std::real(Cj->M[nms] * Ynm[nm]);
+            spherical[0][1] += std::real(Cj->M[nms+NTERM] * Ynm[nm]);
+            spherical[0][2] += std::real(Cj->M[nms+2*NTERM] * Ynm[nm]);
+
+            factor = 1.0/r*(n+1);
+            spherical[1][0] -= std::real(Cj->M[nms] * Ynm[nm]) * factor;
+            spherical[1][1] += std::real(Cj->M[nms] * YnmTheta[nm]);
+
+            spherical[2][0] -= std::real(Cj->M[nms+NTERM] * Ynm[nm]) * factor;
+            spherical[2][1] += std::real(Cj->M[nms+NTERM] * YnmTheta[nm]);
+
+            spherical[3][0] -= std::real(Cj->M[nms+2*NTERM] * Ynm[nm]) * factor;
+            spherical[3][1] += std::real(Cj->M[nms+2*NTERM] * YnmTheta[nm]);
+
+            spherical[4][0] -= std::real(Cj->M[nms+3*NTERM] * Ynm[nm]) * factor;
+            spherical[4][1] += std::real(Cj->M[nms+3*NTERM] * YnmTheta[nm]);
             for (int m = 1; m <= n; ++m)
             {
                 nm  = n * n + n + m;
                 nms = n * (n + 1) / 2 + m;
-                B->TRG[0] += 2 * std::real(Cj->M[nms] * Ynm[nm]);
-                spherical[0] -= 2 * std::real(Cj->M[nms] * Ynm[nm]) / r * (n + 1);
-                spherical[1] += 2 * std::real(Cj->M[nms] * YnmTheta[nm]);
-                spherical[2] += 2 * std::real(Cj->M[nms] * Ynm[nm] * I) * m;
+                spherical[0][0] += 2 * std::real(Cj->M[nms] * Ynm[nm]);
+                spherical[0][1] += 2 * std::real(Cj->M[nms+NTERM] * Ynm[nm]);
+                spherical[0][2] += 2 * std::real(Cj->M[nms+2*NTERM] * Ynm[nm]);
+
+                spherical[1][0] -= 2 * std::real(Cj->M[nms] * Ynm[nm]) * factor;
+                spherical[1][1] += 2 * std::real(Cj->M[nms] * YnmTheta[nm]);
+                spherical[1][3] += 2 * std::real(Cj->M[nms] * Ynm[nm] * I) * m;
+
+                spherical[2][0] -= 2 * std::real(Cj->M[nms+NTERM] * Ynm[nm]) * factor;
+                spherical[2][1] += 2 * std::real(Cj->M[nms+NTERM] * YnmTheta[nm]);
+                spherical[2][3] += 2 * std::real(Cj->M[nms+NTERM] * Ynm[nm] * I) * m;
+
+                spherical[3][0] -= 2 * std::real(Cj->M[nms+2*NTERM] * Ynm[nm]) * factor;
+                spherical[3][1] += 2 * std::real(Cj->M[nms+2*NTERM] * YnmTheta[nm]);
+                spherical[3][3] += 2 * std::real(Cj->M[nms+2*NTERM] * Ynm[nm] * I) * m;
+
+                spherical[4][0] -= 2 * std::real(Cj->M[nms+3*NTERM] * Ynm[nm]) * factor;
+                spherical[4][1] += 2 * std::real(Cj->M[nms+3*NTERM] * YnmTheta[nm]);
+                spherical[4][3] += 2 * std::real(Cj->M[nms+3*NTERM] * Ynm[nm] * I) * m;
             }
         }
-        sph2cart(r, theta, phi, spherical, cartesian);
-        B->TRG[1] += cartesian[0];
-        B->TRG[2] += cartesian[1];
-        B->TRG[3] += cartesian[2];
+        B->TRG[0] += spherical[0][0];
+        B->TRG[1] += spherical[0][1];
+        B->TRG[2] += spherical[0][2];
+        sph2cart(r, theta, phi, spherical[1], cartesian);
+        B->TRG[0] += B->X[0] * cartesian[0];
+        B->TRG[1] += B->X[0] * cartesian[1];
+        B->TRG[2] += B->X[0] * cartesian[2];
+        sph2cart(r, theta, phi, spherical[2], cartesian);
+        B->TRG[0] += B->X[1] * cartesian[0];
+        B->TRG[1] += B->X[1] * cartesian[1];
+        B->TRG[2] += B->X[1] * cartesian[2];
+        sph2cart(r, theta, phi, spherical[3], cartesian);
+        B->TRG[0] += B->X[2] * cartesian[0];
+        B->TRG[1] += B->X[2] * cartesian[1];
+        B->TRG[2] += B->X[2] * cartesian[2];
+        sph2cart(r, theta, phi, spherical[4], cartesian);
+        B->TRG[0] -= cartesian[0];
+        B->TRG[1] -= cartesian[1];
+        B->TRG[2] -= cartesian[2];
+        B->TRG[0] *= 0.039788735772974;
+        B->TRG[1] *= 0.039788735772974;
+        B->TRG[2] *= 0.039788735772974;
     }
 }
 
@@ -250,7 +297,7 @@ void Kernel<Stokes>::L2L(C_iter Ci, C_iter Cj) const
         {
             const int jk = j * j + j + k;
             const int jks = j * (j + 1) / 2 + k;
-            complex L = 0;
+            complex L[4] = {0};
             for (int n = j; n != P; ++n)
             {
                 for (int m = j + k - n; m < 0; ++m)
@@ -258,8 +305,12 @@ void Kernel<Stokes>::L2L(C_iter Ci, C_iter Cj) const
                     const int jnkm = (n - j) * (n - j) + n - j + m - k;
                     const int nm   = n * n + n - m;
                     const int nms  = n * (n + 1) / 2 - m;
-                    L += std::conj(Cj->L[nms]) * Ynm[jnkm]
-                         * real(ODDEVEN(k) * Anm[jnkm] * Anm[jk] / Anm[nm]);
+                    complex factor = Ynm[jnkm]
+                                     * real(ODDEVEN(k) * Anm[jnkm] * Anm[jk] / Anm[nm]);
+                    L[0] += std::conj(Cj->L[nms]) * factor;
+                    L[1] += std::conj(Cj->L[nms+NTERM]) * factor;
+                    L[2] += std::conj(Cj->L[nms+2*NTERM]) * factor;
+                    L[3] += std::conj(Cj->L[nms+3*NTERM]) * factor;
                 }
                 for (int m = 0; m <= n; ++m)
                 {
@@ -268,12 +319,19 @@ void Kernel<Stokes>::L2L(C_iter Ci, C_iter Cj) const
                         const int jnkm = (n - j) * (n - j) + n - j + m - k;
                         const int nm   = n * n + n + m;
                         const int nms  = n * (n + 1) / 2 + m;
-                        L += Cj->L[nms] * std::pow(I, real(m - k - abs(m - k)))
-                             * Ynm[jnkm] * Anm[jnkm] * Anm[jk] / Anm[nm];
+                        complex factor = std::pow(I, real(m - k - abs(m - k)))
+                                         * Ynm[jnkm] * Anm[jnkm] * Anm[jk] / Anm[nm];
+                        L[0] += std::conj(Cj->L[nms]) * factor;
+                        L[1] += std::conj(Cj->L[nms+NTERM]) * factor;
+                        L[2] += std::conj(Cj->L[nms+2*NTERM]) * factor;
+                        L[3] += std::conj(Cj->L[nms+3*NTERM]) * factor;
                     }
                 }
             }
-            Ci->L[jks] += L * EPS;
+            Ci->L[jks] += L[0] * EPS;
+            Ci->L[jks+NTERM] += L[1] * EPS;
+            Ci->L[jks+2*NTERM] += L[2] * EPS;
+            Ci->L[jks+3*NTERM] += L[3] * EPS;
         }
     }
 }
@@ -286,38 +344,84 @@ void Kernel<Stokes>::L2P(C_iter Ci) const
     for (B_iter B = Ci->LEAF; B != Ci->LEAF + Ci->NDLEAF; ++B)
     {
         vect dist = B->X - Ci->X;
-        vect spherical = 0;
+        vect spherical[5] = 0;
         vect cartesian = 0;
-        real r, theta, phi;
+        real r, theta, phi, factor;
         cart2sph(r, theta, phi, dist);
         evalMultipole(r, theta, phi, Ynm, YnmTheta);
         for (int n = 0; n != P; ++n)
         {
             int nm  = n * n + n;
             int nms = n * (n + 1) / 2;
-            B->TRG[0] += std::real(Ci->L[nms] * Ynm[nm]);
-            spherical[0] += std::real(Ci->L[nms] * Ynm[nm]) / r * n;
-            spherical[1] += std::real(Ci->L[nms] * YnmTheta[nm]);
+            spherical[0][0] += std::real(Ci->L[nms] * Ynm[nm]);
+            spherical[0][1] += std::real(Ci->L[nms+NTERM] * Ynm[nm]);
+            spherical[0][2] += std::real(Ci->L[nms+2*NTERM] * Ynm[nm]);
+
+            factor = 1.0 / r * n;
+            spherical[1][0] -= std::real(Ci->L[nms] * Ynm[nm]) * factor;
+            spherical[1][1] += std::real(Ci->L[nms] * YnmTheta[nm]);
+
+            spherical[2][0] -= std::real(Ci->L[nms+NTERM] * Ynm[nm]) * factor;
+            spherical[2][1] += std::real(Ci->L[nms+NTERM] * YnmTheta[nm]);
+
+            spherical[3][0] -= std::real(Ci->L[nms+2*NTERM] * Ynm[nm]) * factor;
+            spherical[3][1] += std::real(Ci->L[nms+2*NTERM] * YnmTheta[nm]);
+
+            spherical[4][0] -= std::real(Ci->L[nms+3*NTERM] * Ynm[nm]) * factor;
+            spherical[4][1] += std::real(Ci->L[nms+3*NTERM] * YnmTheta[nm]);
+            
             for (int m = 1; m <= n; ++m)
             {
                 nm  = n * n + n + m;
                 nms = n * (n + 1) / 2 + m;
-                B->TRG[0] += 2 * std::real(Ci->L[nms] * Ynm[nm]);
-                spherical[0] += 2 * std::real(Ci->L[nms] * Ynm[nm]) / r * n;
-                spherical[1] += 2 * std::real(Ci->L[nms] * YnmTheta[nm]);
-                spherical[2] += 2 * std::real(Ci->L[nms] * Ynm[nm] * I) * m;
+                spherical[0][0] += 2 * std::real(Ci->L[nms] * Ynm[nm]);
+                spherical[0][1] += 2 * std::real(Ci->L[nms+NTERM] * Ynm[nm]);
+                spherical[0][2] += 2 * std::real(Ci->L[nms+2*NTERM] * Ynm[nm]);
+
+                spherical[1][0] += 2 * std::real(Ci->L[nms] * Ynm[nm]) * factor;
+                spherical[1][1] += 2 * std::real(Ci->L[nms] * YnmTheta[nm]);
+                spherical[1][3] += 2 * std::real(Ci->L[nms] * Ynm[nm] * I) * m;
+
+                spherical[2][0] += 2 * std::real(Ci->L[nms+NTERM] * Ynm[nm]) * factor;
+                spherical[2][1] += 2 * std::real(Ci->L[nms+NTERM] * YnmTheta[nm]);
+                spherical[2][3] += 2 * std::real(Ci->L[nms+NTERM] * Ynm[nm] * I) * m;
+
+                spherical[3][0] += 2 * std::real(Ci->L[nms+2*NTERM] * Ynm[nm]) * factor;
+                spherical[3][1] += 2 * std::real(Ci->L[nms+2*NTERM] * YnmTheta[nm]);
+                spherical[3][3] += 2 * std::real(Ci->L[nms+2*NTERM] * Ynm[nm] * I) * m;
+
+                spherical[4][0] += 2 * std::real(Ci->L[nms+3*NTERM] * Ynm[nm]) * factor;
+                spherical[4][1] += 2 * std::real(Ci->L[nms+3*NTERM] * YnmTheta[nm]);
+                spherical[4][3] += 2 * std::real(Ci->L[nms+3*NTERM] * Ynm[nm] * I) * m;                
             }
         }
-        sph2cart(r, theta, phi, spherical, cartesian);
-        B->TRG[1] += cartesian[0];
-        B->TRG[2] += cartesian[1];
-        B->TRG[3] += cartesian[2];
+        B->TRG[0] += spherical[0][0];
+        B->TRG[1] += spherical[0][1];
+        B->TRG[2] += spherical[0][2];
+        sph2cart(r, theta, phi, spherical[1], cartesian);
+        B->TRG[0] += B->X[0] * cartesian[0];
+        B->TRG[1] += B->X[0] * cartesian[1];
+        B->TRG[2] += B->X[0] * cartesian[2];
+        sph2cart(r, theta, phi, spherical[2], cartesian);
+        B->TRG[0] += B->X[1] * cartesian[0];
+        B->TRG[1] += B->X[1] * cartesian[1];
+        B->TRG[2] += B->X[1] * cartesian[2];
+        sph2cart(r, theta, phi, spherical[3], cartesian);
+        B->TRG[0] += B->X[2] * cartesian[0];
+        B->TRG[1] += B->X[2] * cartesian[1];
+        B->TRG[2] += B->X[2] * cartesian[2];
+        sph2cart(r, theta, phi, spherical[4], cartesian);
+        B->TRG[0] -= cartesian[0];
+        B->TRG[1] -= cartesian[1];
+        B->TRG[2] -= cartesian[2];
+        B->TRG[0] *= 0.039788735772974;
+        B->TRG[1] *= 0.039788735772974;
+        B->TRG[2] *= 0.039788735772974;
+        
     }
 }
 
 template<>
 void Kernel<Stokes>::finalize() {}
-
-#include "../kernel/cpuEwaldLaplace.cxx"
 
 

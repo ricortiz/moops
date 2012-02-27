@@ -73,6 +73,7 @@ const int  MAXCELL  = 10000000;                                 //!< Maximum num
 const real CLET     = 2;                                        //!< LET opening critetia
 const real EPS      = 1e-6;                                     //!< Single precision epsilon
 const real EPS2     = 0;                                        //!< Softening parameter (squared)
+const real Delta    = .1;                                       //!< Regularization parameter for Stokeslets
 const real R2MIN    = 0.25;                                     //!< Minimum value for L-J R^2
 const real R2MAX    = 64;                                       //!< Maximum value for L-J R^2
 const int  GPUS     = 3;                                        //!< Number of GPUs per node
@@ -87,8 +88,8 @@ const int NTERM = P * (P + 1) / 2;                              //!< Number of S
 typedef vec<MTERM, real>                        Mset;           //!< Multipole coefficient type for Cartesian
 typedef vec<LTERM, real>                        Lset;           //!< Local coefficient type for Cartesian
 #elif Spherical
-typedef vec<NTERM, complex>                     Mset;           //!< Multipole coefficient type for spherical
-typedef vec<NTERM, complex>                     Lset;           //!< Local coefficient type for spherical
+typedef vec<4*NTERM, complex>                     Mset;           //!< Multipole coefficient type for spherical
+typedef vec<4*NTERM, complex>                     Lset;           //!< Local coefficient type for spherical
 #endif
 typedef std::vector<bigint>                    Bigints;         //!< Vector of big integer types
 
@@ -110,7 +111,7 @@ enum Equation                                                   //!< Equation ty
 {
     Laplace,                                                      //!< Laplace potential + force
     VanDerWaals,                                                  //!< Van der Walls potential + force
-    Stokes
+    Stokes                                                       //! Stokes flow velocities
 };
 
 //! Structure of source bodies (stuff to send)
@@ -121,6 +122,7 @@ struct JBody
     unsigned    ICELL;                                            //!< Cell index
     vect        X;                                                //!< Position
     real        SRC;                                              //!< Scalar source values
+    vect        FORCE;
 };
 typedef std::vector<JBody>             JBodies;                 //!< Vector of source bodies
 typedef std::vector<JBody>::iterator   JB_iter;                 //!< Iterator for source body vector
