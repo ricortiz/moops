@@ -17,7 +17,7 @@ class SwarmApp
     protected:
         enum
         {
-            num_sperms = 1,
+            num_sperms = 25,
             Mt = 6,
             Nt = 100,
             Mh = 12,

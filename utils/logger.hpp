@@ -5,7 +5,7 @@
 #include<fstream>
 #include "timer.hpp"
 
-class Logger_
+class Logger
 {
     protected:
         typedef std::map<std::string, double>::iterator timer_iterator;
@@ -64,7 +64,7 @@ class Logger_
         }
 
         template<typename output>
-        friend output &operator<<(output &out, Logger_ &logger)
+        friend output &operator<<(output &out, Logger &logger)
         {
             for(timer_iterator t = logger.m_timer_log.begin(); t != logger.m_timer_log.end(); ++t)
                 out << t->first << " " << t->second << std::endl;

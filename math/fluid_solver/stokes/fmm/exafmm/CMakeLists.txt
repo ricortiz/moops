@@ -6,16 +6,8 @@ ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64)
 option(USE_CPU "Use CPU kernels" OFF)
 option(USE_GPU "Use CPU kernels" OFF)
 option(USE_CPU_GPU "Use CPU kernels" OFF)
-option(USE_SPHERICAL "Use Spherical Harmonics Expansions" OFF)
+option(USE_SPHERICAL "Use Spherical Harmonics Expansions" ON)
 option(USE_CARTESIAN "Use Cartesian Expansions" OFF)
-
-if(USE_SPHERICAL)
-    set(USE_CARTESIAN OFF)    
-endif(USE_SPHERICAL)
-
-if(USE_CARTESIAN)
-    set(USE_SPHERICAL OFF)    
-endif(USE_CARTESIAN)
 
 if(USE_CPU)
     add_definitions(-Dcpu)

@@ -124,7 +124,7 @@ private:
   void traverseQueue(Pair pair) {
     PairQueue pairQueue;                                        // Queue of interacting cell pairs
 #if QUARK
-    Quark *quark = QUARK_New(4);                                // Initialize QUARK object
+Quark *quark = QUARK_New(PTHREADS);                                // Initialize QUARK object
 #endif
     pairQueue.push(pair);                                       // Push pair to queue
     while( !pairQueue.empty() ) {                               // While dual traversal queue is not empty
@@ -468,7 +468,7 @@ public:
 #elif gpu
 #include "../kernel/gpuEvaluator.cxx"
 #elif cpugpu
-#include "../kernel/hybridEvaluator.cxx"
+#include "../kernel/hybridStokesEvaluator.cxx"
 #endif
 
 #undef splitFirst

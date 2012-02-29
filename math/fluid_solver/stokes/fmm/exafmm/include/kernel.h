@@ -291,6 +291,8 @@ public:
   void allocate();                                              //!< Allocate GPU variables
   void hostToDevice();                                          //!< Copy from host to device
   void deviceToHost();
+  void setDelta(real _delta) { delta = _delta; }
+  real delta;
 };
 
 #endif

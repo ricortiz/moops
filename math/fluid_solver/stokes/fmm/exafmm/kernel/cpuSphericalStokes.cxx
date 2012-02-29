@@ -66,9 +66,6 @@ namespace
 }
 
 template<>
-void Kernel<Stokes>::initialize() {}
-
-template<>
 void Kernel<Stokes>::P2M(C_iter Ci) const
 {
     complex Ynm[4*P*P], YnmTheta[4*P*P];
@@ -78,9 +75,9 @@ void Kernel<Stokes>::P2M(C_iter Ci) const
         real rho, alpha, beta;
         cart2sph(rho, alpha, beta, dist);
         evalMultipole(rho, alpha, -beta, Ynm, YnmTheta);
-        real f0 = B->FORCE[0]*0.039788735772974; // Scale by 1/(8*pi)
-        real f1 = B->FORCE[1]*0.039788735772974;
-        real f2 = B->FORCE[2]*0.039788735772974;
+        real f0 = B->FORCE[0];
+        real f1 = B->FORCE[1];
+        real f2 = B->FORCE[2];
         real fdotx = (B->X[0] * f0 + B->X[1] * f1 + B->X[2] * f2);
         for (int n = 0; n != P; ++n)
         {
@@ -409,8 +406,4 @@ void Kernel<Stokes>::L2P(C_iter Ci) const
         B->TRG[2] += (spherical[0][2]+spherical[1][2]+spherical[2][2]+spherical[3][2]);
     }
 }
-
-template<>
-void Kernel<Stokes>::finalize() {}
-
 

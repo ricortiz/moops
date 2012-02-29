@@ -1,46 +1,48 @@
 /*
-Copyright (C) 2011 by Rio Yokota, Simon Layton, Lorena Barba
+ * Copyright (C) 2011 by Rio Yokota, Simon Layton, Lorena Barba
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-template<Equation equation>
-void Evaluator<equation>::setSourceBody()                       // Set source buffer for bodies
+template<>
+void Evaluator<Stokes>::setSourceBody()                       // Set source buffer for bodies
 {
     startTimer("Set sourceB  ");                                  // Start timer
     for (MC_iter M = sourceSize.begin(); M != sourceSize.end(); ++M)  // Loop over source map
     {
         C_iter Cj = M->first;                                       //  Set source cell
-        sourceBegin[Cj] = sourceHost.size() / 4;                    //  Key : iterator, Value : offset of source leafs
+        sourceBegin[Cj] = sourceHost.size() / 6;                    //  Key : iterator, Value : offset of source leafs
         for (B_iter B = Cj->LEAF; B != Cj->LEAF + Cj->NDLEAF; ++B)  //  Loop over leafs in source cell
         {
             sourceHost.push_back(B->X[0]);                            //   Copy x position to GPU buffer
             sourceHost.push_back(B->X[1]);                            //   Copy y position to GPU buffer
             sourceHost.push_back(B->X[2]);                            //   Copy z position to GPU buffer
-            sourceHost.push_back(B->SRC);                             //   Copy source value to GPU buffer
+            sourceHost.push_back(B->FORCE[0]);                             //   Copy source value to GPU buffer
+            sourceHost.push_back(B->FORCE[1]);                             //   Copy source value to GPU buffer
+            sourceHost.push_back(B->FORCE[2]);                             //   Copy source value to GPU buffer
         }                                                           //  End loop over leafs
     }                                                             // End loop over source map
     stopTimer("Set sourceB  ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::setTargetBody(Lists lists, Maps flags)  // Set target buffer for bodies
+template<>
+void Evaluator<Stokes>::setTargetBody(Lists lists, Maps flags)  // Set target buffer for bodies
 {
     startTimer("Set targetB  ");                                  // Start timer
     int key = 0;                                                  // Initialize key to range of coefs in source cells
@@ -83,8 +85,8 @@ void Evaluator<equation>::setTargetBody(Lists lists, Maps flags)  // Set target 
     stopTimer("Set targetB  ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::getTargetBody(Lists &lists)           // Get body values from target buffer
+template<>
+void Evaluator<Stokes>::getTargetBody(Lists &lists)           // Get body values from target buffer
 {
     startTimer("Get targetB  ");                                  // Start timer
     for (C_iter Ci = CiB; Ci != CiE; ++Ci)                        // Loop over target cells
@@ -105,8 +107,8 @@ void Evaluator<equation>::getTargetBody(Lists &lists)           // Get body valu
     stopTimer("Get targetB  ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::clearBuffers()                        // Clear GPU buffers
+template<>
+void Evaluator<Stokes>::clearBuffers()                        // Clear GPU buffers
 {
     startTimer("Clear buffer ");                                  // Start timer
     constHost.clear();                                            // Clear const vector
@@ -121,8 +123,8 @@ void Evaluator<equation>::clearBuffers()                        // Clear GPU buf
 }
 
 
-template<Equation equation>
-void Evaluator<equation>::evalP2P(Bodies &ibodies, Bodies &jbodies, bool onCPU)  // Evaluate all P2P kernels
+template<>
+void Evaluator<Stokes>::evalP2P(Bodies &ibodies, Bodies &jbodies, bool onCPU)  // Evaluate all P2P kernels
 {
     int numIcall = int(ibodies.size() - 1) / MAXBODY + 1;         // Number of icall loops
     int numJcall = int(jbodies.size() - 1) / MAXBODY + 1;         // Number of jcall loops
@@ -155,7 +157,9 @@ void Evaluator<equation>::evalP2P(Bodies &ibodies, Bodies &jbodies, bool onCPU) 
                     sourceHost.push_back(B->X[0]);                        //   Copy x position to GPU buffer
                     sourceHost.push_back(B->X[1]);                        //   Copy y position to GPU buffer
                     sourceHost.push_back(B->X[2]);                        //   Copy z position to GPU buffer
-                    sourceHost.push_back(B->SRC);                         //   Copy source value to GPU buffer
+                    sourceHost.push_back(B->FORCE[0]);                         //   Copy source value to GPU buffer
+                    sourceHost.push_back(B->FORCE[1]);                         //   Copy source value to GPU buffer
+                    sourceHost.push_back(B->FORCE[2]);                         //   Copy source value to GPU buffer
                 }                                                       //   End loop over source bodies
                 int key = 0;                                            //   Initialize key to range of leafs in source cells
                 int blocks = (BiN - Bi0 - 1) / THREADS + 1;             //   Number of thread blocks needed for this target cell
@@ -205,8 +209,8 @@ void Evaluator<equation>::evalP2P(Bodies &ibodies, Bodies &jbodies, bool onCPU) 
     }                                                             // End loop over icall
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalP2M(Cells &cells)                 // Evaluate all P2M kernels
+template<>
+void Evaluator<Stokes>::evalP2M(Cells &cells)                 // Evaluate all P2M kernels
 {
     startTimer("evalP2M      ");                                  // Start timer
     for (C_iter C = cells.begin(); C != cells.end(); ++C)         // Loop over cells
@@ -221,8 +225,8 @@ void Evaluator<equation>::evalP2M(Cells &cells)                 // Evaluate all 
     stopTimer("evalP2M      ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all M2M kernels
+template<>
+void Evaluator<Stokes>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all M2M kernels
 {
     startTimer("evalM2M      ");                                  // Start timer
     Cj0 = jcells.begin();                                         // Set begin iterator
@@ -236,15 +240,15 @@ void Evaluator<equation>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all 
     stopTimer("evalM2M      ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalM2L(C_iter Ci, C_iter Cj)         // Evaluate single M2L kernel
+template<>
+void Evaluator<Stokes>::evalM2L(C_iter Ci, C_iter Cj)         // Evaluate single M2L kernel
 {
     M2L(Ci, Cj);                                                  // Perform M2L kernel
     NM2L++;                                                       // Count M2L kernel execution
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalM2L(Cells &cells)                 // Evaluate queued M2L kernels
+template<>
+void Evaluator<Stokes>::evalM2L(Cells &cells)                 // Evaluate queued M2L kernels
 {
     startTimer("evalM2L      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
@@ -279,15 +283,15 @@ void Evaluator<equation>::evalM2L(Cells &cells)                 // Evaluate queu
     stopTimer("evalM2L      ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalM2P(C_iter Ci, C_iter Cj)         // Evaluate single M2P kernel
+template<>
+void Evaluator<Stokes>::evalM2P(C_iter Ci, C_iter Cj)         // Evaluate single M2P kernel
 {
     M2P(Ci, Cj);                                                  // Perform M2P kernel
     NM2P++;                                                       // Count M2P kernel execution
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalM2P(Cells &cells)                 // Evaluate queued M2P kernels
+template<>
+void Evaluator<Stokes>::evalM2P(Cells &cells)                 // Evaluate queued M2P kernels
 {
     startTimer("evalM2P      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
@@ -322,16 +326,16 @@ void Evaluator<equation>::evalM2P(Cells &cells)                 // Evaluate queu
     stopTimer("evalM2P      ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalP2P(C_iter Ci, C_iter Cj)         // Queue single P2P kernel
+template<>
+void Evaluator<Stokes>::evalP2P(C_iter Ci, C_iter Cj)         // Queue single P2P kernel
 {
     listP2P[Ci-Ci0].push_back(Cj);                                // Push source cell into P2P interaction list
     flagP2P[Ci-Ci0][Cj] |= Iperiodic;                             // Flip bit of periodic image flag
     NP2P++;                                                       // Count P2P kernel execution
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalP2P(Cells &cells)                 // Evaluate queued P2P kernels
+template<>
+void Evaluator<Stokes>::evalP2P(Cells &cells)                 // Evaluate queued P2P kernels
 {
     Ci0 = cells.begin();                                          // Set begin iterator
     const int numCell = MAXCELL / NCRIT / 4;                      // Number of cells per icall
@@ -366,8 +370,8 @@ void Evaluator<equation>::evalP2P(Cells &cells)                 // Evaluate queu
     flagP2P.clear();                                              // Clear periodic image flags
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalL2L(Cells &cells)                 // Evaluate all L2L kernels
+template<>
+void Evaluator<Stokes>::evalL2L(Cells &cells)                 // Evaluate all L2L kernels
 {
     startTimer("evalL2L      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
@@ -379,8 +383,8 @@ void Evaluator<equation>::evalL2L(Cells &cells)                 // Evaluate all 
     stopTimer("evalL2L      ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalL2P(Cells &cells)                 // Evaluate all L2P kernels
+template<>
+void Evaluator<Stokes>::evalL2P(Cells &cells)                 // Evaluate all L2P kernels
 {
     startTimer("evalL2P      ");                                  // Start timer
     for (C_iter C = cells.begin(); C != cells.end(); ++C)         // Loop over cells
@@ -393,33 +397,8 @@ void Evaluator<equation>::evalL2P(Cells &cells)                 // Evaluate all 
     stopTimer("evalL2P      ");                                   // Stop timer
 }
 
-template<Equation equation>
-void Evaluator<equation>::evalEwaldReal(C_iter Ci, C_iter Cj)   // Evaluate single Ewald real kernel
-{
-    EwaldReal(Ci, Cj);                                            // Perform Ewald real kernel
-}
-
-template<Equation equation>
-void Evaluator<equation>::evalEwaldReal(Cells &cells)           // Evaluate queued Ewald real kernels
-{
-    startTimer("evalEwaldReal");                                  // Start timer
-    Ci0 = cells.begin();                                          // Set begin iterator
-    for (C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci)      // Loop over cells
-    {
-        while (!listP2P[Ci-Ci0].empty())                            //  While M2P interaction list is not empty
-        {
-            C_iter Cj = listP2P[Ci-Ci0].back();                       //   Set source cell iterator
-            EwaldReal(Ci, Cj);                                        //   Perform Ewald real kernel
-            listP2P[Ci-Ci0].pop_back();                               //   Pop last element from M2P interaction list
-        }                                                           //  End while for M2P interaction list
-    }                                                             // End loop over cells topdown
-    listP2P.clear();                                              // Clear interaction lists
-    flagP2P.clear();                                              // Clear periodic image flags
-    stopTimer("evalEwaldReal");                                   // Stop timer
-}
-
-template<Equation equation>
-void Evaluator<equation>::timeKernels()                         // Time all kernels for auto-tuning
+template<>
+void Evaluator<Stokes>::timeKernels()                         // Time all kernels for auto-tuning
 {
     Bodies ibodies(1000), jbodies(1000);                          // Artificial bodies
     for (B_iter Bi = ibodies.begin(), Bj = jbodies.begin(); Bi != ibodies.end(); ++Bi, ++Bj)  // Loop over artificial bodies
@@ -436,14 +415,14 @@ void Evaluator<equation>::timeKernels()                         // Time all kern
     Cj->X = 1;                                                    // Set coordinates of source cell
     Cj->NDLEAF = 1000;                                            // Number of leafs in source cell
     Cj->LEAF = jbodies.begin();                                   // Leaf iterator in source cell
-
+    
     startTimer("M2L kernel   ");                                  // Start timer
     for (int i = 0; i != 1000; ++i) M2L(Ci, Cj);                  // Perform M2L kernel
     timeM2L = stopTimer("M2L kernel   ") / 1000;                  // Stop timer
     startTimer("M2P kernel   ");                                  // Start timer
     for (int i = 0; i != 100; ++i) M2P(Ci, Cj);                   // Perform M2P kernel
     timeM2P = stopTimer("M2P kernel   ") / 1000;                  // Stop timer
-
+    
     Cells icells, jcells;                                         // Artificial cells
     icells.resize(10);                                            // 100 artificial target cells
     jcells.resize(100);                                           // 100 artificial source cells
@@ -473,54 +452,25 @@ void Evaluator<equation>::timeKernels()                         // Time all kern
 
 #if QUARK
 template<Equation equation>
-inline void interactQuark(Quark *quark)
-{
-    Evaluator<equation> *E;
-    C_iter CI, CJ, Ci0, Cj0;
-    quark_unpack_args_5(quark, E, CI, CJ, Ci0, Cj0);
-    ThreadTrace beginTrace;
-    E->startTracer(beginTrace);
+void Evaluator<equation>::interact(C_iter CI, C_iter CJ, Quark*) {
     PairQueue privateQueue;
-    Pair pair(CI, CJ);
+    Pair pair(CI,CJ);
     privateQueue.push(pair);
-    while (!privateQueue.empty())
-    {
+    while( !privateQueue.empty() ) {
         Pair Cij = privateQueue.front();
         privateQueue.pop();
-        if (splitFirst(Cij.first, Cij.second))
-        {
+        if(splitFirst(Cij.first,Cij.second)) {
             C_iter C = Cij.first;
-            for (C_iter Ci = Ci0 + C->CHILD; Ci != Ci0 + C->CHILD + C->NCHILD; ++Ci)
-            {
-                E->interact(Ci, Cij.second, privateQueue);
+            for( C_iter Ci=Ci0+C->CHILD; Ci!=Ci0+C->CHILD+C->NCHILD; ++Ci ) {
+                interact(Ci,Cij.second,privateQueue);
             }
-        }
-        else
-        {
+        } else {
             C_iter C = Cij.second;
-            for (C_iter Cj = Cj0 + C->CHILD; Cj != Cj0 + C->CHILD + C->NCHILD; ++Cj)
-            {
-                E->interact(Cij.first, Cj, privateQueue);
+            for( C_iter Cj=Cj0+C->CHILD; Cj!=Cj0+C->CHILD+C->NCHILD; ++Cj ) {
+                interact(Cij.first,Cj,privateQueue);
             }
         }
     }
-    E->stopTracer(beginTrace, 0x0000ff);
-}
-
-template<Equation equation>
-void Evaluator<equation>::interact(C_iter Ci, C_iter Cj, Quark *quark)
-{
-    char string[256];
-    sprintf(string, "%d %d", int(Ci - Ci0), int(Cj - Cj0));
-    Quark_Task_Flags tflags = Quark_Task_Flags_Initializer;
-    QUARK_Task_Flag_Set(&tflags, TASK_LABEL, intptr_t(string));
-    QUARK_Insert_Task(quark, interactQuark<equation>, &tflags,
-                      sizeof(Evaluator), this, NODEP,
-                      sizeof(Cell), &*Ci, OUTPUT,
-                      sizeof(Cell), &*Cj, NODEP,
-                      sizeof(Cell), &*Ci0, NODEP,
-                      sizeof(Cell), &*Cj0, NODEP,
-                      0);
 }
 #endif
 

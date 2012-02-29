@@ -14,7 +14,7 @@
 #ifdef USE_PV_COPROCESSOR
 #include "utils/paraview_coprocessor.hpp"
 #endif
-#include "utils/logger.hpp"
+// #include "utils/logger.hpp"
 #include "utils/vtk_storage_wrapper.hpp"
 #include "io/write_vtu.hpp"
 
@@ -34,7 +34,7 @@ struct Traits;
 
 #ifdef USE_CUDA
 #include "math/fluid_solver/stokes/gpu_stokes_solver.hpp"
-#include "math/fluid_solver/stokes/hybrid_fmm_stokes_solver.hpp"
+// #include "math/fluid_solver/stokes/hybrid_fmm_stokes_solver.hpp"
 #endif
 
 template < typename _value_type, int _sdc_nodes = 3, int _sdc_corrections = 2 >
@@ -50,9 +50,10 @@ struct TypeBinder
     typedef ParticleWrapper<value_type>                         particle_type;
 #ifdef USE_CUDA
     typedef GpuStokesSolver<float>                              cuda_fluid_solver;
-    typedef HybridFmmStokesSolver<value_type>                   fmm_fluid_solver;
+//     typedef HybridFmmStokesSolver<value_type>                   fmm_fluid_solver;
 #endif
-    typedef CpuStokesSolver<value_type>                         fluid_solver;
+//     typedef CpuStokesSolver<value_type>                         fluid_solver;
+    typedef ExaFmmStokesSolver<value_type>                      fluid_solver;
 
     typedef ForwardEuler                                        forward_euler;
     typedef BackwardEuler<value_type>                           backward_euler;
@@ -61,7 +62,7 @@ struct TypeBinder
     typedef SemiImplicitSDC<value_type, spectral_integrator, sdc_corrections>   implicit_sdc;
     typedef explicit_sdc                                                time_integrator;
     typedef HeartPump<value_type, fluid_solver, time_integrator>        heart_pump_surface;
-    typedef Swarm<value_type, fmm_fluid_solver, time_integrator>        swarm_surface;
+    typedef Swarm<value_type, fluid_solver, time_integrator>        swarm_surface;
     typedef vtkStorageWrapper<swarm_surface, vtkFloatArray>              swarm_vtk_storage;
     typedef vtkStorageWrapper<heart_pump_surface>                       heart_vtk_storage;
     typedef IO::VtkWriter<vtkXMLPolyDataWriter>                         vtk_poly_writer;

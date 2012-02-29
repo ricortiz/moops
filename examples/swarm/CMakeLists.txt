@@ -1,4 +1,10 @@
-
-
+INCLUDE_DIRECTORIES(math/fluid_solver/stokes/fmm/exafmm/external/include)
+add_definitions(-DQUARK)
+ADD_DEFINITIONS(-DSpherical)
+IF(USE_CUDA)
+    ADD_DEFINITIONS(-Dcpugpu)
+ELSEIF(USE_CUDA)
+    ADD_DEFINITIONS(-Dcpu)
+ENDIF(USE_CUDA)
 ADD_EXECUTABLE(swarm swarm.cpp)
-TARGET_LINK_LIBRARIES(swarm ${APP_LIBS})
+TARGET_LINK_LIBRARIES(swarm ${APP_LIBS} cpuKernel quark)

@@ -40,7 +40,7 @@ THE SOFTWARE.
 #include <vector>
 #include "vec.h"                                                //!< My vector type with operator overloading
 #if QUARK
-#include "/home/rortiz/mnt/yunque/projects/moops/build/math/fluid_solver/stokes/fmm/exafmm/external/ext_include/quark.h"
+#include "../external/include/quark.h"
 #endif
 
 typedef unsigned           bigint;                              //!< Big integer type
@@ -67,18 +67,17 @@ extern vect Xperiodic;                                          //!< Coordinate 
 #endif
 
 const int  P        = 6;                                        //!< Order of expansions
-const int  NCRIT    = 30;                                       //!< Number of bodies per cell
+const int  NCRIT    = 1000;                                       //!< Number of bodies per cell
 const int  MAXBODY  = 200000;                                   //!< Maximum number of bodies per GPU kernel
 const int  MAXCELL  = 10000000;                                 //!< Maximum number of bodies/coefs in cell per GPU kernel
 const real CLET     = 2;                                        //!< LET opening critetia
 const real EPS      = 1e-6;                                     //!< Single precision epsilon
 const real EPS2     = 0;                                        //!< Softening parameter (squared)
-const real Delta    = .1;                                       //!< Regularization parameter for Stokeslets
 const real R2MIN    = 0.25;                                     //!< Minimum value for L-J R^2
 const real R2MAX    = 64;                                       //!< Maximum value for L-J R^2
-const int  GPUS     = 2;                                        //!< Number of GPUs per node
+const int  GPUS     = 1;                                        //!< Number of GPUs per node
 const int  THREADS  = 64;                                       //!< Number of threads per thread-block
-const int  PTHREADS = 8;                                        //!< Number of pthreads in quark
+const int  PTHREADS = 4;                                        //!< Number of pthreads in quark
 
 const int MTERM = P * (P + 1) * (P + 2) / 6;                    //!< Number of Cartesian mutlipole terms
 const int LTERM = (P + 1) * (P + 2) * (P + 3) / 6;              //!< Number of Cartesian local terms

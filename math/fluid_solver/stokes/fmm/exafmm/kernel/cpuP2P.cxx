@@ -32,11 +32,11 @@ void Kernel<Stokes>::P2P(C_iter Ci, C_iter Cj) const           // Stokes P2P ker
         {
             vect dx = Bi->X - Bj->X;
             real r2 = norm(dx);
-            real d2 = Delta * Delta;
+            real d2 = delta * delta;
             real R1 = r2 + d2;
             real R2 = R1 + d2;
             real invR = 1.0 / R1;
-            real H = std::sqrt(invR) * invR * 0.039788735772974;
+            real H = std::sqrt(invR) * invR;
             
             real fdx = (Bj->FORCE[0] * dx[0] + Bj->FORCE[1] * dx[1] + Bj->FORCE[2] * dx[2]);
             

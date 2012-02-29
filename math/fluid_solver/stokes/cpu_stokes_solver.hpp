@@ -37,7 +37,12 @@ class CpuStokesSolver
             for ( size_t i = 0; i < size_targets; i += 3 )
                 for ( size_t j = 0; j < size_sources; j += 3 )
                     computeStokeslet( &x[i], &v[i], &y[j], &f[j], m_delta );
-//             std::cout << "direct_velocities = [";std::copy(v, v + 3*m_num_particles, std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "]" << std::endl;
+            size_t idx = 0;
+//             std::cout.precision(7);
+//             std::cout << "velocities = [";
+//             for( size_t i = 0; i < m_num_particles; ++i, idx+=3 )
+//                 std::cout << v[idx] << " " << v[idx+1] << " " << v[idx+2] << " ";
+//             std::cout << "];" << std::endl;
         }
 
         inline void Implicit( value_type t, const value_type *x, value_type *v, const value_type *f )
