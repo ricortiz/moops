@@ -4,10 +4,9 @@ project(MOOPS)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 SET(APP_LIBS "" CACHE INTERNAL "")
-OPTION(USE_QT_GUI "Build with QT4 GUI." OFF)
-OPTION(USE_PV_COPROCESSOR "Use Paraview Coprocessor" OFF)
 
 #FindParaView
+OPTION(USE_PV_COPROCESSOR "Use Paraview Coprocessor" OFF)
 IF(USE_PV_COPROCESSOR)
     FIND_PACKAGE(ParaView)
     INCLUDE(${PARAVIEW_USE_FILE})
@@ -31,7 +30,7 @@ ENDIF(VTK_FOUND)
 ENDIF(NOT USE_PV_COPROCESSOR)
 
 # FindQt4
-
+OPTION(USE_QT_GUI "Build with QT4 GUI." OFF)
 IF(USE_QT_GUI)
     FIND_PACKAGE(Qt4 REQUIRED)
     SET(QT_USE_QTOPENGL TRUE)
@@ -41,6 +40,27 @@ IF(USE_QT_GUI)
     ADD_SUBDIRECTORY(gui)
     MESSAGE(STATUS "Enabling QT4 GUI")
 ENDIF(USE_QT_GUI)
+
+#FindMPI
+option(USE_MPI "Use MPI" ON)
+IF(USE_MPI)
+    find_package(MPI REQUIRED)
+    MESSAGE(STATUS "Enabling MPI")
+    include_directories(${MPI_CXX_INCLUDE_PATH})
+ENDIF(USE_MPI)
+
+#FindCUDA
+OPTION(USE_CUDA "Use the cuda-based Stokes solver." OFF)
+IF(USE_CUDA)
+  FIND_PACKAGE(CUDA REQUIRED)
+  SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_20,code=sm_20 -Xcompiler -fopenmp --ptxas-options=-v -O3 -use_fast_math)
+  ADD_SUBDIRECTORY(math/fluid_solver/stokes/nbody_gpu)
+  ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid)
+  ADD_DEFINITIONS(-DUSE_CUDA)
+  SET(APP_LIBS ${APP_LIBS} cudaStokesSolver hybridfmm)
+  MESSAGE(STATUS "Enabling CUDA")
+ENDIF(USE_CUDA)
+ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/exafmm)
 
 INCLUDE(CheckCXXCompilerFlag)
 INCLUDE(CheckCCompilerFlag)
@@ -81,19 +101,6 @@ INCLUDE(CTest)
 IF(BUILD_TESTING)
     ADD_SUBDIRECTORY(testing)
 ENDIF(BUILD_TESTING)
-
-#FindCUDA
-OPTION(USE_CUDA "Use the cuda-based Stokes solver." OFF)
-IF(USE_CUDA)
-  FIND_PACKAGE(CUDA REQUIRED)
-  SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_11,code=sm_11)
-  ADD_SUBDIRECTORY(math/fluid_solver/stokes/nbody_gpu)
-  ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid)
-  ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/exafmm)
-  ADD_DEFINITIONS(-DUSE_CUDA)
-  SET(APP_LIBS ${APP_LIBS} cudaStokesSolver hybridfmm)
-  MESSAGE(STATUS "Enabling CUDA")
-ENDIF(USE_CUDA)
 
 OPTION(ENABLE_EXAMPLES "Enable examples" ON)
 IF(ENABLE_EXAMPLES)

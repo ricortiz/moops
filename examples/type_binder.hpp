@@ -18,12 +18,13 @@
 #include "utils/vtk_storage_wrapper.hpp"
 #include "io/write_vtu.hpp"
 
-Logger logger;
+// Logger logger;
 
 template<typename T>
 struct Traits;
 
 #include "math/fluid_solver/stokes/cpu_stokes_solver.hpp"
+#include "math/fluid_solver/stokes/exafmm_stokes_solver.hpp"
 #include "math/ode_solver/euler/forward_euler.hpp"
 #include "math/ode_solver/euler/backward_euler.hpp"
 #include "math/ode_solver/sdc/explicit_sdc.hpp"

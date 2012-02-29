@@ -95,7 +95,7 @@ public:
 
   void setGroupOfPoints(Bodies &bodies, int &Ncell) {
     int begin=0, size=0;
-    bigint index = bodies[0].ICELL;
+    size_t index = bodies[0].ICELL;
     for( B_iter B=bodies.begin(); B!=bodies.end(); ++B ) {
       if( B->ICELL != index ) {
         setGroup(Ncell,size);

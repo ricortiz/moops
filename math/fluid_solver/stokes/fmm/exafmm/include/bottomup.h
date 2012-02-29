@@ -60,9 +60,9 @@ public:
 //! Set cell index of all bodies
   void setIndex(Bodies &bodies, int level=-1, int begin=0, int end=0, bool update=false) {
     startTimer("Set index    ");                                // Start timer
-    bigint i;                                                   // Levelwise cell index
+    size_t i;                                                   // Levelwise cell index
     if( level == -1 ) level = getMaxLevel(bodies);              // Decide max level
-    bigint off = ((1 << 3*level) - 1) / 7;                      // Offset for each level
+    size_t off = ((1 << 3*level) - 1) / 7;                      // Offset for each level
     real r = R0 / (1 << (level-1));                             // Radius at finest level
     vec<3,int> nx;                                              // 3-D cell index
     if( end == 0 ) end = bodies.size();                         // Default size is all bodies
@@ -92,16 +92,16 @@ public:
     int maxLevel = getMaxLevel(bodies);                         // Max level for bottom up tree build
     for( int l=maxLevel; l>0; --l ) {                           // Loop upwards from bottom level
       int level = getLevel(bodies[0].ICELL);                    //  Current level
-      bigint cOff = ((1 << 3 * level) - 1) / 7;                 //  Current ce;; index offset
-      bigint pOff = ((1 << 3 * (l-1)) - 1) / 7;                 //  Parent cell index offset
-      bigint index = ((bodies[0].ICELL-cOff) >> 3*(level-l+1)) + pOff;// Current cell index
+      size_t cOff = ((1 << 3 * level) - 1) / 7;                 //  Current ce;; index offset
+      size_t pOff = ((1 << 3 * (l-1)) - 1) / 7;                 //  Parent cell index offset
+      size_t index = ((bodies[0].ICELL-cOff) >> 3*(level-l+1)) + pOff;// Current cell index
       int begin = 0;                                            //  Begin cell index for bodies in cell
       int size = 0;                                             //  Number of bodies in cell
       int b = 0;                                                //  Current body index
       for( B_iter B=bodies.begin(); B!=bodies.end(); ++B,++b ) {//  Loop over bodies
         level = getLevel(B->ICELL);                             //   Level of twig
         cOff = ((1 << 3*level) - 1) / 7;                        //   Offset of twig
-        bigint p = ((B->ICELL-cOff) >> 3*(level-l+1)) + pOff;   //   Cell index of parent cell
+        size_t p = ((B->ICELL-cOff) >> 3*(level-l+1)) + pOff;   //   Cell index of parent cell
         if( p != index ) {                                      //   If it's a new parent cell
           if( size < NCRIT ) {                                  //    If parent cell has few enough bodies
             for( int i=begin; i!=begin+size; ++i ) {            //     Loop over bodies in that cell
@@ -125,7 +125,7 @@ public:
 
 //! Grow tree by splitting cells
   void grow(Bodies &bodies, int level=0, int begin=0, int end=0) {
-    bigint index = bodies[begin].ICELL;                         // Initialize cell index
+    size_t index = bodies[begin].ICELL;                         // Initialize cell index
     int off=begin, size=0;                                      // Initialize offset, and size
     if( level == 0 ) level = getMaxLevel(bodies);               // Max level for bottom up tree build
     if( end == 0 ) end = bodies.size();                         // Default size is all bodies

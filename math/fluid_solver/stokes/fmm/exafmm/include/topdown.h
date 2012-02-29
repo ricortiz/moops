@@ -39,8 +39,8 @@ private:
     int LEVEL;                                                  //!< Level of node
     int ICHILD;                                                 //!< Flag of empty child nodes
     int NLEAF;                                                  //!< Number of leafs in node
-    bigint I;                                                   //!< Cell index
-    bigint CHILD[8];                                            //!< Iterator offset of child nodes
+    size_t I;                                                   //!< Cell index
+    size_t CHILD[8];                                            //!< Iterator offset of child nodes
     B_iter LEAF[NCRIT];                                         //!< Iterator for leafs
     vect X;                                                     //!< Node center
     real R;                                                     //!< Node radius
@@ -58,8 +58,8 @@ private:
 
 //! Add child node and link it
   void addChild(const int octant, int i) {
-    bigint pOff = ((1 << 3* nodes[i].LEVEL   ) - 1) / 7;        // Parent cell index offset
-    bigint cOff = ((1 << 3*(nodes[i].LEVEL+1)) - 1) / 7;        // Current cell index offset
+    size_t pOff = ((1 << 3* nodes[i].LEVEL   ) - 1) / 7;        // Parent cell index offset
+    size_t cOff = ((1 << 3*(nodes[i].LEVEL+1)) - 1) / 7;        // Current cell index offset
     vect x = nodes[i].X;                                        // Initialize new center position with old center
     real r = nodes[i].R/2;                                      // Initialize new size
     for( int d=0; d!=3; ++d ) {                                 // Loop over dimensions

@@ -48,8 +48,8 @@ int nth_element(int,char**) {
   FMM.sortBodies(bodies,FMM.buffer);
 
   FMM.startTimer("Nth element  ");
-  bigint nthGlobal = numBodies * MPISIZE / 3;
-  bigint iSplit = FMM.nth_element(bodies,nthGlobal);
+  size_t nthGlobal = numBodies * MPISIZE / 3;
+  size_t iSplit = FMM.nth_element(bodies,nthGlobal);
   int nthLocal = FMM.splitBodies(bodies,iSplit);
   FMM.stopTimer("Nth element  ",FMM.printNow);
   for( B_iter B=bodies.begin(); B!=bodies.end(); ++B ) {

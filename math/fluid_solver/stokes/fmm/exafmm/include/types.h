@@ -40,7 +40,7 @@ THE SOFTWARE.
 #include <vector>
 #include "vec.h"                                                //!< My vector type with operator overloading
 #if QUARK
-#include "quark.h"
+#include "/home/rortiz/mnt/yunque/projects/moops/build/math/fluid_solver/stokes/fmm/exafmm/external/ext_include/quark.h"
 #endif
 
 typedef unsigned           bigint;                              //!< Big integer type
@@ -76,9 +76,9 @@ const real EPS2     = 0;                                        //!< Softening p
 const real Delta    = .1;                                       //!< Regularization parameter for Stokeslets
 const real R2MIN    = 0.25;                                     //!< Minimum value for L-J R^2
 const real R2MAX    = 64;                                       //!< Maximum value for L-J R^2
-const int  GPUS     = 3;                                        //!< Number of GPUs per node
+const int  GPUS     = 2;                                        //!< Number of GPUs per node
 const int  THREADS  = 64;                                       //!< Number of threads per thread-block
-const int  PTHREADS = 4;                                        //!< Number of pthreads in quark
+const int  PTHREADS = 8;                                        //!< Number of pthreads in quark
 
 const int MTERM = P * (P + 1) * (P + 2) / 6;                    //!< Number of Cartesian mutlipole terms
 const int LTERM = (P + 1) * (P + 2) * (P + 3) / 6;              //!< Number of Cartesian local terms
@@ -122,7 +122,7 @@ struct JBody
     unsigned    ICELL;                                            //!< Cell index
     vect        X;                                                //!< Position
     real        SRC;                                              //!< Scalar source values
-    vect        FORCE;
+    vect        FORCE;                                            //!< Force source values
 };
 typedef std::vector<JBody>             JBodies;                 //!< Vector of source bodies
 typedef std::vector<JBody>::iterator   JB_iter;                 //!< Iterator for source body vector

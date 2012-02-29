@@ -56,11 +56,11 @@ public:
 
 private:
 //! Get parent cell index from current cell index
-  bigint getParent(bigint index) {
+  size_t getParent(size_t index) {
     int level = getLevel(index);                                // Get level from cell index
-    bigint cOff = ((1 << 3 *  level   ) - 1) / 7;               // Cell index offset of current level
-    bigint pOff = ((1 << 3 * (level-1)) - 1) / 7;               // Cell index offset of parent level
-    bigint i = ((index-cOff) >> 3) + pOff;                      // Cell index of parent cell
+    size_t cOff = ((1 << 3 *  level   ) - 1) / 7;               // Cell index offset of current level
+    size_t pOff = ((1 << 3 * (level-1)) - 1) / 7;               // Cell index offset of parent level
+    size_t i = ((index-cOff) >> 3) + pOff;                      // Cell index of parent cell
     return i;                                                   // Return cell index of parent cell
   }
 
@@ -130,7 +130,7 @@ protected:
 //! Get cell center and radius from cell index
   void getCenter(Cell &cell) {
     int level = getLevel(cell.ICELL);                           // Get level from cell index
-    bigint index = cell.ICELL - ((1 << 3*level) - 1) / 7;       // Subtract cell index offset of current level
+    size_t index = cell.ICELL - ((1 << 3*level) - 1) / 7;       // Subtract cell index offset of current level
     cell.R = R0 / (1 << level);                                 // Cell radius
     int d = level = 0;                                          // Initialize dimension and level
     vec<3,int> nx = 0;                                          // Initialize 3-D cell index
@@ -149,7 +149,7 @@ protected:
   void bodies2twigs(Bodies &bodies, Cells &twigs) {
     startTimer("Bodies2twigs ");                                // Start timer
     int nleaf = 0;                                              // Initialize number of leafs
-    bigint index = bodies[0].ICELL;                             // Initialize cell index
+    size_t index = bodies[0].ICELL;                             // Initialize cell index
     B_iter firstLeaf = bodies.begin();                          // Initialize body iterator for first leaf
     Cell cell;                                                  // Cell structure
     for( B_iter B=bodies.begin(); B!=bodies.end(); ++B ) {      // Loop over bodies

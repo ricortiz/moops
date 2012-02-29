@@ -168,7 +168,7 @@ private:
 
 protected:
 //! Get level from cell index
-  int getLevel(bigint index) {
+  int getLevel(size_t index) {
     int i = index;                                              // Copy to dummy index
     int level = -1;                                             // Initialize level counter
     while( i >= 0 ) {                                           // While cell index is non-negative

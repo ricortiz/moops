@@ -1,12 +1,5 @@
 project(exafmm)
 
-#FindMPI
-option(USE_MPI "Use MPI" ON)
-IF(USE_MPI)
-    find_package(MPI REQUIRED)
-    MESSAGE(STATUS "Enabling MPI")
-    include_directories(${MPI_CXX_INCLUDE_PATH})
-ENDIF(USE_MPI)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include)
 ADD_DEFINITIONS(-D_FILE_OFFSET_BITS=64)
 
@@ -15,17 +8,6 @@ option(USE_GPU "Use CPU kernels" OFF)
 option(USE_CPU_GPU "Use CPU kernels" OFF)
 option(USE_SPHERICAL "Use Spherical Harmonics Expansions" OFF)
 option(USE_CARTESIAN "Use Cartesian Expansions" OFF)
-
-if(USE_CPU)
-    set(USE_GPU OFF)
-    set(USE_CPU_GPU OFF)
-elseif(USE_GPU)
-    set(USE_CPU OFF)
-    set(USE_CPU_GPU OFF)
-elseif(USE_CPU_GPU)
-    set(USE_GPU OFF)
-    set(USE_CPU OFF)
-endif(USE_CPU)
 
 if(USE_SPHERICAL)
     set(USE_CARTESIAN OFF)    
