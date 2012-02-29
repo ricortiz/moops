@@ -71,13 +71,12 @@ int stokesSerial(int, char**)
 #endif
         FMM.stopTimer("Direct sum   ", true);
         FMM.eraseTimer("Direct sum   ");
-        FMM.printAllTime();
         FMM.resetTimer();
 
         real diff = 0, norm = 0;
         bodies.resize(numTarget);
-    FMM.evalError(bodies,FMM.buffer,diff,norm);
-    FMM.printError(diff,norm);
+        FMM.evalError(bodies, FMM.buffer, diff, norm);
+        FMM.printError(diff, norm);
     }
     FMM.finalize();
     std::cout << "v1 = [";
