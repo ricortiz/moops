@@ -53,7 +53,6 @@ void Evaluator<equation>::evalP2M(Cells &cells)                 // Evaluate all 
 template<Equation equation>
 void Evaluator<equation>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all M2M kernels
 {
-    startTimer("evalM2M      ");                                  // Start timer
     Cj0 = jcells.begin();                                         // Set begin iterator
     for ( C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci )    // Loop over target cells bottomup
     {
@@ -62,20 +61,20 @@ void Evaluator<equation>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all 
             M2M(Ci, Cj);                                              //   Perform M2M kernel
         }                                                           //  End loop over child cells
     }                                                             // End loop target over cells
-    stopTimer("evalM2M      ");                                   // Stop timer
 }
 
 template<Equation equation>
 void Evaluator<equation>::evalM2L(C_iter Ci, C_iter Cj)         // Evaluate single M2L kernel
 {
+    startTimer("evalM2L      ");                                  // Start timer
     M2L(Ci, Cj);                                                  // Perform M2L kernel
     NM2L++;                                                       // Count M2L kernel execution
+    stopTimer("evalM2L      ");                                   // Stop timer
 }
 
 template<Equation equation>
 void Evaluator<equation>::evalM2L(Cells &cells)                 // Evaluate queued M2L kernels
 {
-    startTimer("evalM2L      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
     for ( C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci )    // Loop over cells
     {
@@ -105,20 +104,20 @@ void Evaluator<equation>::evalM2L(Cells &cells)                 // Evaluate queu
     }                                                             // End loop over cells topdown
     listM2L.clear();                                              // Clear interaction lists
     flagM2L.clear();                                              // Clear periodic image flags
-    stopTimer("evalM2L      ");                                   // Stop timer
 }
 
 template<Equation equation>
 void Evaluator<equation>::evalM2P(C_iter Ci, C_iter Cj)         // Evaluate single M2P kernel
 {
+    startTimer("evalM2P      ");                                  // Start timer
     M2P(Ci, Cj);                                                  // Perform M2P kernel
     NM2P++;                                                       // Count M2P kernel execution
+    stopTimer("evalM2P      ");                                   // Stop timer
 }
 
 template<Equation equation>
 void Evaluator<equation>::evalM2P(Cells &cells)                 // Evaluate queued M2P kernels
 {
-    startTimer("evalM2P      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
     for ( C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci )    // Loop over cells
     {
@@ -148,20 +147,20 @@ void Evaluator<equation>::evalM2P(Cells &cells)                 // Evaluate queu
     }                                                             // End loop over cells topdown
     listM2P.clear();                                              // Clear interaction lists
     flagM2P.clear();                                              // Clear periodic image flags
-    stopTimer("evalM2P      ");                                   // Stop timer
 }
 
 template<Equation equation>
 void Evaluator<equation>::evalP2P(C_iter Ci, C_iter Cj)         // Evaluate single P2P kernel
 {
+    startTimer("evalP2P      ");                                  // Start timer
     P2P(Ci, Cj);                                                  // Perform P2P kernel
+    stopTimer("evalP2P      ");                                   // Stop timer
     NP2P++;                                                       // Count P2P kernel execution
 }
 
 template<Equation equation>
 void Evaluator<equation>::evalP2P(Cells &cells)                 // Evaluate queued P2P kernels
 {
-    startTimer("evalP2P      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
     for ( C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci )    // Loop over cells
     {
@@ -191,7 +190,6 @@ void Evaluator<equation>::evalP2P(Cells &cells)                 // Evaluate queu
     }                                                             // End loop over cells topdown
     listP2P.clear();                                              // Clear interaction lists
     flagP2P.clear();                                              // Clear periodic image flags
-    stopTimer("evalP2P      ");                                   // Stop timer
 }
 
 template<Equation equation>

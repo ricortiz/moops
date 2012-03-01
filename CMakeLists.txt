@@ -108,7 +108,3 @@ IF(ENABLE_EXAMPLES)
 ENDIF(ENABLE_EXAMPLES)
 
 ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/exafmm)
-IF(USE_QUARK)
-    INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/math/fluid_solver/stokes/fmm/exafmm/external/include)
-    add_definitions(-DQUARK)
-ENDIF(USE_QUARK)

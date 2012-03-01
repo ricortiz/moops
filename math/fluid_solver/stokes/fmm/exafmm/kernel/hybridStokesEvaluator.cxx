@@ -243,7 +243,9 @@ void Evaluator<Stokes>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all M2
 template<>
 void Evaluator<Stokes>::evalM2L(C_iter Ci, C_iter Cj)         // Evaluate single M2L kernel
 {
+    startTimer("evalM2L      ");
     M2L(Ci, Cj);                                                  // Perform M2L kernel
+    stopTimer("evalM2L      ");
     NM2L++;                                                       // Count M2L kernel execution
 }
 
@@ -286,7 +288,9 @@ void Evaluator<Stokes>::evalM2L(Cells &cells)                 // Evaluate queued
 template<>
 void Evaluator<Stokes>::evalM2P(C_iter Ci, C_iter Cj)         // Evaluate single M2P kernel
 {
+    startTimer("evalM2P      ");                                  // Start timer
     M2P(Ci, Cj);                                                  // Perform M2P kernel
+    stopTimer("evalM2P      ");                                   // Stop timer
     NM2P++;                                                       // Count M2P kernel execution
 }
 

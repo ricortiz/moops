@@ -158,50 +158,6 @@ class vtkStorageWrapper
                     setInnerCells(i, j, M, N, offset);
         }
 
-
-        template<typename tree_type>
-        void setOctree(tree_type &tree)
-        {
-            setNode(tree.root, tree.edge_length);
-            m_box_grid->SetPoints(m_hex_points);
-        }
-        template<typename node_type>
-        void setNode(node_type *node, float *extent)
-        {
-            float points[8][3] =
-            {
-                {node->mid_x - extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z - extent[node->level+1]},
-                {node->mid_x + extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z - extent[node->level+1]},
-                {node->mid_x + extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z - extent[node->level+1]},
-                {node->mid_x - extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z - extent[node->level+1]},
-                {node->mid_x - extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z + extent[node->level+1]},
-                {node->mid_x + extent[node->level+1], node->mid_y - extent[node->level+1], node->mid_z + extent[node->level+1]},
-                {node->mid_x + extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z + extent[node->level+1]},
-                {node->mid_x - extent[node->level+1], node->mid_y + extent[node->level+1], node->mid_z + extent[node->level+1]}
-            };
-
-            for (int i = 0 ; i < 8; ++i)
-                if (node->child[i])
-                    setNode(node->child[i], extent);
-
-            if (!node->isParent && node->pArrayLow >= 0 && node->pArrayHigh >= 0)
-                addBox(points);
-        }
-
-        void addBox(float points[8][3])
-        {
-            vtkSmartPointer<vtkHexahedron> hexahedron = vtkSmartPointer<vtkHexahedron>::New();
-            hexahedron->GetPointIds()->SetId(0, m_hex_points->InsertNextPoint(points[0]));
-            hexahedron->GetPointIds()->SetId(1, m_hex_points->InsertNextPoint(points[1]));
-            hexahedron->GetPointIds()->SetId(2, m_hex_points->InsertNextPoint(points[2]));
-            hexahedron->GetPointIds()->SetId(3, m_hex_points->InsertNextPoint(points[3]));
-            hexahedron->GetPointIds()->SetId(4, m_hex_points->InsertNextPoint(points[4]));
-            hexahedron->GetPointIds()->SetId(5, m_hex_points->InsertNextPoint(points[5]));
-            hexahedron->GetPointIds()->SetId(6, m_hex_points->InsertNextPoint(points[6]));
-            hexahedron->GetPointIds()->SetId(7, m_hex_points->InsertNextPoint(points[7]));
-            m_box_grid->InsertNextCell(hexahedron->GetCellType(), hexahedron->GetPointIds());
-        }
-        
     private:
         inline void setIdBuffer(int i, int j)
         {
@@ -219,71 +175,68 @@ class vtk_octree_storage
     private:
         vtkSmartPointer<vtkUnstructuredGrid> m_box;
         vtkSmartPointer<vtkPoints>           m_hex_points;
-        
+
     public:
         vtk_octree_storage() : m_box(vtkSmartPointer<vtkUnstructuredGrid>::New()), m_hex_points(vtkSmartPointer<vtkPoints>::New())
         {}
         vtkSmartPointer<vtkUnstructuredGrid> &getBox() { return m_box; }
-        
+
 
         template<typename tree_type>
         void setOctree(tree_type &tree)
         {
-            setNode(tree.root, tree.edge_length);
+            setNodes(tree.getBoxes());
             setCurrentPoints();
         }
-        template<typename node_type>
-        void setNode(node_type *node, float *extent)
-        {            
-            for (int i = 0 ; i < 8; ++i)
-                if (node->child[i])
-                    setNode(node->child[i], extent);
-
-            if (!node->isParent && node->pArrayLow >= 0 && node->pArrayHigh >= 0)
-            {
-                float points[8][3] = {{0}};
-                getPoints(node,extent,points);
-                addBox(points);
-            }
-        }
-
-        template<typename node_type>
-        void getPoints(node_type *node, float *extent, float points[8][3])
+        template<typename node_array_type>
+        void setNodes(node_array_type &nodes)
         {
-            float e = extent[node->level+1];
-            points[0][0] = node->mid_x - e;
-            points[0][1] = node->mid_y - e;
-            points[0][2] = node->mid_z - e;
-            
-            points[1][0] = node->mid_x + e;
-            points[1][1] = node->mid_y - e;
-            points[1][2] = node->mid_z - e;
-            
-            points[2][0] = node->mid_x + e;
-            points[2][1] = node->mid_y + e;
-            points[2][2] = node->mid_z - e;
-            
-            points[3][0] = node->mid_x - e;
-            points[3][1] = node->mid_y + e;
-            points[3][2] = node->mid_z - e;
-            
-            points[4][0] = node->mid_x - e;
-            points[4][1] = node->mid_y - e;
-            points[4][2] = node->mid_z + e;
-            
-            points[5][0] = node->mid_x + e;
-            points[5][1] = node->mid_y - e;
-            points[5][2] = node->mid_z + e;
-            
-            points[6][0] = node->mid_x + e;
-            points[6][1] = node->mid_y + e;
-            points[6][2] = node->mid_z + e;
-            
-            points[7][0] = node->mid_x - e;
-            points[7][1] = node->mid_y + e;
-            points[7][2] = node->mid_z + e;                    
+            for (size_t i = 0; i < nodes.size(); ++i)
+//                 if (nodes[i].NCHILD == 0)
+                {
+                    float points[8][3] = {{0}};
+                    getPoints(nodes[i], points);
+                    addBox(points);
+                }
         }
-        
+
+        template<typename node_type>
+        void getPoints(node_type &node, float points[8][3])
+        {
+            float e = node.R;
+            points[0][0] = node.X[0] - e;
+            points[0][1] = node.X[1] - e;
+            points[0][2] = node.X[2] - e;
+
+            points[1][0] = node.X[0] + e;
+            points[1][1] = node.X[1] - e;
+            points[1][2] = node.X[2] - e;
+
+            points[2][0] = node.X[0] + e;
+            points[2][1] = node.X[1] + e;
+            points[2][2] = node.X[2] - e;
+
+            points[3][0] = node.X[0] - e;
+            points[3][1] = node.X[1] + e;
+            points[3][2] = node.X[2] - e;
+
+            points[4][0] = node.X[0] - e;
+            points[4][1] = node.X[1] - e;
+            points[4][2] = node.X[2] + e;
+
+            points[5][0] = node.X[0] + e;
+            points[5][1] = node.X[1] - e;
+            points[5][2] = node.X[2] + e;
+
+            points[6][0] = node.X[0] + e;
+            points[6][1] = node.X[1] + e;
+            points[6][2] = node.X[2] + e;
+
+            points[7][0] = node.X[0] - e;
+            points[7][1] = node.X[1] + e;
+            points[7][2] = node.X[2] + e;
+        }
+
         void addBox(float points[8][3])
         {
             vtkSmartPointer<vtkHexahedron> hexahedron = vtkSmartPointer<vtkHexahedron>::New();
@@ -297,7 +250,7 @@ class vtk_octree_storage
             hexahedron->GetPointIds()->SetId(7, m_hex_points->InsertNextPoint(points[7]));
             m_box->InsertNextCell(hexahedron->GetCellType(), hexahedron->GetPointIds());
         }
-
+        
         void setCurrentPoints()
         {
             m_box->SetPoints(m_hex_points);

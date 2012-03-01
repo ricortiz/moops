@@ -15,7 +15,6 @@ protected:
     private:
         size_t                  m_num_particles;
         particle_array_type     m_particles;
-        box_array_type          m_target_boxes;
         box_array_type          m_source_boxes;
         SerialFMM<Stokes>       m_fmm;
 
@@ -27,6 +26,8 @@ protected:
         {
             m_fmm.initialize();            
         }
+
+        box_array_type &getBoxes() { return m_source_boxes; }
 
         ~ExaFmmStokesSolver()
         {
@@ -78,7 +79,7 @@ protected:
             m_fmm.evalError(m_particles, m_fmm.buffer, diff, norm);
             m_fmm.printError(diff, norm);
         }
-
+        SerialFMM<Stokes> &solver() { return m_fmm; }
 };
 
 

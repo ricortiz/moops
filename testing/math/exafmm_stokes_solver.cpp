@@ -31,8 +31,8 @@ int exafmm_stokes_solver(int ac, char **av)
     vtkSmartPointer<vtkFloatArray> data_points = vtkSmartPointer<vtkFloatArray>::New();
     vtkSmartPointer<vtkCellArray>  cells = vtkSmartPointer<vtkCellArray>::New();
     typedef float value_type;
-    size_t num_sources = 1 << 8;
-    size_t num_targets = 1 << 8;
+    size_t num_sources = 1 << 7;
+    size_t num_targets = 1 << 7;
     size_t size_sources = 3 * num_sources;
     size_t size_targets = 3 * num_targets;
     std::vector<value_type> sources(size_sources), targets(size_targets), velocities(size_targets), forces(size_sources);
@@ -46,9 +46,12 @@ int exafmm_stokes_solver(int ac, char **av)
     std::cout << "forces = ["; std::copy(forces.begin(), forces.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "];" << std::endl;
     fmm.setDelta(delta);
     fmm(0, &sources[0], &velocities[0], &forces[0]);
-    std::cout << "velocities = ["; std::copy(velocities.begin(), velocities.end(), std::ostream_iterator<value_type>(std::cout, " ")); std::cout << "];" << std::endl;
+    fmm.solver().printAllTime();
     fmm.allPairs();
-
+    vtk_octree_storage vtk_octree;
+    vtk_octree.setOctree(fmm);
+    IO::VtkWriter<vtkXMLUnstructuredGridWriter> vtkWriter("./octree");
+    vtkWriter.write(vtk_octree.getBox(),0);
 #ifdef USE_QT_GUI
     QApplication app(ac, av);
 

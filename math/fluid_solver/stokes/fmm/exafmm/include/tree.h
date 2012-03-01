@@ -173,7 +173,9 @@ protected:
     getCenter(cell);                                            // Set cell center and radius
     twigs.push_back(cell);                                      // Push cells into vector
     stopTimer("Bodies2twigs ",printNow);                        // Stop timer & print
+    startTimer("evalP2M      ");
     evalP2M(twigs);                                             // Evaluate all P2M kernels
+    stopTimer("evalP2M      ",printNow);
   }
 
 //! Link twigs bottomup to create all cells in tree
@@ -209,7 +211,9 @@ protected:
     startTimer("Twigs2cells  ");                                // Start timer
     unique(cells,sticks,begin,end);                             // Just in case there is a collision at root
     stopTimer("Twigs2cells  ",printNow);                        // Stop timer & print
+    startTimer("evalM2M      ");
     evalM2M(cells,cells);                                       // Evaluate all M2M kernels
+    stopTimer("evalM2M      ",printNow);
   }
 
 public:
