@@ -1,21 +1,22 @@
 #ifndef PARTICLE_SYSTEM_HPP
 #define PARTICLE_SYSTEM_HPP
-//=========================================================================
-//
-//  Program:   Modular Object Oriented Particle Simulator
-//  Module:    ParticleSystem
-//
-//  Copyright (c) Ricardo Ortiz
-//  All rights reserved.
-//     This software is distributed WITHOUT ANY WARRANTY; without even
-//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-//     PURPOSE.
-//
-//=========================================================================
-/// @NAME ParticleSystem - Main kernel for the particle system
-/// @SECTION Description The ParticleSystem class is the main class for the simulator.  
-///			 It owns the storage and provides methods for accessing the data.
-
+/****************************************************************************
+** MOOPS -- Modular Object Oriented Particle Simulator
+** Copyright (C) 2011-2012  Ricardo Ortiz <ortiz@unc.edu>
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 #include<limits>
 #include<algorithm>
 

@@ -1,22 +1,38 @@
-#ifndef GMRES_RAW_HPP
-#define GMRES_RAW_HPP
-
+#ifndef GENERALIZED_MINIMAL_RESIDUAL_METHOD_HPP
+#define GENERALIZED_MINIMAL_RESIDUAL_METHOD_HPP
+/****************************************************************************
+** MOOPS -- Modular Object Oriented Particle Simulator
+** Copyright (C) 2011-2012  Ricardo Ortiz <ortiz@unc.edu>
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 #include<algorithm>
 
 #include "krylov_storage.hpp"
 #include "krylov_base.hpp"
 
-template<typename value_type, size_t krylov_space_max_dim>
-class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalResidualMethod<value_type, krylov_space_max_dim> >
+template<typename value_type, int krylov_space_maximum_dimension>
+class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalResidualMethod<value_type, krylov_space_maximum_dimension> >
 {
     protected:
-        krylov_storage<value_type, krylov_space_max_dim> m_storage;
+        krylov_storage<value_type, krylov_space_maximum_dimension> m_storage;
 
     private:
         size_t m_system_size;
         enum
         {
-            k_max = krylov_space_max_dim
+            k_max = krylov_space_maximum_dimension
         };
 
     public:
@@ -36,7 +52,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
         /**
         * \brief Gneralized Minimal Residual Method.  Solves the linear system:  F(x)= b, where F(x) = A*x.
         *
-        * \param F This is a linear operator that acts on x.
+        * \param F This is a linear operator on x.
         * \param b Right hand side vector of the linear system.
         * \param x Initial guess and solution vector
         * \param stats This is an optional vector to collect statistics of the method.  Defaults to 0.
@@ -108,10 +124,11 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
                 std::string fn_eval_gmres_key = "gmres_fn_eval";
                 s[fn_eval_gmres_key].push_back(k + 1);
             }
+            
             /// Solve the least square problem by solving the upper triangular linear system
             this->back_solve(k);
+            
             /// Update the solution
-//             value_type u = g(0)*v(0)[0];
             for(int i = 0; i < k; i++)
             {
                 for(size_t j = 0; j < m_system_size; ++j)

@@ -1,24 +1,22 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
-//=========================================================================
-//
-//  Program:   Modular Object Oriented Particle Simulator
-//  Module:    Particle
-//
-//  Copyright (c) Ricardo Ortiz
-//  All rights reserved.
-//     This software is distributed WITHOUT ANY WARRANTY; without even
-//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-//     PURPOSE.
-//
-//=========================================================================
-
-/// @name Particle - Stores the particle state.
-/// @section Description Particle is the wrapper for the data arrays.  
-/// 	It contains three pointers that gets set up when the particle system 
-/// 	class is instantiated.
-/// @section See Also 
-/// 	ParticleSystem particle_system_storage
+/****************************************************************************
+** MOOPS -- Modular Object Oriented Particle Simulator
+** Copyright (C) 2011-2012  Ricardo Ortiz <ortiz@unc.edu>
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 
 template<typename _value_type>
 struct ParticleWrapper

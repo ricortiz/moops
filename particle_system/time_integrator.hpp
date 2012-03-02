@@ -1,21 +1,22 @@
 #ifndef TIME_INTEGRATOR_HPP
 #define TIME_INTEGRATOR_HPP
-//=========================================================================
-//
-//  Program:   Modular Object Oriented Particle Simulator
-//  Module:    TimeIntegrator
-//
-//  Copyright (c) Ricardo Ortiz
-//  All rights reserved.
-//     This software is distributed WITHOUT ANY WARRANTY; without even
-//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-//     PURPOSE.
-//
-//=========================================================================
-/// @name SDCIntegrator -- Wrapper for the Spectral Deffered Correction time integrator
-/// @section Description SDCIntegrator wraps the integrator so it can be used by the simulator
-///                      It contains the main method that drives the simulation: void integrate()
-/// @section See also ExplicitSDC SemiImplicitSDC
+/****************************************************************************
+** MOOPS -- Modular Object Oriented Particle Simulator
+** Copyright (C) 2011-2012  Ricardo Ortiz <ortiz@unc.edu>
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 
 
 template<typename Derived>
