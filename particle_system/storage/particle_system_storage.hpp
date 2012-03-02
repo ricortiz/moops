@@ -1,17 +1,22 @@
 #ifndef PARTICLE_SYSTEM_STORAGE_HPP
 #define PARTICLE_SYSTEM_STORAGE_HPP
-//=========================================================================
-//
-//  Program:   Modular Object Oriented Particle Simulator
-//  Module:    ParticleSystemStorage
-//
-//  Copyright (c) Ricardo Ortiz
-//  All rights reserved.
-//     This software is distributed WITHOUT ANY WARRANTY; without even
-//     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-//     PURPOSE.
-//
-//=========================================================================
+/****************************************************************************
+ * * MOOPS -- Modular Object Oriented Particle Simulator
+ ** Copyright (C) 2011-2012  Ricardo Ortiz <ortiz@unc.edu>
+ **
+ ** This program is free software: you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License as published by
+ ** the Free Software Foundation, either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** This program is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ **
+ ** You should have received a copy of the GNU General Public License
+ ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ****************************************************************************/
 /// @name ParticleSystemStorage - Provides the storage for the particle system.
 ///
 /// @section Description This particle system provides allocation and handling of 
@@ -106,7 +111,7 @@ class ParticleSystemStorage<T,particle_type,VOLUME>
             m_data_size = num_particles*3;
             m_data.positions = new T[m_data_size];
             m_data.velocities = new T[m_data_size];
-            m_data.forces = 0;
+            m_data.forces = NULL;
             m_data.particles = new particle_type[num_particles];
             for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
             {

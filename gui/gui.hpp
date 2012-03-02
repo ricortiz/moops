@@ -56,7 +56,7 @@ class Gui : public GuiBase
 #include "gui.tpp"
 
 template<typename app_type>
-int runGui(Gui<app_type> &app)
+int runGui(int ac, char** av,Gui<app_type> &app)
 {
     QVTKApplication app_window(ac, av);
     app.setGridActor(true);

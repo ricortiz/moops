@@ -67,6 +67,7 @@ GuiBase::GuiBase()
     actionExit->setText(QApplication::translate("GuiBase", "E&xit", 0, QApplication::UnicodeUTF8));
     menuFile->setTitle(QApplication::translate("GuiBase", "&File", 0, QApplication::UnicodeUTF8));
     coord->setText(QApplication::translate("GuiBase", "TextLabel", 0, QApplication::UnicodeUTF8));
+    
     this->setCentralWidget(centralwidget);
     this->setMenuBar(menubar);
     this->setStatusBar(statusbar);

@@ -42,24 +42,21 @@ class GuiBase : public QMainWindow
     public:
         GuiBase();
 
-
     public slots:
         void popup(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command);
         void updateCoords(vtkObject* obj);
         void reset(QAction*);
 
-
     protected:
-
-        QVBoxLayout  *vboxLayout;
-        QHBoxLayout  *hboxLayout;
-        QWidget *centralwidget;
-        QAction *actionExit;
-        QLabel  *coord;
-        QMenuBar *menubar;
-        QMenu   *menuFile;
-        QStatusBar *statusbar;
-        QTimer *m_timer;
+        QVBoxLayout     *vboxLayout;
+        QHBoxLayout     *hboxLayout;
+        QWidget         *centralwidget;
+        QAction         *actionExit;
+        QLabel          *coord;
+        QMenuBar        *menubar;
+        QMenu           *menuFile;
+        QStatusBar      *statusbar;
+        QTimer          *m_timer;
 };
 
 #endif

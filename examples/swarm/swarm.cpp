@@ -150,7 +150,7 @@ int main(int ac, char **av)
     SwarmApp swarm;
     swarm.init(ac, av);
 #if defined USE_QT_GUI
-    return runGui(swarm);
+    return runGui(ac,av,swarm);
 #elif defined USE_PV_COPROCESSOR
     swarm.initCoprocessor(ac, av);
     return runCoprocessor(swarm);
