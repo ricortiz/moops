@@ -14,11 +14,8 @@
 #ifdef USE_PV_COPROCESSOR
 #include "utils/paraview_coprocessor.hpp"
 #endif
-// #include "utils/logger.hpp"
 #include "utils/vtk_storage_wrapper.hpp"
 #include "io/write_vtu.hpp"
-
-// Logger logger;
 
 template<typename T>
 struct Traits;
@@ -64,7 +61,7 @@ struct TypeBinder
     typedef HeartPump<value_type, fluid_solver, time_integrator>        heart_pump_surface;
     typedef Swarm<value_type, fluid_solver, time_integrator>        swarm_surface;
     typedef vtkStorageWrapper<swarm_surface, vtkFloatArray>              swarm_vtk_storage;
-    typedef vtkStorageWrapper<heart_pump_surface>                       heart_vtk_storage;
+    typedef vtkStorageWrapper<heart_pump_surface, vtkFloatArray>                       heart_vtk_storage;
     typedef IO::VtkWriter<vtkXMLPolyDataWriter>                         vtk_poly_writer;
     typedef IO::VtkWriter<vtkXMLUnstructuredGridWriter>                 vtk_unstructured_writer;
 

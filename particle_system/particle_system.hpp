@@ -27,14 +27,14 @@ class ParticleSystem
         typedef typename Traits<Derived>::value_type value_type;
         typedef typename Traits<Derived>::particle_type particle_type;
         typedef typename Traits<Derived>::storage_type storage_type;
-	
+
 
     private:
         value_type            m_time;         ///< Current time.
         storage_type          m_storage;
-	size_t 		      m_num_particles;
+        size_t         m_num_particles;
         value_type            m_domain[2][3]
-;
+        ;
     public:
 
         ParticleSystem(size_t num_particles) : m_time(0.0), m_storage(num_particles), m_num_particles(num_particles)
@@ -65,20 +65,20 @@ class ParticleSystem
             m_domain[0][0] = m_domain[0][1] = m_domain[0][2] = 0;
             // extent
             m_domain[1][0] = m_domain[1][1] = m_domain[1][2] = 0;
-            for(int i = 0; i < m_num_particles; i++)
+            for (int i = 0; i < m_num_particles; i++)
             {
-                for(int k = 0 ; k < 3; ++k)
+                for (int k = 0 ; k < 3; ++k)
                 {
-                    if(p[i].position[k] > max[k])
+                    if (p[i].position[k] > max[k])
                         max[k] = p[i].position[k];
-                    if(p[i].position[k] < min[k])
+                    if (p[i].position[k] < min[k])
                         min[k] = p[i].position[k];
                     m_domain[0][k] += p[i].position[k];
                 }
             }
-            
+
             value_type R0 = 0;
-            for(int i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 m_domain[0][i] /= m_num_particles;
                 m_domain[0][i] = int(m_domain[0][i] + .5); // shift center to nearest integer
@@ -87,16 +87,95 @@ class ParticleSystem
                 max[i] = std::abs(max[i] - m_domain[0][i]) + .001;
                 min[i] = std::abs(min[i] - m_domain[0][i]) + .001;
             }
-            
+
             m_domain[1][0] = m_domain[1][1] = m_domain[1][2] = R0 * 1.000001;
         }
 
         void clear() { m_time = 0.; }
-        inline void clear_forces() { std::fill(forces(),forces()+data_size(),0.0); }
-        inline void clear_velocities() { std::fill(velocities(),velocities()+data_size(),0.0); }
-        inline std::size_t particles_size() { return m_num_particles; }      
+        inline void clear_forces() { std::fill(forces(), forces() + data_size(), 0.0); }
+        inline void clear_velocities() { std::fill(velocities(), velocities() + data_size(), 0.0); }
+        inline std::size_t particles_size() { return m_num_particles; }
         inline std::size_t data_size() { return m_storage.data_size(); }
         storage_type &storage() { return m_storage; }
+
+        template<typename out_stream>
+        out_stream &writeForces(out_stream &out = std::cout, bool fortran = false)
+        {
+            value_type *p = this->forces();
+            if (!fortran)
+            {
+                out << "f = [";
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
+                out << "];" << std::endl;
+            }
+            else
+            {
+                out << this->particles_size() << " " << 3 << " " << 3*this->particles_size() << std::endl;
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << " " << p[idx + 1] << " " << p[idx + 2] << "\n";
+                out << std::endl;
+            }
+            return out;
+        }
+
+        template<typename out_stream>
+        out_stream &writeVelocities(out_stream &out = std::cout, bool fortran = false)
+        {
+            value_type *p = this->velocities();
+            if (!fortran)
+            {
+                out << "v = [";
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
+                out << "];" << std::endl;
+            }
+            else
+            {
+                out << this->particles_size() << " " << 3 << " " << 3*this->particles_size() << std::endl;
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << " " << p[idx + 1] << " " << p[idx + 2] << "\n";
+                out << std::endl;
+            }
+            return out;
+        }
+
+        template<typename out_stream>
+        out_stream &writePositions(out_stream &out = std::cout, bool fortran = false)
+        {
+            value_type *p = this->positions();
+            if (!fortran)
+            {
+                out << "p = [";
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << "," << p[idx + 1] << "," << p[idx + 2] << ";";
+                out << "];" << std::endl;
+            }
+            else
+            {
+                out << this->particles_size() << " " << 3 << " " << 3*this->particles_size() << std::endl;
+                for (size_t i = 0, idx = 0; i < this->particles_size(); ++i, idx += 3)
+                    out << p[idx] << " " << p[idx + 1] << " " << p[idx + 2] << "\n";
+                out << std::endl;
+            }
+            return out;
+        }
+        
+        template<typename out_stream>
+        void writeData(out_stream &out)
+        {
+            writePositions(out);
+            writeForces(out);
+            writeVelocities(out);
+        }
+        
+        template<typename out_stream>
+        friend out_stream &operator<<(out_stream &out,ParticleSystem<Derived> &system)
+        {
+            system.writeData(out);
+            return out;
+        }
+        
 };
 
 #endif

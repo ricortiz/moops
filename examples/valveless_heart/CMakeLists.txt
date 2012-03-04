@@ -1,4 +1,14 @@
-
+IF(USE_QUARK)
+    INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/math/fluid_solver/stokes/fmm/exafmm/external/include)
+    add_definitions(-DQUARK)
+    set(APP_LIBS ${APP_LIBS} quark)
+ENDIF(USE_QUARK)
+ADD_DEFINITIONS(-DSpherical)
+IF(USE_CUDA)
+    ADD_DEFINITIONS(-Dcpugpu)
+ELSEIF(USE_CUDA)
+    ADD_DEFINITIONS(-Dcpu)
+ENDIF(USE_CUDA)
 ADD_EXECUTABLE(valveless_heart valveless_heart.cpp)
-TARGET_LINK_LIBRARIES(valveless_heart ${APP_LIBS})
+TARGET_LINK_LIBRARIES(valveless_heart ${APP_LIBS} cpuKernel)
 

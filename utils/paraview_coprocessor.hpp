@@ -59,10 +59,10 @@ class ParaviewCoprocessor
             if (pipeline->Initialize(cpPythonFile.c_str()) == 0)
             {
                 std::cout << "Problem reading the python script." << std::endl;
-                return 1;
+                return 0;
             }
             m_processor->AddPipeline(pipeline);
-            return 0;
+            return 1;
         }
 
         inline int run()
