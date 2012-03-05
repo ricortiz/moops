@@ -44,8 +44,6 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             getStrengths(col_ptr, col_idx, strenght);
             setSprings(col_ptr, col_idx, strenght);
             setIteratorRange(lo, hi);
-//             this->writePositions(std::cout);
-//             this->writeSprings(std::cout,m_spring_range.first,m_spring_range.second);
         }
 
         inline void computeForces(value_type time)

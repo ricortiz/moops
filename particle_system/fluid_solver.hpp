@@ -43,6 +43,12 @@ class FluidSolver
         }
 
         template<typename value_type>
+        inline void operator()(value_type t, value_type *x, value_type *v, size_t num_targets)
+        {
+            m_fluid_solver(t,x,v,derived().positions(),derived().forces(),num_targets);
+        }
+        
+        template<typename value_type>
         inline void Explicit(value_type t, value_type *x, value_type *v)
         {
             derived().computeForces(t);

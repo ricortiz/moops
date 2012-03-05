@@ -28,7 +28,6 @@ class ParticleSystem
         typedef typename Traits<Derived>::particle_type particle_type;
         typedef typename Traits<Derived>::storage_type storage_type;
 
-
     private:
         value_type            m_time;         ///< Current time.
         storage_type          m_storage;

@@ -18,47 +18,37 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 
+#include "particle_system.hpp"
 
-template < typename particle_system_type,
-typename immersed_surface_type,
-template<typename> class integration_policy >
-class ParticleMarkers : public particle_system_type, public integration_policy<ParticleMarkers<particle_system_type, immersed_surface_type, integration_policy> >
+template<typename Derived, typename time_integrator>
+class ParticleMarkers : public ParticleSystem<ParticleMarkers<Derived,time_integrator> >
 {
+protected:
+        time_integrator integrator;
     public:
-        typedef typename immersed_structure_traits<immersed_surface_type>::ode_rhs_type ode_rhs_type;
-        typedef typename particle_system_type::value_type    value_type;
-        typedef typename particle_system_type::particle_type particle_type;
-        typedef integration_policy<ParticleMarkers<particle_system_type,immersed_surface_type,integration_policy> > time_integrator_type;
+        inline Derived &derived()
+        {
+            return *static_cast<Derived*>(this);
+        }
+        
+        ParticleMarkers(size_t num_particles) : ParticleSystem<Derived>(num_particles), integrator(num_particles) {  }
 
-    private:
-        immersed_surface_type            &m_surface;
-
-    public:
-
-        ParticleMarkers(immersed_surface_type &surface, size_t ode_size) : particle_system_type(ode_size), time_integrator_type(ode_size), m_surface(surface) {  }
-        ~ParticleMarkers() {}
-
+        template<typename value_type>
         void run(value_type timestep)
         {
-            this->integrate(timestep);
-            this->time() += timestep;
-        }
-
-        void operator()(value_type time, value_type *x, value_type *v)
-        {
-            value_type *f = m_surface.forces();
-            value_type *y = m_surface.positions();
             size_t num_targets = this->particles_size();
-            size_t num_sources = m_surface.particles_size();
-            this->ode_rhs()(x, v, y, f, num_sources, num_targets);
+            derived()(this->time(),this->positions(), this->velocities(),this->particles_size());
+            integrator(this->time(),this->positions(), this->velocities(),timestep);
+            this->time() += timestep;
         }
 };
 
-template< typename _particle_system_type, typename _immersed_surface_type, template<typename> class _integration_policy>
-struct immersed_structure_traits<ParticleMarkers<_particle_system_type, _immersed_surface_type, _integration_policy> >
+template<typename Derived,time_integrator>
+struct Traits<ParticleMarkers<Derived,time_integrator> >
 {
-    typedef typename immersed_structure_traits<_immersed_surface_type>::ode_rhs_type ode_rhs_type;
-    typedef typename _particle_system_type::value_type                  value_type;
+    typedef typename Traits<Derived>::value_type value_type;
+    typedef typename Traits<Derived>::particle_type particle_type;
+    typedef typename Traits<Derived>::storage_type storage_type;
 };
 
 #endif
