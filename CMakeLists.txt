@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 project(MOOPS)
 
+
+# Setup host dependent variables
+IF($ENV{HOSTNAME} MATCHES "macundo")
+    message(STATUS "Setting variables for macundo")
+ELSEIF($ENV{HOSTNAME} MATCHES "killdevil-login2.kd.unc.edu")
+    message(STATUS "Setting variables for killdevil")
+ENDIF()
+
 IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
        message(FATAL_ERROR "Rejecting in-place build. Please use a build directory")
 ENDIF()
@@ -63,7 +71,7 @@ IF(USE_CUDA)
   ENDIF()
   ADD_SUBDIRECTORY(math/fluid_solver/stokes/nbody_gpu)
   ADD_DEFINITIONS(-DUSE_CUDA)
-  SET(APP_LIBS ${APP_LIBS} gpuKernel)
+  SET(APP_LIBS ${APP_LIBS} gpuKernel cudaStokesSolver)
   MESSAGE(STATUS "Enabling CUDA")
 ENDIF()
 

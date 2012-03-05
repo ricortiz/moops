@@ -47,9 +47,9 @@ protected:
 
     public:
 
-        OvalGeometry() : m_speed(1), m_size(0), m_inner_radius(.05), m_outer_radius(.5), m_lo(250), m_hi(750), m_num_particles(0) {}
+        OvalGeometry() : m_speed(1),  m_inner_radius(.05), m_outer_radius(.5), m_lo(250), m_hi(750), m_num_particles(0) {}
         OvalGeometry(value_type x0[3], size_t M = 6, size_t N = 100, value_type speed = .05, value_type inner_radius = .05, value_type outer_radius = .5)
-                : m_speed(speed), m_size(M*N), m_inner_radius(inner_radius), m_outer_radius(outer_radius), m_hi(500), m_lo(1000), m_num_particles(M*N)
+                : m_speed(speed), m_inner_radius(inner_radius), m_outer_radius(outer_radius), m_hi(500), m_lo(1000), m_num_particles(M*N)
         {
             m_dims[0] = M;
             m_dims[1] = N;
@@ -58,8 +58,9 @@ protected:
             m_x0[2] = x0[2];
             assert(m_hi > m_lo);
             m_radius_scale.resize(m_hi-m_lo,0.0);
+            m_num_particles = M*N;
         }
-
+        void getRadiusScaling(std::vector<value_type> &scaling) { scaling = m_radius_scale; }
         void getDimensions(size_t &M, size_t &N) { M = m_dims[0]; N = m_dims[1]; }
         void getInnerRadius(value_type &radius) { radius = m_inner_radius; }
         void getOuterRadius(value_type &radius) { radius = m_outer_radius; }
@@ -82,6 +83,7 @@ protected:
         }
         
         size_t const &numParticles() const { return m_num_particles; }
+        
         void getLocalFrame(value_type s, value_type x[3],value_type normal[3])
         {
             value_type Dx[3] = {0};
@@ -164,7 +166,7 @@ protected:
             size_t idx = std::max(std::min(spring->A()->i,m_hi-1),m_lo) - m_lo;
             base_type::resetRestingLength(spring,m_radius_scale[idx]);
         }
-        const std::vector<value_type> &setCylindricalRadiusScaling(value_type t)
+        void setCylindricalRadiusScaling(value_type t)
 	{
 	  size_t n = m_hi - m_lo;
 	  size_t m = m_dims[0]/2;
@@ -173,7 +175,7 @@ protected:
             value_type x_2 = 1.0;
 	    
 	}
-        const std::vector<value_type> &setPeristalticRadiusScaling(value_type t)
+        void setPeristalticRadiusScaling(value_type t)
         {
             size_t n = m_hi - m_lo;
             // Range of stretchy part
@@ -212,7 +214,6 @@ protected:
                 m_radius_scale[k] *= filter[k] * scale;
                 m_radius_scale[k] = 1 - m_radius_scale[k];
             }
-            return m_radius_scale;
         }
 
 };

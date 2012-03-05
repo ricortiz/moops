@@ -94,19 +94,19 @@ class SpringSystem
         }
 
         template<typename out_stream>
-        void printSprings(out_stream &out = std::cout)
+        void writeSprings(out_stream &out = std::cout)
         {
-            printSprings(out, m_springs.begin(), m_springs.end());
+            writeSprings(out, m_springs.begin(), m_springs.end());
         }
 
         template<typename out_stream>
-        void printRestingLengths(out_stream &out = std::cout)
+        void writeRestingLengths(out_stream &out = std::cout)
         {
-            printRestingLengths(out, m_springs.begin(), m_springs.end());
+            writeRestingLengths(out, m_springs.begin(), m_springs.end());
         }
         
         template<typename out_stream>
-        void printSprings(out_stream &out, spring_iterator start, spring_iterator end)
+        void writeSprings(out_stream &out, spring_iterator start, spring_iterator end)
         {
             out << "springs = [";
             spring_iterator s = start;
@@ -116,7 +116,7 @@ class SpringSystem
         }
 
         template<typename out_stream>
-        void printRestingLengths(out_stream &out, spring_iterator start, spring_iterator end)
+        void writeRestingLengths(out_stream &out, spring_iterator start, spring_iterator end)
         {
             out << "spring_lenghts = [";
             spring_iterator s = start;
@@ -128,7 +128,7 @@ class SpringSystem
         template<typename out_stream>
         friend out_stream &operator<<(out_stream &out, SpringSystem<Derived> &system)
         {
-            system.printSprings(out);
+            system.writeSprings(out);
             return out;
         }
 

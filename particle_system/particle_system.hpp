@@ -92,8 +92,8 @@ class ParticleSystem
         }
 
         void clear() { m_time = 0.; }
-        inline void clear_forces() { std::fill(forces(), forces() + data_size(), 0.0); }
-        inline void clear_velocities() { std::fill(velocities(), velocities() + data_size(), 0.0); }
+        inline void clearForces() { std::fill(forces(), forces() + data_size(), 0.0); }
+        inline void clearVelocities() { std::fill(velocities(), velocities() + data_size(), 0.0); }
         inline std::size_t particles_size() { return m_num_particles; }
         inline std::size_t data_size() { return m_storage.data_size(); }
         storage_type &storage() { return m_storage; }

@@ -26,7 +26,8 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             m_geometry.setDimensions(M, N);
             m_geometry.setX0(0, 0, 0);
             m_geometry.setForcingRange(lo, hi);
-            m_geometry.setWaveSpeed(.001);
+            m_geometry.setInnerRadius(.05);
+            m_geometry.setOuterRadius(.5);
             std::vector<size_t> /*&*/col_ptr/* = this->fluid_solver().col_ptr*/;// sparse matrix (CSR-format) holding
             std::vector<size_t> /*&*/col_idx/* = this->fluid_solver().col_idx*/;// sparse matrix (CSR-format) holding
             std::vector<value_type> strenght;            // interactions between particles
@@ -36,11 +37,15 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             strenght.reserve(num_springs);               // Reserve
             col_ptr.push_back(0);
             m_geometry.init(&this->particles()[0]);
+            value_type T[3] = {0,0,.15};
+            m_geometry.applyTranslation(&this->particles()[0],T);
             m_geometry.getConnections(col_ptr, col_idx);
             sortConnections(col_ptr, col_idx);
             getStrengths(col_ptr, col_idx, strenght);
-            base_type::setSprings(col_ptr, col_idx, strenght);
+            setSprings(col_ptr, col_idx, strenght);
             setIteratorRange(lo, hi);
+//             this->writePositions(std::cout);
+//             this->writeSprings(std::cout,m_spring_range.first,m_spring_range.second);
         }
 
         inline void computeForces(value_type time)
@@ -48,6 +53,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             m_geometry.setPeristalticRadiusScaling(time);
             for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
                 m_geometry.resetRestingLength(s);
+            this->clearForces();
             base_type::computeForces();
         }
 
@@ -63,16 +69,6 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
                 std::sort(begin, end);
             }
         }
-        void setSprings(size_t plo, size_t phi)
-        {
-            std::vector<size_t> col_ptr, col_idx;
-            std::vector<value_type> strenght;
-            col_ptr.push_back(0);
-            m_geometry.getConnections(col_ptr, col_idx);
-            getStrengths(col_ptr, col_idx, strenght, plo, phi);
-
-            base_type::setSprings(col_ptr, col_idx, strenght);
-        }
 
         void initVolume(oval_type &oval_geometry, particle_type *particles, size_t num_sub_surfaces = 1)
         {
@@ -86,6 +82,9 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
 
         void setIteratorRange(size_t lo, size_t hi)
         {
+            size_t M, N;
+            m_geometry.getDimensions(M, N);
+            lo*=M; hi *= M;
             spring_iterator s = this->springs_begin(), s_end = this->springs_end(), f;
             for (; s != s_end; ++s)
                 if (s->getAidx() / 3 == lo)

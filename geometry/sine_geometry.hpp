@@ -244,18 +244,7 @@ class SineGeometry : public BaseGeometry<SineGeometry<value_type> >
             }
         }
 
-        template < typename particle_type>
-        void applyTranslation(particle_type *particles, value_type T[3])
-        {
-            size_t i;
-            #pragma omp parallel for private(i) shared(particles,T)
-            for(i = 0; i < m_num_particles; ++i)
-            {
-                particles[i].position[0] += T[0];
-                particles[i].position[1] += T[1];
-                particles[i].position[2] += T[2];
-            }
-        }
+
     private:
         value_type amplitude_cubic(const value_type &s)
         {
