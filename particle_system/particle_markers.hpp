@@ -21,30 +21,31 @@
 #include "particle_system.hpp"
 
 template<typename Derived, typename time_integrator>
-class ParticleMarkers : public ParticleSystem<ParticleMarkers<Derived,time_integrator> >
+class ParticleMarkers : public ParticleSystem<ParticleMarkers<Derived, time_integrator> >
 {
-protected:
+    protected:
         time_integrator integrator;
+        
     public:
         inline Derived &derived()
         {
             return *static_cast<Derived*>(this);
         }
-        
+
         ParticleMarkers(size_t num_particles) : ParticleSystem<Derived>(num_particles), integrator(num_particles) {  }
 
         template<typename value_type>
         void run(value_type timestep)
         {
             size_t num_targets = this->particles_size();
-            derived()(this->time(),this->positions(), this->velocities(),this->particles_size());
-            integrator(this->time(),this->positions(), this->velocities(),timestep);
+            derived()(this->time(), this->positions(), this->velocities(), this->particles_size());
+            integrator(this->time(), this->positions(), this->velocities(), timestep);
             this->time() += timestep;
         }
 };
 
-template<typename Derived,time_integrator>
-struct Traits<ParticleMarkers<Derived,time_integrator> >
+template<typename Derived, time_integrator>
+struct Traits<ParticleMarkers<Derived, time_integrator> >
 {
     typedef typename Traits<Derived>::value_type value_type;
     typedef typename Traits<Derived>::particle_type particle_type;

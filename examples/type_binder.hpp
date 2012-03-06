@@ -46,7 +46,7 @@ struct TypeBinder
     typedef _value_type                                         value_type;
     typedef ParticleWrapper<value_type>                         particle_type;
 #ifdef USE_CUDA
-    typedef GpuStokesSolver<float>                              cuda_stokes_solver;
+    typedef GpuStokesSolver<float>                              gpu_stokes_solver;
 #endif
     typedef CpuStokesSolver<value_type>                         cpu_stokes_solver;
     typedef ExaFmmStokesSolver<value_type>                      fmm_stokes_solver;
@@ -57,14 +57,12 @@ struct TypeBinder
     typedef ExplicitSDC<value_type, spectral_integrator, sdc_corrections>       explicit_sdc;
     typedef SemiImplicitSDC<value_type, spectral_integrator, sdc_corrections>   implicit_sdc;
     typedef explicit_sdc                                                time_integrator;
-    typedef HeartPump<value_type, cuda_stokes_solver, time_integrator>        heart_pump_surface;
+    typedef HeartPump<value_type, cpu_stokes_solver, time_integrator>        heart_pump_surface;
     typedef Swarm<value_type, fmm_stokes_solver, time_integrator>        swarm_surface;
     typedef vtkStorageWrapper<swarm_surface, vtkFloatArray>              swarm_vtk_storage;
     typedef vtkStorageWrapper<heart_pump_surface, vtkFloatArray>                       heart_vtk_storage;
     typedef IO::VtkWriter<vtkXMLPolyDataWriter>                         vtk_poly_writer;
     typedef IO::VtkWriter<vtkXMLUnstructuredGridWriter>                 vtk_unstructured_writer;
-
-
 };
 
 #endif
