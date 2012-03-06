@@ -44,7 +44,7 @@ class ParticleMarkers : public ParticleSystem<ParticleMarkers<Derived, time_inte
         }
 };
 
-template<typename Derived, time_integrator>
+template<typename Derived, typename time_integrator>
 struct Traits<ParticleMarkers<Derived, time_integrator> >
 {
     typedef typename Traits<Derived>::value_type value_type;
