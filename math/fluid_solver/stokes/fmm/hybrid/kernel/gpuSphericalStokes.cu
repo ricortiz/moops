@@ -22,7 +22,14 @@ THE SOFTWARE.
 #define KERNEL
 #include "kernel.hpp"
 #undef KERNEL
-#include <cutil.h>
+#  define CUDA_SAFE_CALL( call) {                                    \
+    cudaError err = call;                                                    \
+    if( cudaSuccess != err) {                                                \
+        fprintf(stderr, "Cuda error in file '%s' in line %i : %s.\n",        \
+                __FILE__, __LINE__, cudaGetErrorString( err) );              \
+        exit(EXIT_FAILURE);                                                  \
+    } }
+
 
 __device__ __constant__ gpureal constDevc[514];                 // Constants on device
 
