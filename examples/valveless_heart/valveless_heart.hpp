@@ -36,9 +36,9 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             col_idx.reserve(num_springs);                // Reserve
             strenght.reserve(num_springs);               // Reserve
             col_ptr.push_back(0);
-            m_geometry.init(&this->particles()[0]);
-            value_type T[3] = {0,0,.15};
-            m_geometry.applyTranslation(&this->particles()[0],T);
+            m_geometry.init(this->particles());
+//             value_type T[3] = {0,0,.15};
+//             m_geometry.applyTranslation(this->particles(),T);
             m_geometry.getConnections(col_ptr, col_idx);
             sortConnections(col_ptr, col_idx);
             getStrengths(col_ptr, col_idx, strenght);
@@ -55,7 +55,6 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             base_type::computeForces();
         }
 
-
     private:
         void sortConnections(std::vector<size_t> &col_ptr, std::vector<size_t> &col_idx)
         {
@@ -66,11 +65,6 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
                 end = col_idx.begin() + col_ptr[i + 1];
                 std::sort(begin, end);
             }
-        }
-
-        void initVolume(oval_type &oval_geometry, particle_type *particles, size_t num_sub_surfaces = 1)
-        {
-            oval_geometry.init(particles, num_sub_surfaces);
         }
 
         void getStrengths(const std::vector<size_t> &col_ptr, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
@@ -98,6 +92,14 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
         oval_type &geometry()
         {
             return m_geometry;
+        }
+
+        template<typename tracers_type>
+        void setTracers(tracers_type &tracers, size_t num_rings)
+        {
+            m_geometry.init(tracers.particles(),num_rings);
+//             value_type T[3] = {0,0,.15};
+//             m_geometry.applyTranslation(tracers.particles(),T);
         }
 };
 

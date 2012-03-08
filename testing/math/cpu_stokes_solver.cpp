@@ -24,7 +24,7 @@ int cpu_stokes_solver(int ,char **)
     size_t size_targets = 3*num_targets;
     std::vector<value_type> sources(size_sources), targets(size_targets), velocities(size_targets), forces(size_sources);
     value_type delta = .01;
-    CpuStokesSolver<double> solver(0);
+    CpuStokesSolver<double> solver(num_sources);
     solver.setDelta(delta);
 
     std::generate(sources.begin(),sources.end(),random_generator<value_type>());
@@ -32,9 +32,9 @@ int cpu_stokes_solver(int ,char **)
     std::generate(velocities.begin(),velocities.end(),random_generator<value_type>());
     std::generate(forces.begin(),forces.end(),random_generator<value_type>());
 
-    solver(0,&targets[0],&velocities[0],&sources[0],&forces[0],num_sources,num_targets);
-    solver(0,&targets[0],&velocities[0],&targets[0],&forces[0],num_sources,num_targets);
-    solver(0,&sources[0],&velocities[0],&sources[0],&forces[0],num_sources,num_targets);
+    solver(0,&targets[0],&velocities[0],&sources[0],&forces[0],num_targets);
+    solver(0,&targets[0],&velocities[0],&targets[0],&forces[0],num_targets);
+    solver(0,&sources[0],&velocities[0],&sources[0],&forces[0],num_targets);
     
     return 0;
 }

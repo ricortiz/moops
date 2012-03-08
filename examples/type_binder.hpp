@@ -28,6 +28,7 @@ struct Traits;
 #include "math/ode_solver/sdc/semi_implicit_sdc.hpp"
 #include "examples/valveless_heart/valveless_heart.hpp"
 #include "examples/swarm/swarm.hpp"
+#include "particle_system/particle_markers.hpp"
 
 #ifdef USE_CUDA
 #include "math/fluid_solver/stokes/gpu_stokes_solver.hpp"
@@ -42,7 +43,7 @@ struct TypeBinder
         sdc_nodes = _sdc_nodes,
         sdc_corrections = _sdc_corrections
     };
-    typedef TypeBinder<_value_type>                             Types;
+    typedef TypeBinder<_value_type,_sdc_nodes,_sdc_corrections> Types;
     typedef _value_type                                         value_type;
     typedef ParticleWrapper<value_type>                         particle_type;
 #ifdef USE_CUDA
@@ -57,10 +58,13 @@ struct TypeBinder
     typedef ExplicitSDC<value_type, spectral_integrator, sdc_corrections>       explicit_sdc;
     typedef SemiImplicitSDC<value_type, spectral_integrator, sdc_corrections>   implicit_sdc;
     typedef explicit_sdc                                                time_integrator;
-    typedef HeartPump<value_type, cpu_stokes_solver, time_integrator>        heart_pump_surface;
-    typedef Swarm<value_type, fmm_stokes_solver, time_integrator>        swarm_surface;
-    typedef vtkStorageWrapper<swarm_surface, vtkFloatArray>              swarm_vtk_storage;
-    typedef vtkStorageWrapper<heart_pump_surface, vtkFloatArray>                       heart_vtk_storage;
+    typedef HeartPump<value_type, gpu_stokes_solver, time_integrator>   heart_pump_surface;
+    typedef Swarm<value_type, fmm_stokes_solver, time_integrator>       swarm_surface;
+    typedef ParticleMarkers<heart_pump_surface,forward_euler>           tracers_type;
+    
+    typedef vtkSurfaceStorage<swarm_surface, vtkFloatArray>             swarm_vtk_storage;
+    typedef vtkSurfaceStorage<heart_pump_surface, vtkFloatArray>        heart_vtk_storage;
+    typedef vtkMarkersStorage<tracers_type, vtkFloatArray>              tracer_vtk_storage;
     typedef IO::VtkWriter<vtkXMLPolyDataWriter>                         vtk_poly_writer;
     typedef IO::VtkWriter<vtkXMLUnstructuredGridWriter>                 vtk_unstructured_writer;
 };

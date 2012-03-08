@@ -38,6 +38,7 @@ class HybridFmmStokesSolver
         std::vector<unsigned int> m_index;
         value_type m_delta;
         bool m_initialized;
+        bool m_images;
 
     public:
         HybridFmmStokesSolver(size_t num_particles)

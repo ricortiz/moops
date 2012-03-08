@@ -142,7 +142,7 @@ void ComputeImages(const vector3_type &target, vector3_type &velocity, const vec
  * @return updated velocity vector
  **/
 template<typename vector3_type, typename int_type, typename real_type> __device__
-void ComputeTile(const vector3_type &target, vector3_type &velocity, int_type num_sources, real_type delta, bool with_image)
+void ComputeTile(const vector3_type &target, vector3_type &velocity, real_type delta, int_type num_sources, bool with_image)
 {
     extern __shared__ vector3_type shared_data[];
     vector3_type *sources = &shared_data[0];
@@ -164,8 +164,6 @@ void ComputeTile(const vector3_type &target, vector3_type &velocity, int_type nu
     if(with_image)
         for (unsigned int counter = 0; counter < num_sources; ++i, ++counter )
             ComputeImages(target, velocity, sources[i], forces[i], delta);
-
-
 }
 
 /**
@@ -180,7 +178,7 @@ void ComputeTile(const vector3_type &target, vector3_type &velocity, int_type nu
  * @return updated velocity vector
  **/
 template<typename vector3_type, typename int_type, typename real_type> __device__
-vector3_type ComputeTiles(const vector3_type &target, const vector3_type* source_array, const vector3_type* force_array, int_type num_sources, int_type num_targets, real_type delta, bool with_image)
+vector3_type ComputeTiles(const vector3_type &target, const vector3_type* source_array, const vector3_type* force_array, real_type delta, int_type num_sources, int_type num_targets, bool with_image)
 {
     extern __shared__ vector3_type shared_data[];
     vector3_type *sources = &shared_data[0];
@@ -207,7 +205,7 @@ vector3_type ComputeTiles(const vector3_type &target, const vector3_type* source
         __syncthreads();
 
         if (index < num_targets)
-            ComputeTile(target, velocity, blockDim.x, delta, with_image);
+            ComputeTile(target, velocity, delta, blockDim.x, with_image);
 
         __syncthreads();
     }
@@ -225,7 +223,7 @@ vector3_type ComputeTiles(const vector3_type &target, const vector3_type* source
         __syncthreads();
 
         if (index < num_targets)
-            ComputeTile(target, velocity, bodyLeft, delta, with_image);
+            ComputeTile(target, velocity, delta, bodyLeft, with_image);
 
         __syncthreads();
     }

@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-template<>
+
 void Evaluator<Stokes>::setSourceBody()                       // Set source buffer for bodies
 {
     startTimer("Set sourceB  ");                                  // Start timer
@@ -41,7 +41,7 @@ void Evaluator<Stokes>::setSourceBody()                       // Set source buff
     stopTimer("Set sourceB  ");                                   // Stop timer
 }
 
-template<>
+
 void Evaluator<Stokes>::setTargetBody(Lists lists, Maps flags)  // Set target buffer for bodies
 {
     startTimer("Set targetB  ");                                  // Start timer
@@ -85,7 +85,6 @@ void Evaluator<Stokes>::setTargetBody(Lists lists, Maps flags)  // Set target bu
     stopTimer("Set targetB  ");                                   // Stop timer
 }
 
-template<>
 void Evaluator<Stokes>::getTargetBody(Lists &lists)           // Get body values from target buffer
 {
     startTimer("Get targetB  ");                                  // Start timer
@@ -107,7 +106,6 @@ void Evaluator<Stokes>::getTargetBody(Lists &lists)           // Get body values
     stopTimer("Get targetB  ");                                   // Stop timer
 }
 
-template<>
 void Evaluator<Stokes>::clearBuffers()                        // Clear GPU buffers
 {
     startTimer("Clear buffer ");                                  // Start timer
@@ -122,8 +120,6 @@ void Evaluator<Stokes>::clearBuffers()                        // Clear GPU buffe
     stopTimer("Clear buffer ");                                   // Stop timer
 }
 
-
-template<>
 void Evaluator<Stokes>::evalP2P(Bodies &ibodies, Bodies &jbodies, bool onCPU)  // Evaluate all P2P kernels
 {
     int numIcall = int(ibodies.size() - 1) / MAXBODY + 1;         // Number of icall loops
@@ -209,7 +205,6 @@ void Evaluator<Stokes>::evalP2P(Bodies &ibodies, Bodies &jbodies, bool onCPU)  /
     }                                                             // End loop over icall
 }
 
-template<>
 void Evaluator<Stokes>::evalP2M(Cells &cells)                 // Evaluate all P2M kernels
 {
     startTimer("evalP2M      ");                                  // Start timer
@@ -225,7 +220,7 @@ void Evaluator<Stokes>::evalP2M(Cells &cells)                 // Evaluate all P2
     stopTimer("evalP2M      ");                                   // Stop timer
 }
 
-template<>
+
 void Evaluator<Stokes>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all M2M kernels
 {
     startTimer("evalM2M      ");                                  // Start timer
@@ -240,7 +235,7 @@ void Evaluator<Stokes>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all M2
     stopTimer("evalM2M      ");                                   // Stop timer
 }
 
-template<>
+
 void Evaluator<Stokes>::evalM2L(C_iter Ci, C_iter Cj)         // Evaluate single M2L kernel
 {
     startTimer("evalM2L      ");
@@ -249,7 +244,7 @@ void Evaluator<Stokes>::evalM2L(C_iter Ci, C_iter Cj)         // Evaluate single
     NM2L++;                                                       // Count M2L kernel execution
 }
 
-template<>
+
 void Evaluator<Stokes>::evalM2L(Cells &cells)                 // Evaluate queued M2L kernels
 {
     startTimer("evalM2L      ");                                  // Start timer
@@ -285,7 +280,7 @@ void Evaluator<Stokes>::evalM2L(Cells &cells)                 // Evaluate queued
     stopTimer("evalM2L      ");                                   // Stop timer
 }
 
-template<>
+
 void Evaluator<Stokes>::evalM2P(C_iter Ci, C_iter Cj)         // Evaluate single M2P kernel
 {
     startTimer("evalM2P      ");                                  // Start timer
@@ -294,7 +289,7 @@ void Evaluator<Stokes>::evalM2P(C_iter Ci, C_iter Cj)         // Evaluate single
     NM2P++;                                                       // Count M2P kernel execution
 }
 
-template<>
+
 void Evaluator<Stokes>::evalM2P(Cells &cells)                 // Evaluate queued M2P kernels
 {
     startTimer("evalM2P      ");                                  // Start timer
@@ -330,7 +325,7 @@ void Evaluator<Stokes>::evalM2P(Cells &cells)                 // Evaluate queued
     stopTimer("evalM2P      ");                                   // Stop timer
 }
 
-template<>
+
 void Evaluator<Stokes>::evalP2P(C_iter Ci, C_iter Cj)         // Queue single P2P kernel
 {
     listP2P[Ci-Ci0].push_back(Cj);                                // Push source cell into P2P interaction list
@@ -338,7 +333,7 @@ void Evaluator<Stokes>::evalP2P(C_iter Ci, C_iter Cj)         // Queue single P2
     NP2P++;                                                       // Count P2P kernel execution
 }
 
-template<>
+
 void Evaluator<Stokes>::evalP2P(Cells &cells)                 // Evaluate queued P2P kernels
 {
     Ci0 = cells.begin();                                          // Set begin iterator
@@ -374,7 +369,7 @@ void Evaluator<Stokes>::evalP2P(Cells &cells)                 // Evaluate queued
     flagP2P.clear();                                              // Clear periodic image flags
 }
 
-template<>
+
 void Evaluator<Stokes>::evalL2L(Cells &cells)                 // Evaluate all L2L kernels
 {
     startTimer("evalL2L      ");                                  // Start timer
@@ -387,7 +382,7 @@ void Evaluator<Stokes>::evalL2L(Cells &cells)                 // Evaluate all L2
     stopTimer("evalL2L      ");                                   // Stop timer
 }
 
-template<>
+
 void Evaluator<Stokes>::evalL2P(Cells &cells)                 // Evaluate all L2P kernels
 {
     startTimer("evalL2P      ");                                  // Start timer
@@ -401,7 +396,7 @@ void Evaluator<Stokes>::evalL2P(Cells &cells)                 // Evaluate all L2
     stopTimer("evalL2P      ");                                   // Stop timer
 }
 
-template<>
+
 void Evaluator<Stokes>::timeKernels()                         // Time all kernels for auto-tuning
 {
     Bodies ibodies(1000), jbodies(1000);                          // Artificial bodies
@@ -455,8 +450,8 @@ void Evaluator<Stokes>::timeKernels()                         // Time all kernel
 }
 
 #if QUARK
-template<Equation equation>
-void Evaluator<equation>::interact(C_iter CI, C_iter CJ, Quark*) {
+template<>
+void Evaluator<Stokes>::interact(C_iter CI, C_iter CJ, Quark*) {
     PairQueue privateQueue;
     Pair pair(CI,CJ);
     privateQueue.push(pair);

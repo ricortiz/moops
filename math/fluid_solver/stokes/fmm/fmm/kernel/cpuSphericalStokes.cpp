@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #define KERNEL
-#include "kernel.h"
+#include "kernel.hpp"
 #undef KERNEL
 
 namespace
@@ -64,7 +64,6 @@ namespace
 
 }
 
-template<>
 void Kernel<Stokes>::P2M(C_iter Ci) const
 {
     complex Ynm[4*P*P], YnmTheta[4*P*P];
@@ -94,7 +93,6 @@ void Kernel<Stokes>::P2M(C_iter Ci) const
     }
 }
 
-template<>
 void Kernel<Stokes>::M2M(C_iter Ci, C_iter Cj) const
 {
     const complex I(0., 1.);                                      // Imaginary unit
@@ -152,7 +150,6 @@ void Kernel<Stokes>::M2M(C_iter Ci, C_iter Cj) const
     }
 }
 
-template<>
 void Kernel<Stokes>::M2L(C_iter Ci, C_iter Cj) const
 {
     complex Ynm[4*P*P], YnmTheta[4*P*P];
@@ -202,7 +199,6 @@ void Kernel<Stokes>::M2L(C_iter Ci, C_iter Cj) const
 }
 
 // Only for tree code and hybrid tree method
-template<>
 void Kernel<Stokes>::M2P(C_iter Ci, C_iter Cj) const
 {
     const complex I(0., 1.);                                      // Imaginary unit
@@ -280,7 +276,6 @@ void Kernel<Stokes>::M2P(C_iter Ci, C_iter Cj) const
     }
 }
 
-template<>
 void Kernel<Stokes>::L2L(C_iter Ci, C_iter Cj) const
 {
     const complex I(0., 1.);                                      // Imaginary unit
@@ -335,7 +330,6 @@ void Kernel<Stokes>::L2L(C_iter Ci, C_iter Cj) const
     }
 }
 
-template<>
 void Kernel<Stokes>::L2P(C_iter Ci) const
 {
     const complex I(0., 1.);                                      // Imaginary unit

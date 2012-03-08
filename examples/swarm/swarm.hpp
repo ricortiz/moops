@@ -77,7 +77,7 @@ class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
                 for (spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second; s != end; ++s)
                     m_geometry.resetRestingLength(s, time);
             }
-            this->clear_forces();
+            this->clearForces();
             base_type::computeForces();
 //             updateForceGradient();
         }

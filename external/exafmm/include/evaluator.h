@@ -558,8 +558,6 @@ class Evaluator : public Dataset<equation>
 #include "../kernel/cpuEvaluator.cxx"
 #elif gpu
 #include "../kernel/gpuEvaluator.cxx"
-#elif cpugpu
-#include "../kernel/hybridStokesEvaluator.cxx"
 #endif
 
 #undef splitFirst

@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #define KERNEL
-#include "kernel.h"
+#include "kernel.hpp"
 #undef KERNEL
 #include <cutil.h>
 
@@ -143,7 +143,6 @@ namespace                                                       // Prevent overl
     }
 }                                                               // End anonymous namespace
 
-template<>
 void Kernel<Stokes>::initialize()
 {
     startTimer("Init GPU     ");                                  // Start timer
@@ -154,12 +153,10 @@ void Kernel<Stokes>::initialize()
     eraseTimer("Init GPU     ");                                  // Erase timer
 }
 
-template<>
 void Kernel<Stokes>::finalize()
 {
 }
 
-template<>
 void Kernel<Stokes>::allocate()
 {
     cudaThreadSynchronize();
@@ -192,7 +189,7 @@ void Kernel<Stokes>::allocate()
     stopTimer("cudaMalloc   ");
 }
 
-template<>
+
 void Kernel<Stokes>::hostToDevice()
 {
     cudaThreadSynchronize();
@@ -206,7 +203,6 @@ void Kernel<Stokes>::hostToDevice()
     stopTimer("cudaMemcpy   ");
 }
 
-template<>
 void Kernel<Stokes>::deviceToHost()
 {
     cudaThreadSynchronize();
@@ -329,7 +325,6 @@ __global__ void StokesP2M_GPU(int *keysGlob, int *rangeGlob, gpureal *targetGlob
     targetGlob[2*itarget+1] = target[1];
 }
 
-template<>
 void Kernel<Stokes>::P2M()
 {
     cudaThreadSynchronize();
@@ -434,7 +429,6 @@ __global__ void StokesM2M_GPU(int *keysGlob, int *rangeGlob, gpureal *targetGlob
     targetGlob[2*itarget+1] = target[1];
 }
 
-template<>
 void Kernel<Stokes>::M2M()
 {
     cudaThreadSynchronize();
@@ -550,7 +544,6 @@ __global__ void StokesM2L_GPU(int *keysGlob, int *rangeGlob, gpureal *targetGlob
     targetGlob[2*itarget+1] = target[1] * EPS;
 }
 
-template<>
 void Kernel<Stokes>::M2L()
 {
     cudaThreadSynchronize();
@@ -682,7 +675,6 @@ __global__ void StokesM2P_GPU(int *keysGlob, int *rangeGlob, gpureal *targetGlob
     targetGlob[4*itarget+3] = target[3];
 }
 
-template<>
 void Kernel<Stokes>::M2P()
 {
     cudaThreadSynchronize();
@@ -817,7 +809,6 @@ __global__ void StokesP2P_GPU(int *keysGlob, int *rangeGlob, gpureal *targetGlob
     targetGlob[4*itarget+3] = target[3];
 }
 
-template<>
 void Kernel<Stokes>::P2P()
 {
     cudaThreadSynchronize();
@@ -919,7 +910,6 @@ __global__ void StokesL2L_GPU(int *keysGlob, int *rangeGlob, gpureal *targetGlob
     targetGlob[2*itarget+1] = target[1];
 }
 
-template<>
 void Kernel<Stokes>::L2L()
 {
     cudaThreadSynchronize();
@@ -1032,7 +1022,6 @@ __global__ void StokesL2P_GPU(int *keysGlob, int *rangeGlob, gpureal *targetGlob
     targetGlob[4*itarget+3] = target[3];
 }
 
-template<>
 void Kernel<Stokes>::L2P()
 {
     cudaThreadSynchronize();

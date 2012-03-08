@@ -40,7 +40,7 @@ void ComputeStokesletsKernel(const vector3_type* target_array, vector3_type* vel
     	index = 0;  
 
 	vector3_type target = target_array[index];
-	vector3_type velocity = ComputeTiles(target, source_array, force_array, num_sources, num_targets, deltas, with_images);
+	vector3_type velocity = ComputeTiles(target, source_array, force_array, deltas, num_sources, num_targets, with_images);
 	
 	if (index < num_targets)
             velocity_array[index] = velocity;

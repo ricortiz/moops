@@ -1,5 +1,5 @@
 
-set(OBJ_FILES_CPU stokesSerial.cxx ijparallelrun.cxx let.cxx overlap_comm.cxx Nparallel.cxx skip_tree.cxx unpartition.cxx parallelrun.cxx bisection.cxx nth_element.cxx shift.cxx construct.cxx kernel.cxx Nserial.cxx ewald_direct.cxx serialrun.cxx unsort.cxx ijserialrun.cxx)
+set(OBJ_FILES_CPU ijparallelrun.cxx let.cxx overlap_comm.cxx Nparallel.cxx skip_tree.cxx unpartition.cxx parallelrun.cxx bisection.cxx nth_element.cxx shift.cxx construct.cxx kernel.cxx Nserial.cxx ewald_direct.cxx serialrun.cxx unsort.cxx ijserialrun.cxx)
 set(OBJ_FILES_GPU check_gpus.cxx direct_gpu.cxx )
 
 MACRO(MAKE_TESTS TestList DriverName)

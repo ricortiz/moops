@@ -29,21 +29,27 @@ class ForwardEuler
         inline void operator()(function_type &F, value_type t, value_type *x, value_type *xold, value_type *v, value_type dt)
         {
             F(t, xold, v);
-            for(size_t i = 0; i < ode_size; ++i)
+            size_t i;
+            #pragma omp parallel for private(i)
+            for(i = 0; i < ode_size; ++i)
                 x[i] = xold[i] + dt * v[i];
         }
 
         template<typename function_type, typename value_type>
         inline void operator()(function_type &, value_type, value_type *x, value_type *xold, value_type *v, value_type *vold, value_type dt)
         {
-            for(size_t i = 0; i < ode_size; ++i)
+            size_t i;
+            #pragma omp parallel for private(i)
+            for(i = 0; i < ode_size; ++i)
                 x[i] = xold[i] + dt * vold[i];
         }
 
         template<typename function_type, typename value_type>
         inline void operator()(function_type &F, value_type t, value_type *x, value_type *v, value_type dt)
         {
-            for(size_t i = 0; i < ode_size; ++i)
+            size_t i;
+            #pragma omp parallel for private(i)
+            for(i = 0; i < ode_size; ++i)
                 x[i] += dt * v[i];
             F(t+dt,x,v);
         }
@@ -51,13 +57,17 @@ class ForwardEuler
         template<typename value_type>
         inline void operator()(value_type *x, const value_type *v, value_type dt)
         {
-            for(size_t i = 0; i < ode_size; ++i)
+            size_t i;
+            #pragma omp parallel for private(i)
+            for(i = 0; i < ode_size; ++i)
                 x[i] += dt * v[i];
         }
 
         template<typename value_type>
         inline void operator()(value_type *xnew, value_type *xold, const value_type *v, value_type dt)
         {
+            size_t i;
+            #pragma omp parallel for private(i)
             for(size_t i = 0; i < ode_size; ++i)
                 xnew[i] = xold[i] + dt * v[i];
         }

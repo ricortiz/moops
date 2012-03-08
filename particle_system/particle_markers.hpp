@@ -19,37 +19,36 @@
 ****************************************************************************/
 
 #include "particle_system.hpp"
+#include "storage/particle_system_storage.hpp"
 
-template<typename Derived, typename time_integrator>
-class ParticleMarkers : public ParticleSystem<ParticleMarkers<Derived, time_integrator> >
+template<typename surface_type, typename time_integrator>
+class ParticleMarkers : public ParticleSystem<ParticleMarkers<surface_type, time_integrator> >
 {
     protected:
-        time_integrator integrator;
-        
-    public:
-        inline Derived &derived()
-        {
-            return *static_cast<Derived*>(this);
-        }
+        typedef ParticleSystem<ParticleMarkers<surface_type, time_integrator> > base_type;
 
-        ParticleMarkers(size_t num_particles) : ParticleSystem<Derived>(num_particles), integrator(num_particles) {  }
+    protected:
+        time_integrator integrator;
+
+    public:
+        ParticleMarkers(size_t num_particles) : base_type(num_particles), integrator(3*num_particles) {  }
 
         template<typename value_type>
-        void run(value_type timestep)
+        void run(value_type timestep, surface_type &surface)
         {
             size_t num_targets = this->particles_size();
-            derived()(this->time(), this->positions(), this->velocities(), this->particles_size());
-            integrator(this->time(), this->positions(), this->velocities(), timestep);
+            surface(this->time(), this->positions(), this->velocities(), this->particles_size());
+            integrator(this->positions(), this->velocities(), timestep);
             this->time() += timestep;
         }
 };
 
-template<typename Derived, typename time_integrator>
-struct Traits<ParticleMarkers<Derived, time_integrator> >
+template<typename surface_type, typename time_integrator>
+struct Traits<ParticleMarkers<surface_type, time_integrator> >
 {
-    typedef typename Traits<Derived>::value_type value_type;
-    typedef typename Traits<Derived>::particle_type particle_type;
-    typedef typename Traits<Derived>::storage_type storage_type;
+    typedef typename Traits<surface_type>::value_type value_type;
+    typedef typename Traits<surface_type>::particle_type particle_type;
+    typedef ParticleSystemStorage< value_type, particle_type, VOLUME > storage_type;
 };
 
 #endif

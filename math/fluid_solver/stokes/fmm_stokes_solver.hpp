@@ -36,6 +36,7 @@ class FmmStokesSolver
     private:
         value_type m_delta;
         size_t m_num_particles;
+        bool m_images;
         
     public:
         FmmStokesSolver(size_t num_particles) : m_num_particles(num_particles) {}
@@ -55,6 +56,7 @@ class FmmStokesSolver
         }
         
         void setDelta(value_type delta) { m_delta = delta; }
+        void withImages(bool images) { m_images = images; }
 };
 
 

@@ -19,8 +19,8 @@ class ValvelessPump
         enum
         {
             sdc_nodes = 5,
-            M = 20,
-            N = 200,
+            M = 40,
+            N = 400,
             num_particles = M * N,
             data_size = 3 * num_particles,
             fmm_max_particles = 20,
@@ -30,21 +30,27 @@ class ValvelessPump
         typedef TypeBinder<value_type> types;
 
         types::heart_pump_surface       m_heart_pump;
+        types::tracers_type             m_tracers;
         value_type                      m_time_step;
         types::heart_vtk_storage        m_vtk_storage;
+        types::tracer_vtk_storage        m_tracers_vtk_storage;
         types::vtk_poly_writer          m_surface_writer;
+        types::vtk_poly_writer          m_tracer_writer;
         bool                            m_record;
 
     public:
 
         ValvelessPump() :
                 m_heart_pump(M, N),
+                m_tracers(num_particles),
                 m_time_step(0.01),
                 m_vtk_storage(m_heart_pump),
+                m_tracers_vtk_storage(m_tracers),
                 m_record(true)
         {
+            m_heart_pump.setTracers(m_tracers,1);
             m_heart_pump.fluid_solver().setDelta(.5*M_PI / N);
-            m_heart_pump.fluid_solver().withImages(true);
+//             m_heart_pump.fluid_solver().withImages(true);
             m_heart_pump.geometry().setWaveSpeed(m_time_step+.5*m_time_step);
             setCells();
         }
@@ -58,6 +64,7 @@ class ValvelessPump
             }
             std::string path = av[1];
             m_surface_writer.setDataPath(path + "/surface/heart");
+            m_tracer_writer.setDataPath(path + "/surface/tracer");
             return 1;
         }
         
@@ -66,6 +73,7 @@ class ValvelessPump
             if (m_record)
                 write();
             m_heart_pump.run(m_time_step);
+            m_tracers.run(m_time_step,m_heart_pump);
         }
 
         void fake_run()
@@ -99,8 +107,14 @@ class ValvelessPump
         }
         
         types::heart_vtk_storage &vtk_storage() { return m_vtk_storage; }
-        void write(){ m_surface_writer.write(m_vtk_storage.grid(), m_heart_pump.time()); }
+        void write()
+        {
+            m_surface_writer.write(m_vtk_storage.grid(), m_heart_pump.time());
+            m_tracer_writer.write(m_tracers_vtk_storage.grid(), m_heart_pump.time() );            
+        }
         types::heart_pump_surface &boundary() { return m_heart_pump; }
+
+        
 };
 
 

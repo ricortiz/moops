@@ -36,7 +36,9 @@ struct BackwardEulerFunction
     {
         std::fill(Fx, Fx + ode_size, 0.0);
         F(t, x, Fx);
-        for (size_t i = 0; i < ode_size; ++i)
+        size_t i;
+#pragma omp parallel for private(i)
+        for (i = 0; i < ode_size; ++i)
         {
             Fx[i] *= -dt;
             Fx[i] += x[i] - rhs[i];
@@ -77,6 +79,8 @@ class BackwardEuler
             BackwardEulerFunction<value_type, function_type> G(F, xold, t, dt, ode_size);
             newton_solver(G, x, 1e-15, 1e-15);
             value_type inv_dt = 1.0 / dt;
+            size_t i;
+#pragma omp parallel for private(i)
             for (size_t i = 0; i < ode_size; ++i)
                 v[i] = inv_dt * (x[i] - xold[i]);
         }

@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-#include "serialfmm.h"
+#include "math/fluid_solver/stokes/fmm/fmm/include/serialfmm.hpp"
 
 int stokesSerial(int, char**)
 {
@@ -41,6 +41,7 @@ int stokesSerial(int, char**)
         FMM.random(bodies, 1, 1);
         FMM.startTimer("FMM          ");
         FMM.setDomain(bodies);
+        FMM.setDelta(.01);
         cells.clear();
 #ifdef TOPDOWN
         FMM.topdown(bodies, cells);
@@ -64,7 +65,7 @@ int stokesSerial(int, char**)
             jbodies = FMM.buffer;
         }
         FMM.buffer.resize(numTarget);
-        FMM.evalP2P(FMM.buffer, jbodies);
+        FMM.evalP2P(FMM.buffer, jbodies, 1);
         FMM.writeTarget(FMM.buffer);
 #else
         FMM.readTarget(FMM.buffer);

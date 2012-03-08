@@ -30,25 +30,20 @@ struct vtkArrays
     vtkSmartPointer<vtk_data_array_type> positions;
     vtkSmartPointer<vtk_data_array_type> velocities;
     vtkSmartPointer<vtk_data_array_type> forces;
-    vtkSmartPointer<vtkCellArray> cells;
+    vtkSmartPointer<vtkCellArray>        cells;
 };
 
 
 template < typename particle_system_storage, typename array_type = vtkDoubleArray >
-class vtkStorageWrapper
+class vtkSurfaceStorage
 {
     private:
-        vtkArrays<array_type>         m_vtk_data;
-        vtkSmartPointer<vtkPolyData>  m_poly_data;
-        vtkSmartPointer<vtkUnstructuredGrid> m_box_grid;
-        vtkSmartPointer<vtkPoints> m_hex_points;
-        vtkIdType                     m_id_buffer[4][2];
+        vtkArrays<array_type>                   m_vtk_data;
+        vtkSmartPointer<vtkPolyData>            m_poly_data;
+        vtkIdType                               m_id_buffer[4][2];
 
     public:
-        vtkStorageWrapper(particle_system_storage &data)
-                : m_poly_data(vtkSmartPointer<vtkPolyData>::New()),
-                m_box_grid(vtkSmartPointer<vtkUnstructuredGrid>::New()),
-                m_hex_points(vtkSmartPointer<vtkPoints>::New())
+        vtkSurfaceStorage(particle_system_storage &data) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
         {
             m_vtk_data.positions = vtkSmartPointer<array_type>::New();
             m_vtk_data.velocities = vtkSmartPointer<array_type>::New();
@@ -86,8 +81,6 @@ class vtkStorageWrapper
         inline vtkSmartPointer<vtkCellArray> &cells()                  { return m_vtk_data.cells; }
         inline const vtkSmartPointer<vtkPolyData> &grid() const        { return m_poly_data; }
         inline vtkSmartPointer<vtkPolyData> &grid()                    { return m_poly_data; }
-        inline const vtkSmartPointer<vtkUnstructuredGrid> &box() const { return m_box_grid; }
-        inline vtkSmartPointer<vtkUnstructuredGrid> &box()             { return m_box_grid; }
 
         inline void setInnerCells(int i, int j, int M, int N, size_t offset)
         {
@@ -169,15 +162,59 @@ class vtkStorageWrapper
 
 };
 
+template<typename markers_data, typename array_type>
+class vtkMarkersStorage
+{
+private:
+    vtkSmartPointer<vtkPolyData>  m_poly_data;
+    vtkArrays<array_type>         m_vtk_data;
+    
+public:
+    vtkMarkersStorage(markers_data &data)
+    : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
+    {
+        m_vtk_data.positions = vtkSmartPointer<array_type>::New();
+        m_vtk_data.velocities = vtkSmartPointer<array_type>::New();
+        m_vtk_data.cells = vtkSmartPointer<vtkCellArray>::New();
 
-class vtk_octree_storage
+        size_t size = data.data_size();
+        m_vtk_data.positions->SetArray(data.positions(), size, 1);
+        m_vtk_data.velocities->SetArray(data.velocities(), size, 1);
+        m_vtk_data.positions->SetNumberOfComponents(3);
+        m_vtk_data.positions->SetName("positions");
+        m_vtk_data.velocities->SetNumberOfComponents(3);
+        m_vtk_data.velocities->SetName("velocity");
+        
+        vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+        points->SetData(m_vtk_data.positions);
+        m_poly_data->SetPoints(points);
+        if (m_vtk_data.velocities->GetSize() > 0)
+            m_poly_data->GetPointData()->AddArray(m_vtk_data.velocities);
+
+        for(vtkIdType i = 0; i < data.particles_size(); ++i)
+            m_vtk_data.cells->InsertNextCell(VTK_VERTEX,&i);
+        m_poly_data->SetVerts(m_vtk_data.cells);
+    }
+
+    inline const vtkSmartPointer<array_type> &positions() const    { return m_vtk_data.positions; }
+    inline vtkSmartPointer<array_type> &positions()                { return m_vtk_data.positions; }
+    inline const vtkSmartPointer<array_type> &velocities() const   { return m_vtk_data.velocities; }
+    inline vtkSmartPointer<array_type> &velocities()               { return m_vtk_data.velocities; }
+    inline const vtkSmartPointer<vtkCellArray> &cells() const      { return m_vtk_data.cells; }
+    inline vtkSmartPointer<vtkCellArray> &cells()                  { return m_vtk_data.cells; }
+    inline const vtkSmartPointer<vtkPolyData> &grid() const        { return m_poly_data; }
+    inline vtkSmartPointer<vtkPolyData> &grid()                    { return m_poly_data; }
+    
+};
+
+class vtkOctreeStorage
 {
     private:
         vtkSmartPointer<vtkUnstructuredGrid> m_box;
         vtkSmartPointer<vtkPoints>           m_hex_points;
 
     public:
-        vtk_octree_storage() : m_box(vtkSmartPointer<vtkUnstructuredGrid>::New()), m_hex_points(vtkSmartPointer<vtkPoints>::New())
+        vtkOctreeStorage() : m_box(vtkSmartPointer<vtkUnstructuredGrid>::New()), m_hex_points(vtkSmartPointer<vtkPoints>::New())
         {}
         vtkSmartPointer<vtkUnstructuredGrid> &getBox() { return m_box; }
 

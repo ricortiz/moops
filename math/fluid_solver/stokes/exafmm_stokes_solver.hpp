@@ -18,7 +18,7 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include <vector>
-#include "fmm/exafmm/include/serialfmm.h"
+#include "external/exafmm/include/serialfmm.h"
 
 template < typename value_type>
 class ExaFmmStokesSolver
@@ -33,6 +33,7 @@ protected:
         particle_array_type     m_particles;
         box_array_type          m_source_boxes;
         SerialFMM<Stokes>       m_fmm;
+        bool m_images;
 
     public:
         ExaFmmStokesSolver(size_t num_particles)
@@ -96,6 +97,7 @@ protected:
             m_fmm.printError(diff, norm);
         }
         SerialFMM<Stokes> &solver() { return m_fmm; }
+        void withImages(bool images) { m_images = images; }
 };
 
 

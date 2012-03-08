@@ -133,7 +133,7 @@ class SwarmApp
         void write()
         {
             m_surface_writer.write(m_vtk_storage.grid(), m_swarm.time());
-            vtk_octree_storage vtk_octree;
+            vtkOctreeStorage vtk_octree;
             vtk_octree.setOctree(m_swarm.fluid_solver());
             m_octree_writer.write(vtk_octree.getBox(), m_swarm.time());
         }
