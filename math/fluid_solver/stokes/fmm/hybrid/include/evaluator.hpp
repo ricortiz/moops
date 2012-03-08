@@ -89,19 +89,24 @@ class Evaluator<Stokes> : public Dataset<Stokes>
             if ( timeP2P*Cj->NDLEAF < timeM2P && timeP2P*Ci->NDLEAF*Cj->NDLEAF < timeM2L) // If P2P is fastest
             {
                 evalP2P(Ci, Cj);                                          //  Evaluate on CPU, queue on GPU
+                NP2P++;
             }
             else if ( timeM2P < timeP2P*Cj->NDLEAF && timeM2P*Ci->NDLEAF < timeM2L )  // If M2P is fastest
             {
                 evalM2P(Ci, Cj);                                          //  Evaluate on CPU, queue on GPU
+                NM2P++;
             }
             else                                                      // If M2L is fastest
             {
                 evalM2L(Ci, Cj);                                          //  Evaluate on CPU, queue on GPU
+                NM2L++;
             }                                                           // End if for kernel selection
 #elif TREECODE
             evalM2P(Ci, Cj);                                            // Evaluate on CPU, queue on GPU
+            NM2P++;
 #else
             evalM2L(Ci, Cj);                                            // Evalaute on CPU, queue on GPU
+            NM2L++;
 #endif
         }
 
@@ -265,6 +270,7 @@ class Evaluator<Stokes> : public Dataset<Stokes>
 #else
                     C_iter Ci = cells.end() - 1;                            //   Set root cell as target iterator
                     evalM2L(Ci, Cj);                                        //   Perform M2P kernel
+                    NM2L++;
 #endif
                 }                                                         //  End loop over x periodic direction
             }                                                           // End loop over sublevels of tree
@@ -401,6 +407,7 @@ class Evaluator<Stokes> : public Dataset<Stokes>
             else if (Ci->NCHILD == 0 && Cj->NCHILD == 0)              // Else if both cells are leafs
             {
                 evalP2P(Ci, Cj);                                          //  Use P2P
+                NP2P++;
             }
             else                                                      // If cells are close but not leafs
             {

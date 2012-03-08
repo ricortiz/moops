@@ -34,12 +34,12 @@
 template<>
 void ComputeStokeslets<float>(const float *h_targets, float *h_velocities, const float * h_sources, const float * h_strengths, float delta, size_t num_sources, size_t num_targets, bool with_images)
 {
-    cudaSetDeviceFlags(cudaDeviceMapHost);
     // First, allocate space on device
     size_t size_targets = 3 * num_targets;
     size_t size_sources = 3 * num_sources;
     float *d_velocities, *d_targets, *d_sources, *d_strengths;  // Device pointers
 #ifdef CUDA_4_1
+    cudaSetDeviceFlags(cudaDeviceMapHost);
     cudaHostRegister(const_cast<float*>(h_targets), sizeof(float) * size_targets, cudaHostRegisterMapped);
     cudaHostRegister(h_velocities, sizeof(float) * size_targets, cudaHostRegisterMapped);
     cudaHostRegister(const_cast<float*>(h_sources), sizeof(float) * size_sources, cudaHostRegisterMapped);

@@ -268,6 +268,7 @@ void Evaluator<Stokes>::evalM2L(Cells &cells)                 // Evaluate queued
                             Xperiodic[1] = iy * 2 * R0;                       //       Coordinate offset for y periodic direction
                             Xperiodic[2] = iz * 2 * R0;                       //       Coordinate offset for z periodic direction
                             M2L(Ci, Cj);                                      //       Perform M2L kernel
+                            NM2L++;       
                         }                                                   //      Endif for periodic flag
                     }                                                     //     End loop over x periodic direction
                 }                                                       //    End loop over y periodic direction
@@ -313,6 +314,7 @@ void Evaluator<Stokes>::evalM2P(Cells &cells)                 // Evaluate queued
                             Xperiodic[1] = iy * 2 * R0;                       //       Coordinate offset for y periodic direction
                             Xperiodic[2] = iz * 2 * R0;                       //       Coordinate offset for z periodic direction
                             M2P(Ci, Cj);                                      //       Perform M2P kernel
+                            NM2P++;
                         }                                                   //      Endif for periodic flag
                     }                                                     //     End loop over x periodic direction
                 }                                                       //    End loop over y periodic direction
