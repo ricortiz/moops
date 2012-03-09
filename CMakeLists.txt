@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(MOOPS)
 
-
 # Setup host dependent variables
 IF($ENV{HOSTNAME} MATCHES "macundo")
     message(STATUS "Setting variables for macundo")
@@ -10,7 +9,7 @@ ELSEIF($ENV{HOSTNAME} MATCHES "killdevil-login2.kd.unc.edu")
     message(STATUS "Setting variables for killdevil")
 ELSEIF($ENV{HOSTNAME} MATCHES "wilson.hpc.renci.org")
     message(STATUS "Loading modules in wilson...")
-    execute_process(COMMAND "/hpc_shared/apps/RHEL-5/x86_64/Modules/current/bin/modulecmd sh load" git/1.7.4.1 gcc/4.5.1 cuda/4.1rc1 openmpi/1.4.2_gcc-4.1 RESULT_VARIABLE out)
+    execute_process(COMMAND "module load" git/1.7.4.1 gcc/4.5.1 cuda/4.1rc1 openmpi/1.4.2_gcc-4.1 RESULT_VARIABLE out)
     message("        ${out}")
 ENDIF()
 
@@ -141,3 +140,4 @@ IF(ENABLE_EXAMPLES)
 ENDIF()
 
 ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/kernel)
+INCLUDE(KillDevil.cmake)

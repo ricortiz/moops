@@ -75,7 +75,7 @@ const real EPS      = 1e-6;                                     //!< Single prec
 const real EPS2     = 0;                                        //!< Softening parameter (squared)
 const real R2MIN    = 0.25;                                     //!< Minimum value for L-J R^2
 const real R2MAX    = 64;                                       //!< Maximum value for L-J R^2
-const int  GPUS     = 1;                                        //!< Number of GPUs per node
+const int  GPUS     = 2;                                        //!< Number of GPUs per node
 const int  THREADS  = 64;                                       //!< Number of threads per thread-block
 const int  PTHREADS = 4;                                        //!< Number of pthreads in quark
 

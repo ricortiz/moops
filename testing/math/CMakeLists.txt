@@ -7,7 +7,7 @@ ENDIF(USE_QUARK)
 ADD_DEFINITIONS(-DSpherical)
 
 
-SET(fluid_solvers cpu_stokes_solver.cpp images.cpp stokesSerial.cxx)
+SET(fluid_solvers cpu_stokes_solver.cpp images.cpp stokesParallel.cxx)
 SET(linear_solvers generalized_minimal_residual_method.cpp)
 SET(nonlinear_solvers inexact_newton.cpp)
 SET(ode_solvers backward_euler.cpp forward_euler.cpp explicit_sdc.cpp semi_implicit_sdc.cpp)
