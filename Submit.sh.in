@@ -1,7 +1,0 @@
-#!/bin/bash
-
-@SET_ENV@
-@GIT_CMD@
-@EXEC@
-
-@BSUB@

@@ -4,6 +4,7 @@ project(MOOPS)
 
 # Setup host dependent variables
 IF($ENV{HOSTNAME} MATCHES "macundo")
+    INCLUDE(cmake/KillDevil.cmake)
     message(STATUS "Setting variables for macundo")
 ELSEIF($ENV{HOSTNAME} MATCHES "killdevil-login2.kd.unc.edu")
     message(STATUS "Setting variables for killdevil")
@@ -140,4 +141,3 @@ IF(ENABLE_EXAMPLES)
 ENDIF()
 
 ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/kernel)
-INCLUDE(KillDevil.cmake)
