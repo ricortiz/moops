@@ -18,7 +18,7 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #include <vector>
-#include "external/exafmm/include/serialfmm.h"
+#include "math/fluid_solver/stokes/fmm/hybrid/include/serialfmm.hpp"
 
 template < typename value_type>
 class ExaFmmStokesSolver

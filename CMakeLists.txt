@@ -2,18 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(MOOPS)
 
-# Setup host dependent variables
-IF($ENV{HOSTNAME} MATCHES "macundo")
-    INCLUDE(cmake/KillDevil.cmake)
-    message(STATUS "Setting variables for macundo")
-ELSEIF($ENV{HOSTNAME} MATCHES "killdevil-login2.kd.unc.edu")
-    message(STATUS "Setting variables for killdevil")
-ELSEIF($ENV{HOSTNAME} MATCHES "wilson.hpc.renci.org")
-    message(STATUS "Loading modules in wilson...")
-    execute_process(COMMAND "module load" git/1.7.4.1 gcc/4.5.1 cuda/4.1rc1 openmpi/1.4.2_gcc-4.1 RESULT_VARIABLE out)
-    message("        ${out}")
-ENDIF()
-
 IF (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
        message(FATAL_ERROR "Rejecting in-place build. Please use a build directory")
 ENDIF()
@@ -66,6 +54,12 @@ option(USE_MPI "Use MPI" ON)
 IF(USE_MPI)
     FIND_PACKAGE(MPI REQUIRED)
     MESSAGE(STATUS "Enabling MPI")
+    if(MPI_CXX_FOUND)
+        set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    endif()
+    if(MPI_C_FOUND)
+        set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    endif()
     INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
 ENDIF()
 
@@ -141,3 +135,5 @@ IF(ENABLE_EXAMPLES)
 ENDIF()
 
 ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/kernel)
+# Setup host variables
+INCLUDE(cmake/KillDevil.cmake)
