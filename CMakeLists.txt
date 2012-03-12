@@ -136,4 +136,6 @@ ENDIF()
 
 ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/kernel)
 # Setup host variables
-INCLUDE(cmake/KillDevil.cmake)
+if($ENV{HOSTNAME} MATCHES "macundo")
+    INCLUDE(cmake/KillDevil.cmake)
+endif()
