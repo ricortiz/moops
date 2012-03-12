@@ -32,11 +32,11 @@ endmacro(SET_BUILD_COMMANDS)
 
 # sets the variable BSUB_COMMANDS
 macro(SET_BSUB_COMMANDS EXE JOB_NAME QUEUE)
-    set(BSUB_COMMANDS "bsub <<EOF")
+    set(BSUB_COMMANDS "\nbsub <<EOF")
     set(BSUB_COMMANDS "${BSUB_COMMANDS} \n####   Run program    ####")
     set(BSUB_COMMANDS "${BSUB_COMMANDS} \n#BSUB -q ${QUEUE}")
     set(BSUB_COMMANDS "${BSUB_COMMANDS} \n#BSUB -J ${JOB_NAME}")
-    set(BSUB_COMMANDS "${BSUB_COMMANDS} \n#BSUB -n 2")
+    set(BSUB_COMMANDS "${BSUB_COMMANDS} \n#BSUB -n ${NUM_PROCESSORS}")
     set(BSUB_COMMANDS "${BSUB_COMMANDS} \n#BSUB -T 12")
     set(BSUB_COMMANDS "${BSUB_COMMANDS} \n#BSUB -x")
     set(BSUB_COMMANDS "${BSUB_COMMANDS} \n#BSUB -o out.%J")
