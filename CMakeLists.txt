@@ -136,6 +136,9 @@ ENDIF()
 
 ADD_SUBDIRECTORY(math/fluid_solver/stokes/fmm/hybrid/kernel)
 # Setup host variables
+option(ADD_SUBMISION_SCRIPTS "Add submision of jobs to the clusters." OFF)
 if($ENV{HOSTNAME} MATCHES "macundo")
-    INCLUDE(cmake/KillDevil.cmake)
+    if(${ADD_SUBMISION_SCRIPTS})
+        INCLUDE(cmake/KillDevil.cmake)
+    endif()
 endif()

@@ -63,8 +63,8 @@ class ValvelessPump
                 return 0;
             }
             std::string path = av[1];
-            m_surface_writer.setDataPath(path + "/surface/heart");
-            m_tracer_writer.setDataPath(path + "/surface/tracer");
+            m_surface_writer.setDataPath(path + "/heart");
+            m_tracer_writer.setDataPath(path + "/tracer");
             return 1;
         }
         
