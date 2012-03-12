@@ -43,7 +43,7 @@ class ValvelessPump
         ValvelessPump() :
                 m_heart_pump(M, N),
                 m_tracers(num_particles),
-                m_time_step(0.01),
+                m_time_step(0.001),
                 m_vtk_storage(m_heart_pump),
                 m_tracers_vtk_storage(m_tracers),
                 m_record(true)

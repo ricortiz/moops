@@ -22,6 +22,13 @@ macro(PULL_REPOSITORY)
     execute_process(COMMAND ${SSH_COMMAND} ${REMOTE_SERVER} ${CMD} RESULT_VARIABLE out)
 endmacro(PULL_REPOSITORY)
 
+macro(COPY_REPOSITORY FROM TO)
+    set(CMD "bash <<EOF")
+    set(CMD "${CMD} \nrsync -av --exclude build* --exclude *.git* --exclude *docs* ${FROM} ${TO}")
+    set(CMD "${CMD} \nEOF")
+    execute_process(COMMAND ${CMD} OUTPUT_VARIABLE out)
+endmacro(COPY_REPOSITORY)
+
 macro(SET_BUILD_COMMANDS ${CMAKE_CACHE})
     set(CMD "bash <<EOF")
     set(CMD "${CMD} \nif [ ! -d ${MOOPS_BINARY_DIR} ]\; then")

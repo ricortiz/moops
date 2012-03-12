@@ -14,8 +14,8 @@ set(KILLDEVIL_ENV "bash <<EOF \nmodule initclear")
 set(KILLDEVIL_ENV "${KILLDEVIL_ENV} \nmodule initadd mvapich2_gcc/4.4.6 cuda cmake git")
 set(QUEUE gpu)
 set(NUM_PROCESSORS 1)
-set(PROGRAM_PATH ${MOOPS_BINARY_DIR}/examples/valveless_heart)
-set(PROGRAM_NAME valveless_heart)
+set(PROGRAM_NAME swarm)
+set(PROGRAM_PATH ${MOOPS_BINARY_DIR}/examples/${PROGRAM_NAME})
 set(JOB_NAME moops_${PROGRAM_NAME})
 
 
@@ -24,12 +24,11 @@ execute_process(COMMAND ${SSH_COMMAND} ${REMOTE_SERVER} ${KILLDEVIL_ENV} RESULT_
 if(CLONE_PROJECT_KILLDEVIL)
     clone_repository()
 else()
-    pull_repository()
+    copy_repository(${CMAKE_SOURCE_DIR} "${REMOTE_SERVER}:/${MOOPS_SOURCE_DIR}")
 endif()
 
 set_build_commands(${CMAKE_CACHE})
 add_data_path(${SCRATCH_REMOTE_DIRECTORY}/${PROGRAM_NAME}_data)
 
-
 set_bsub_commands("${PROGRAM_PATH}/${PROGRAM_NAME} ${SCRATCH_REMOTE_DIRECTORY}/${PROGRAM_NAME}_data" ${JOB_NAME} ${QUEUE})
-submit_job("SubmitValvelesHeartSolvers")
+submit_job("SubmitSwarmSolvers")
