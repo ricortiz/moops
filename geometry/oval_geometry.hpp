@@ -156,6 +156,7 @@ protected:
                     this->add_cylinder_connections(i,j,m_dims[0],m_dims[1],col_idx);
                     this->add_plane_connections(i,j,m_dims[0],m_dims[1],col_idx);
                     this->add_closed_connections(i,j,m_dims[0],m_dims[1],col_idx);
+                    this->reinforce(i,j,m_dims[0],m_dims[1],col_idx);
                     col_ptr.push_back(col_idx.size());
                 }
         }
@@ -214,6 +215,13 @@ protected:
                 m_radius_scale[k] *= filter[k] * scale;
                 m_radius_scale[k] = 1 - m_radius_scale[k];
             }
+        }
+        template<typename array_type>
+        inline void reinforce(int i, int j, int M, int N, array_type &col_idx, size_t offset = 0)
+        {
+            int connections[5][2] = {{i-2,j},{i+2,j},{i,j-2},{i,j+2},{i+M/2,j}};
+            for(int k = 0; k < 5; ++k)
+                col_idx.push_back((connections[k][1] + N) % N * M + (connections[k][0]+M)%M + offset);
         }
 
 };

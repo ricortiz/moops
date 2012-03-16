@@ -21,10 +21,12 @@
 template<typename _value_type>
 struct ParticleWrapper
 {
-  typedef _value_type value_type;
+    typedef _value_type value_type;
+
     value_type *position;
     value_type *velocity;
     value_type *force;
+    
     size_t i;
     size_t j;
     size_t k;

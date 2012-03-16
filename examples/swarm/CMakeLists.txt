@@ -1,4 +1,4 @@
-
+set(APP_NAME swarm)
 IF(USE_QUARK)
     INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/math/fluid_solver/stokes/fmm/exafmm/external/include)
     add_definitions(-DQUARK)
@@ -10,5 +10,14 @@ IF(USE_CUDA)
 ELSEIF(USE_CUDA)
     ADD_DEFINITIONS(-Dcpu)
 ENDIF(USE_CUDA)
-ADD_EXECUTABLE(swarm swarm.cpp)
-TARGET_LINK_LIBRARIES(swarm ${APP_LIBS})
+ADD_EXECUTABLE(${APP_NAME} swarm.cpp)
+TARGET_LINK_LIBRARIES(${APP_NAME} ${APP_LIBS})
+
+set(QUEUE gpu)
+set(NUM_PROCESSORS 1)
+set(NUM_CORES_PER_PROCESSORS 12)
+set(PROGRAM_NAME swarm)
+set(PROGRAM_PATH ${MOOPS_BINARY_DIR}/examples/${PROGRAM_NAME})
+set(JOB_NAME moops_${PROGRAM_NAME})
+INCLUDE(${PROJECT_SOURCE_DIR}/cmake/KillDevil.cmake)
+

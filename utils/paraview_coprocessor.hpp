@@ -23,10 +23,10 @@ template<typename app_type>
 class ParaviewCoprocessor
 {
     private:
-        vtkSmartPointer<vtkCPDataDescription>  m_data_descriptor;
-        vtkSmartPointer<vtkCPProcessor> m_processor;
-        int m_timestep;
-        int m_nsteps;
+        vtkSmartPointer<vtkCPDataDescription>   m_data_descriptor;
+        vtkSmartPointer<vtkCPProcessor>         m_processor;
+        int                                     m_timestep;
+        int                                     m_nsteps;
 
     public:
         ParaviewCoprocessor()

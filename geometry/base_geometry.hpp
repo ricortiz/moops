@@ -94,8 +94,8 @@ class BaseGeometry
                 if((connections[k][0] >= 0) && (connections[k][0] <= M - 1) && (j == 0 || j == N - 1))
                     col_idx.push_back((connections[k][1] + N) % N * M + (connections[k][0]+M)%M + offset);
 
-        }
-
+        }        
+        
         value_type getDistance(size_t Ai, size_t Aj, size_t Bi, size_t Bj, value_type scale)
         {
             value_type points[2][3] = {{0}};

@@ -49,7 +49,7 @@ class ValvelessPump
                 m_record(true)
         {
             m_heart_pump.setTracers(m_tracers,1);
-            m_heart_pump.fluid_solver().setDelta(.5*M_PI / N);
+            m_heart_pump.fluid_solver().setDelta(/*.5*M_PI / N*/.005);
 //             m_heart_pump.fluid_solver().withImages(true);
             m_heart_pump.geometry().setWaveSpeed(m_time_step+.5*m_time_step);
             setCells();

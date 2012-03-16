@@ -44,6 +44,9 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             getStrengths(col_ptr, col_idx, strenght);
             setSprings(col_ptr, col_idx, strenght);
             setIteratorRange(lo, hi);
+//             this->writePositions(std::cout);
+//             spring_iterator s = m_spring_range.first; for(int i = 0; i < 500; ++i) ++s;
+//             this->writeSprings(std::cout,m_spring_range.first, s);
         }
 
         inline void computeForces(value_type time)
@@ -69,7 +72,11 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
 
         void getStrengths(const std::vector<size_t> &col_ptr, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
         {
-            strengths.resize(col_idx.size(), 1.0);            
+            strengths.resize(col_idx.size(), 10.0);
+            for(size_t p = 0; p < col_ptr.size() - 1; ++p)
+                for(size_t i = col_ptr[p], end = col_ptr[p + 1]; i < end; ++i)
+                    if(std::abs(p-col_idx[i]) == 2)
+                        strengths[i] = 2;
         }
 
         void setIteratorRange(size_t lo, size_t hi)

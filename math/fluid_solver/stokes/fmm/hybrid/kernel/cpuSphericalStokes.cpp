@@ -82,12 +82,50 @@ void Kernel<Stokes>::P2M(C_iter Ci) const
         {
             for (int m = 0; m <= n; ++m)
             {
-                const int nm  = n * n + n + m;
+                const int nm  = n * (n + 1) + m;
                 const int nms = n * (n + 1) / 2 + m;
                 Ci->M[nms] += f0 * Ynm[nm];
                 Ci->M[nms+offsets[0]] += f1 * Ynm[nm];
                 Ci->M[nms+offsets[1]] += f2 * Ynm[nm];
                 Ci->M[nms+offsets[2]] += fdotx * Ynm[nm];
+            }
+        }
+    }
+}
+
+void Kernel<Stokes>::D2M(C_iter Ci) const
+{
+    const complex I(0., 1.);   
+    complex Ynm[4*P*P], YnmTheta[4*P*P];
+    for (B_iter B = Ci->LEAF; B != Ci->LEAF + Ci->NDLEAF; ++B)
+    {
+        vect dist = B->X - Ci->X;
+        real rho, alpha, beta, factor;
+        vect d = 0, gradient = 0;
+        cart2sph(rho, alpha, beta, dist);
+        evalMultipole(rho, alpha, -beta, Ynm, YnmTheta);
+        d[0] = B->FORCE[0]*B->X[2];
+        d[1] = B->FORCE[1]*B->X[2];
+        d[2] = -B->FORCE[2]*B->X[2];
+        real u = -B->FORCE[2];
+        for (int n = 0; n != P; ++n)
+        {
+            int nm  = n * n + n;
+            int nms = n * (n + 1) / 2;
+            
+            factor = 1.0 / rho * n;
+            gradient[0] += std::real( Ynm[nm]) * factor;
+            gradient[1] += std::real( YnmTheta[nm]);
+            Ci->M[nms] += u * (gradient[0]*d[0]+gradient[1]*d[1]);
+            
+            for (int m = 1; m <= n; ++m)
+            {
+                const int nm  = n * (n + 1) + m;
+                const int nms = n * (n + 1) / 2 + m;
+                gradient[0] += 2 * std::real( Ynm[nm]) * factor;
+                gradient[1] += 2 * std::real( YnmTheta[nm]);
+                gradient[2] += 2 * std::real( Ynm[nm] * I) * m;
+                Ci->M[nms] += u * (gradient[0]*d[0]+gradient[1]*d[1]+gradient[2]*d[2]);
             }
         }
     }
