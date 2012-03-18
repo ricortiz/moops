@@ -1,3 +1,14 @@
+# - Functions to help submiting jobs to a remote computer or cluster
+#
+# This module provides the following functions:
+#   clone_repository
+#   pull_repository
+#   copy_repository
+#   build_app
+#   add_data_path
+#   submit_job
+#   terminate_job
+
 # find local commands
 find_program(SSH_COMMAND NAMES ssh)
 find_program(SSH_COMMAND NAMES scp)
@@ -18,7 +29,8 @@ endmacro(PULL_REPOSITORY)
 
 # macro to rsync repo in to remote directory
 macro(COPY_REPOSITORY APP_NAME FROM TO)
-    set(CMD "${RSYNC_COMMAND} -av --rsh=ssh --exclude build* --exclude *.git* --exclude *docs* --exclude *~ ${FROM} ${TO}")
+    set(OPTIONS -aCv --rsh=ssh --exclude='bin*' --exclude='build*' --exclude='*docs*' )
+    set(CMD ${RSYNC_COMMAND} ${OPTIONS} ${FROM} ${TO})
     add_custom_target(${APP_NAME}_copy_repository COMMAND ${CMD} VERBATIM)
 endmacro(COPY_REPOSITORY)
 
