@@ -40,6 +40,7 @@ public:
   void P2P(C_iter Ci, C_iter Cj) const;                         //!< Evaluate P2P kernel on CPU
   void L2L(C_iter Ci, C_iter Cj) const;                         //!< Evaluate L2L kernel on CPU
   void L2P(C_iter Ci) const;                                    //!< Evaluate L2P kernel on CPU
+  void D2M(C_iter Ci) const;                                    //!< Evaluate D2P kernel on CPU
   void P2M();                                                   //!< Evaluate P2M kernel on GPU
   void M2M();                                                   //!< Evaluate M2M kernel on GPU
   void M2L();                                                   //!< Evaluate M2L kernel on GPU
