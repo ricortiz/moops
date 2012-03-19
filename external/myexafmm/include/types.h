@@ -110,7 +110,7 @@ enum Equation                                                   //!< Equation ty
 {
     Laplace,                                                      //!< Laplace potential + force
     VanDerWaals,                                                  //!< Van der Walls potential + force
-    Stokes                                                       //! Stokes flow velocities
+    Stokes                                                       //!< Stokes flow velocities
 };
 
 //! Structure of source bodies (stuff to send)
