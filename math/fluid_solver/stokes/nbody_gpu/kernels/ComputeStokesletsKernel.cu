@@ -17,8 +17,8 @@
 ** You should have received a copy of the GNU General Public License
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-#include "ComputeTiles.cuh"
 
+#include "ComputeTiles.cuh"
 
 /**
  * @brief Main stokelets computation kernel.
@@ -37,7 +37,7 @@ void ComputeStokesletsKernel(const vector3_type* target_array, vector3_type* vel
 {
 	int_type index = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
 	if (index >= num_targets)
-    	index = 0;  
+            index = 0;  
 
 	vector3_type target = target_array[index];
 	vector3_type velocity = ComputeTiles(target, source_array, force_array, deltas, num_sources, num_targets, with_images);

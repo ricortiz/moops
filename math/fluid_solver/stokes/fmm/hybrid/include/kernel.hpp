@@ -33,8 +33,12 @@ template<>
 class Kernel<Stokes> : public KernelBase {
 public:
   void initialize();                                            //!< Initialize kernels
+  void evalMultipole(real rho, real alpha, real beta, complex *Ynm) const;//!< Set Spherical multipole expansion
+  void evalMultipoleTheta(real rho, real alpha, real beta, complex *Ynm, complex *YnmTheta) const;//!< With dY/dtheta
+  void evalLocal(real rho, real alpha, real beta, complex *Ynm) const;//!< Set Spherical local expansion
+  void evalLocalTheta(real rho, real alpha, real beta, complex *Ynm, complex *YnmTheta) const;//!< With dY/dtheta
   void P2M(C_iter Ci) const;                                    //!< Evaluate P2M kernel on CPU
-  void M2M(C_iter Ci, C_iter Cj) const;                         //!< Evaluate M2M kernel on CPU
+  void M2M(C_iter Ci) const;                         //!< Evaluate M2M kernel on CPU
   void M2L(C_iter Ci, C_iter Cj) const;                         //!< Evaluate M2L kernel on CPU
   void M2P(C_iter Ci, C_iter Cj) const;                         //!< Evaluate M2P kernel on CPU
   void P2P(C_iter Ci, C_iter Cj) const;                         //!< Evaluate P2P kernel on CPU

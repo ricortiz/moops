@@ -30,6 +30,11 @@ THE SOFTWARE.
 template<>
 class Evaluator<Stokes> : public Dataset<Stokes>
 {
+    private:
+        real        timeM2L;                                          //!< M2L execution time
+        real        timeM2P;                                          //!< M2P execution time
+        real        timeP2P;                                          //!< P2P execution time
+        
     protected:
         C_iter      CiB;                                              //!< icells begin per call
         C_iter      CiE;                                              //!< icells end per call
@@ -38,15 +43,16 @@ class Evaluator<Stokes> : public Dataset<Stokes>
         Lists       listM2L;                                          //!< M2L interaction list
         Lists       listM2P;                                          //!< M2P interaction list
         Lists       listP2P;                                          //!< P2P interaction list
-        real        timeM2L;                                          //!< M2L execution time
-        real        timeM2P;                                          //!< M2P execution time
-        real        timeP2P;                                          //!< P2P execution time
 
         int         Iperiodic;                                        //!< Periodic image flag (using each bit for images)
         const int   Icenter;                                          //!< Periodic image flag at center
         Maps        flagM2L;                                          //!< Existance of periodic image for M2L
         Maps        flagM2P;                                          //!< Existance of periodic image for M2P
         Maps        flagP2P;                                          //!< Existance of periodic image for P2P
+
+        real        NP2P;                                             //!< Number of P2P kernel calls
+        real        NM2P;                                             //!< Number of M2P kernel calls
+        real        NM2L;                                             //!< Number of M2L kernel calls
 
     public:
         using Kernel<Stokes>::printNow;                             //!< Switch to print timings
@@ -65,9 +71,6 @@ class Evaluator<Stokes> : public Dataset<Stokes>
         using Kernel<Stokes>::sourceBegin;                          //!< Define map for offset of source cells
         using Kernel<Stokes>::sourceSize;                           //!< Define map for size of source cells
         using Kernel<Stokes>::targetBegin;                          //!< Define map for offset of target cells
-        using Kernel<Stokes>::NP2P;                                 //!< Number of P2P kernel calls
-        using Kernel<Stokes>::NM2P;                                 //!< Number of M2P kernel calls
-        using Kernel<Stokes>::NM2L;                                 //!< Number of M2L kernel calls
         using Kernel<Stokes>::allocate;                             //!< Allocate GPU kernels
         using Kernel<Stokes>::hostToDevice;                         //!< Copy from host to device
         using Kernel<Stokes>::deviceToHost;                         //!< Copy from device to host
@@ -89,24 +92,20 @@ class Evaluator<Stokes> : public Dataset<Stokes>
             if ( timeP2P*Cj->NDLEAF < timeM2P && timeP2P*Ci->NDLEAF*Cj->NDLEAF < timeM2L) // If P2P is fastest
             {
                 evalP2P(Ci, Cj);                                          //  Evaluate on CPU, queue on GPU
-                NP2P++;
             }
             else if ( timeM2P < timeP2P*Cj->NDLEAF && timeM2P*Ci->NDLEAF < timeM2L )  // If M2P is fastest
             {
                 evalM2P(Ci, Cj);                                          //  Evaluate on CPU, queue on GPU
-                NM2P++;
             }
             else                                                      // If M2L is fastest
             {
                 evalM2L(Ci, Cj);                                          //  Evaluate on CPU, queue on GPU
-                NM2L++;
             }                                                           // End if for kernel selection
 #elif TREECODE
             evalM2P(Ci, Cj);                                            // Evaluate on CPU, queue on GPU
             NM2P++;
 #else
             evalM2L(Ci, Cj);                                            // Evalaute on CPU, queue on GPU
-            NM2L++;
 #endif
         }
 
@@ -214,7 +213,10 @@ class Evaluator<Stokes> : public Dataset<Stokes>
                                             cell.X[0]  = C->X[0] + (ix * 6 + cx * 2) * C->R;//     Set new x coordinate for periodic image
                                             cell.X[1]  = C->X[1] + (iy * 6 + cy * 2) * C->R;//     Set new y cooridnate for periodic image
                                             cell.X[2]  = C->X[2] + (iz * 6 + cz * 2) * C->R;//     Set new z coordinate for periodic image
-                                            cell.M     = C->M;                          //         Copy multipoles to new periodic image
+                                            cell.M[0] = C->M[0];                                      //     Copy multipoles to new periodic image
+                                            cell.M[1] = C->M[1];                                      //     Copy multipoles to new periodic image
+                                            cell.M[2] = C->M[2];                                      //     Copy multipoles to new periodic image
+                                            cell.M[3] = C->M[3];                                      //     Copy multipoles to new periodic image
                                             cell.NDLEAF = cell.NCHILD = 0;              //         Initialize NDLEAF & NCHILD
                                             jcells.push_back(cell);                     //         Push cell into periodic jcell vector
                                         }                                             //        End loop over z periodic direction (child)
@@ -233,7 +235,10 @@ class Evaluator<Stokes> : public Dataset<Stokes>
                             cell.X[0] = C->X[0] + ix * 2 * C->R;                //     Set new x coordinate for periodic image
                             cell.X[1] = C->X[1] + iy * 2 * C->R;                //     Set new y cooridnate for periodic image
                             cell.X[2] = C->X[2] + iz * 2 * C->R;                //     Set new z coordinate for periodic image
-                            cell.M = C->M;                                      //     Copy multipoles to new periodic image
+                            cell.M[0] = C->M[0];                                      //     Copy multipoles to new periodic image
+                            cell.M[1] = C->M[1];                                      //     Copy multipoles to new periodic image
+                            cell.M[2] = C->M[2];                                      //     Copy multipoles to new periodic image
+                            cell.M[3] = C->M[3];                                      //     Copy multipoles to new periodic image
                             pjcells.push_back(cell);                            //     Push cell into periodic jcell vector
                         }                                                     //    End loop over z periodic direction
                     }                                                       //   End loop over y periodic direction
@@ -270,7 +275,6 @@ class Evaluator<Stokes> : public Dataset<Stokes>
 #else
                     C_iter Ci = cells.end() - 1;                            //   Set root cell as target iterator
                     evalM2L(Ci, Cj);                                        //   Perform M2P kernel
-                    NM2L++;
 #endif
                 }                                                         //  End loop over x periodic direction
             }                                                           // End loop over sublevels of tree
@@ -407,7 +411,6 @@ class Evaluator<Stokes> : public Dataset<Stokes>
             else if (Ci->NCHILD == 0 && Cj->NCHILD == 0)              // Else if both cells are leafs
             {
                 evalP2P(Ci, Cj);                                          //  Use P2P
-                NP2P++;
             }
             else                                                      // If cells are close but not leafs
             {

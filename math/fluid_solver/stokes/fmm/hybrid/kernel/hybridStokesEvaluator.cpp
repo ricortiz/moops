@@ -1,16 +1,16 @@
 /*
  * Copyright (C) 2011 by Rio Yokota, Simon Layton, Lorena Barba
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -210,8 +210,14 @@ void Evaluator<Stokes>::evalP2M(Cells &cells)                 // Evaluate all P2
     startTimer("evalP2M      ");                                  // Start timer
     for (C_iter C = cells.begin(); C != cells.end(); ++C)         // Loop over cells
     {
-        C->M = 0;                                                   //  Initialize multipole coefficients
-        C->L = 0;                                                   //  Initialize local coefficients
+        C->M[0] = 0;                                                   //  Initialize multipole coefficients
+        C->M[1] = 0;                                                   //  Initialize multipole coefficients
+        C->M[2] = 0;                                                   //  Initialize multipole coefficients
+        C->M[3] = 0;                                                   //  Initialize multipole coefficients
+        C->L[0] = 0;                                                   //  Initialize local coefficients
+        C->L[1] = 0;                                                   //  Initialize local coefficients
+        C->L[2] = 0;                                                   //  Initialize local coefficients
+        C->L[3] = 0;                                                   //  Initialize local coefficients
         if (C->NCHILD == 0)                                         //  If cell is a twig
         {
             P2M(C);                                                   //   Perform P2M kernel
@@ -223,34 +229,36 @@ void Evaluator<Stokes>::evalP2M(Cells &cells)                 // Evaluate all P2
 
 void Evaluator<Stokes>::evalM2M(Cells &cells, Cells &jcells)  // Evaluate all M2M kernels
 {
-    startTimer("evalM2M      ");                                  // Start timer
     Cj0 = jcells.begin();                                         // Set begin iterator
-    for (C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci)      // Loop over target cells bottomup
+    for ( C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci )    // Loop over target cells bottomup
     {
-        for (C_iter Cj = Cj0 + Ci->CHILD; Cj != Cj0 + Ci->CHILD + Ci->NCHILD; ++Cj)  // Loop over child cells
-        {
-            M2M(Ci, Cj);                                              //   Perform M2M kernel
-        }                                                           //  End loop over child cells
-    }                                                             // End loop target over cells
-    stopTimer("evalM2M      ");                                   // Stop timer
+        int level = getLevel(Ci->ICELL);                            // Get current level
+        std::stringstream eventName;                                // Declare event name
+        eventName << "evalM2M: " << level << "   ";                 // Set event name with level
+        startTimer(eventName.str());                                // Start timer
+        M2M(Ci);                                                    // Perform M2M kernel
+        stopTimer(eventName.str());                                 // Stop timer
+    }
 }
 
 
 void Evaluator<Stokes>::evalM2L(C_iter Ci, C_iter Cj)         // Evaluate single M2L kernel
 {
-    startTimer("evalM2L      ");
-    M2L(Ci, Cj);                                                  // Perform M2L kernel
-    stopTimer("evalM2L      ");
-    NM2L++;                                                       // Count M2L kernel execution
+    listM2L[Ci-Ci0].push_back(Cj);                                // Push source cell into M2L interaction list
+    flagM2L[Ci-Ci0][Cj] |= Iperiodic;                             // Flip bit of periodic image flag
+    NM2L++;                                                   // Count M2L kernel execution
 }
 
 
 void Evaluator<Stokes>::evalM2L(Cells &cells)                 // Evaluate queued M2L kernels
 {
-    startTimer("evalM2L      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
     for (C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci)      // Loop over cells
     {
+        int level = getLevel(Ci->ICELL);                            // Get current level
+        std::stringstream eventName;                                // Declare event name
+        eventName << "evalM2L: " << level << "   ";                 // Set event name with level
+        startTimer(eventName.str());                                // Start timer
         while (!listM2L[Ci-Ci0].empty())                            //  While M2L interaction list is not empty
         {
             C_iter Cj = listM2L[Ci-Ci0].back();                       //   Set source cell iterator
@@ -267,36 +275,36 @@ void Evaluator<Stokes>::evalM2L(Cells &cells)                 // Evaluate queued
                             Xperiodic[0] = ix * 2 * R0;                       //       Coordinate offset for x periodic direction
                             Xperiodic[1] = iy * 2 * R0;                       //       Coordinate offset for y periodic direction
                             Xperiodic[2] = iz * 2 * R0;                       //       Coordinate offset for z periodic direction
-                            M2L(Ci, Cj);                                      //       Perform M2L kernel
-                            NM2L++;       
                         }                                                   //      Endif for periodic flag
                     }                                                     //     End loop over x periodic direction
                 }                                                       //    End loop over y periodic direction
             }                                                         //   End loop over z periodic direction
             listM2L[Ci-Ci0].pop_back();                               //   Pop last element from M2L interaction list
         }                                                           //  End while for M2L interaction list
+        stopTimer(eventName.str());                                 // Stop timer
     }                                                             // End loop over cells topdown
     listM2L.clear();                                              // Clear interaction lists
     flagM2L.clear();                                              // Clear periodic image flags
-    stopTimer("evalM2L      ");                                   // Stop timer
 }
 
 
 void Evaluator<Stokes>::evalM2P(C_iter Ci, C_iter Cj)         // Evaluate single M2P kernel
 {
-    startTimer("evalM2P      ");                                  // Start timer
-    M2P(Ci, Cj);                                                  // Perform M2P kernel
-    stopTimer("evalM2P      ");                                   // Stop timer
+    listM2P[Ci-Ci0].push_back(Cj);                                // Push source cell into M2P interaction list
+    flagM2P[Ci-Ci0][Cj] |= Iperiodic;                             // Flip bit of periodic image flag
     NM2P++;                                                       // Count M2P kernel execution
 }
 
 
 void Evaluator<Stokes>::evalM2P(Cells &cells)                 // Evaluate queued M2P kernels
 {
-    startTimer("evalM2P      ");                                  // Start timer
     Ci0 = cells.begin();                                          // Set begin iterator
     for (C_iter Ci = cells.begin(); Ci != cells.end(); ++Ci)      // Loop over cells
     {
+        int level = getLevel(Ci->ICELL);                            // Get current level
+        std::stringstream eventName;                                // Declare event name
+        eventName << "evalM2P: " << level << "   ";                 // Set event name with level
+        startTimer(eventName.str());                                // Start timer
         while (!listM2P[Ci-Ci0].empty())                            //  While M2P interaction list is not empty
         {
             C_iter Cj = listM2P[Ci-Ci0].back();                       //   Set source cell iterator
@@ -314,17 +322,16 @@ void Evaluator<Stokes>::evalM2P(Cells &cells)                 // Evaluate queued
                             Xperiodic[1] = iy * 2 * R0;                       //       Coordinate offset for y periodic direction
                             Xperiodic[2] = iz * 2 * R0;                       //       Coordinate offset for z periodic direction
                             M2P(Ci, Cj);                                      //       Perform M2P kernel
-                            NM2P++;
                         }                                                   //      Endif for periodic flag
                     }                                                     //     End loop over x periodic direction
                 }                                                       //    End loop over y periodic direction
             }                                                         //   End loop over z periodic direction
             listM2P[Ci-Ci0].pop_back();                               //   Pop last element from M2P interaction list
         }                                                           //  End while for M2P interaction list
+        stopTimer(eventName.str());                                 // Stop timer
     }                                                             // End loop over cells topdown
     listM2P.clear();                                              // Clear interaction lists
     flagM2P.clear();                                              // Clear periodic image flags
-    stopTimer("evalM2P      ");                                   // Stop timer
 }
 
 
@@ -402,7 +409,7 @@ void Evaluator<Stokes>::evalL2P(Cells &cells)                 // Evaluate all L2
 void Evaluator<Stokes>::timeKernels()                         // Time all kernels for auto-tuning
 {
     Bodies ibodies(1000), jbodies(1000);                          // Artificial bodies
-    for (B_iter Bi = ibodies.begin(), Bj = jbodies.begin(); Bi != ibodies.end(); ++Bi, ++Bj)  // Loop over artificial bodies
+    for ( B_iter Bi = ibodies.begin(), Bj = jbodies.begin(); Bi != ibodies.end(); ++Bi, ++Bj )  // Loop over artificial bodies
     {
         Bi->X = 0;                                                  //  Set coordinates of target body
         Bj->X = 1;                                                  //  Set coordinates of source body
@@ -416,59 +423,42 @@ void Evaluator<Stokes>::timeKernels()                         // Time all kernel
     Cj->X = 1;                                                    // Set coordinates of source cell
     Cj->NDLEAF = 1000;                                            // Number of leafs in source cell
     Cj->LEAF = jbodies.begin();                                   // Leaf iterator in source cell
-    
-    startTimer("M2L kernel   ");                                  // Start timer
-    for (int i = 0; i != 1000; ++i) M2L(Ci, Cj);                  // Perform M2L kernel
-    timeM2L = stopTimer("M2L kernel   ") / 1000;                  // Stop timer
-    startTimer("M2P kernel   ");                                  // Start timer
-    for (int i = 0; i != 100; ++i) M2P(Ci, Cj);                   // Perform M2P kernel
-    timeM2P = stopTimer("M2P kernel   ") / 1000;                  // Stop timer
-    
-    Cells icells, jcells;                                         // Artificial cells
-    icells.resize(10);                                            // 100 artificial target cells
-    jcells.resize(100);                                           // 100 artificial source cells
-    Ci0 = icells.begin();                                         // Set global begin iterator for source
-    for (Ci = icells.begin(); Ci != icells.end(); ++Ci)    // Loop over target cells
-    {
-        Ci->X = 0;                                                  //  Set coordinates of target cell
-        Ci->NDLEAF = 100;                                           //  Number of leafs in target cell
-        Ci->LEAF = ibodies.begin();                                 //  Leaf iterator in target cell
-    }                                                             // End loop over target cells
-    for (Cj = jcells.begin(); Cj != jcells.end(); ++Cj)    // Loop over source cells
-    {
-        Cj->X = 1;                                                  //  Set coordinates of source cell
-        Cj->NDLEAF = 100;                                           //  Number of leafs in source cell
-        Cj->LEAF = jbodies.begin();                                 //  Leaf iterator in source cell
-    }                                                             // End loop over source cells
-    listP2P.resize(icells.size());                                // Resize P2P interaction list
-    flagP2P.resize(icells.size());
-    for (Ci = icells.begin(); Ci != icells.end(); ++Ci)    // Loop over target cells
-    {
-        for (Cj = jcells.begin(); Cj != jcells.end(); ++Cj)  //  Loop over source cells
-        {
-            listP2P[Ci-Ci0].push_back(Cj);                            //   Push source cell into P2P interaction list
-        }                                                           //  End loop over source cells
-    }
+    startTimer("P2P kernel");                                     // Start timer
+    for ( int i = 0; i != 1; ++i ) P2P(Ci, Cj);                   // Perform P2P kernel
+    timeP2P = stopTimer("P2P kernel") / 10000;                    // Stop timer
+    startTimer("M2L kernel");                                     // Start timer
+    for ( int i = 0; i != 1000; ++i ) M2L(Ci, Cj);                // Perform M2L kernel
+    timeM2L = stopTimer("M2L kernel") / 1000;                     // Stop timer
+    startTimer("M2P kernel");                                     // Start timer
+    for ( int i = 0; i != 100; ++i ) M2P(Ci, Cj);                 // Perform M2P kernel
+    timeM2P = stopTimer("M2P kernel") / 1000;                     // Stop timer
 }
 
 #if QUARK
 template<>
-void Evaluator<Stokes>::interact(C_iter CI, C_iter CJ, Quark*) {
+void Evaluator<Stokes>::interact(C_iter CI, C_iter CJ, Quark*)
+{
     PairQueue privateQueue;
-    Pair pair(CI,CJ);
+    Pair pair(CI, CJ);
     privateQueue.push(pair);
-    while( !privateQueue.empty() ) {
+    while ( !privateQueue.empty() )
+    {
         Pair Cij = privateQueue.front();
         privateQueue.pop();
-        if(splitFirst(Cij.first,Cij.second)) {
+        if (splitFirst(Cij.first, Cij.second))
+        {
             C_iter C = Cij.first;
-            for( C_iter Ci=Ci0+C->CHILD; Ci!=Ci0+C->CHILD+C->NCHILD; ++Ci ) {
-                interact(Ci,Cij.second,privateQueue);
+            for ( C_iter Ci = Ci0 + C->CHILD; Ci != Ci0 + C->CHILD + C->NCHILD; ++Ci )
+            {
+                interact(Ci, Cij.second, privateQueue);
             }
-        } else {
+        }
+        else
+        {
             C_iter C = Cij.second;
-            for( C_iter Cj=Cj0+C->CHILD; Cj!=Cj0+C->CHILD+C->NCHILD; ++Cj ) {
-                interact(Cij.first,Cj,privateQueue);
+            for ( C_iter Cj = Cj0 + C->CHILD; Cj != Cj0 + C->CHILD + C->NCHILD; ++Cj )
+            {
+                interact(Cij.first, Cj, privateQueue);
             }
         }
     }

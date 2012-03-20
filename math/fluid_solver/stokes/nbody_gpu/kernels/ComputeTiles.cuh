@@ -29,7 +29,11 @@
  * @return updated velocity vector
  **/
 template<typename vector3_type, typename real_type> __host__ __device__
-void ComputeStokeslets(const vector3_type &target, vector3_type &velocity, const vector3_type &source, const vector3_type &force, real_type delta)
+void ComputeStokeslets(const vector3_type &target,
+                        vector3_type &velocity,
+                        const vector3_type &source,
+                        const vector3_type &force,
+                        real_type delta)
 {
     vector3_type dx = {target.x - source.x,target.y - source.y,target.z - source.z};
 
@@ -142,7 +146,7 @@ void ComputeImages(const vector3_type &target, vector3_type &velocity, const vec
  * @return updated velocity vector
  **/
 template<typename vector3_type, typename int_type, typename real_type> __device__
-void ComputeTile(const vector3_type &target, vector3_type &velocity, real_type delta, int_type num_sources, bool with_image)
+void ComputeTile(const vector3_type &target,vector3_type &velocity, real_type delta, int_type num_sources, bool with_image)
 {
     extern __shared__ vector3_type shared_data[];
     vector3_type *sources = &shared_data[0];
@@ -197,7 +201,7 @@ vector3_type ComputeTiles(const vector3_type &target, const vector3_type* source
                 index = 0;
 
     for (int_type tile = 0; tile < numTiles; ++tile)
-        {
+    {
         int_type posIdx = tile * blockDim.x + threadIdx.x;
         sources[threadIdx.x] = source_array[posIdx];
         forces[threadIdx.x] = force_array[posIdx];
