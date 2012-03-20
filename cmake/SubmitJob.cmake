@@ -11,7 +11,6 @@
 
 # find local commands
 find_program(SSH_COMMAND NAMES ssh)
-find_program(SSH_COMMAND NAMES scp)
 find_program(RSYNC_COMMAND NAMES rsync)
 
 # macro to clone repo into remote directory
