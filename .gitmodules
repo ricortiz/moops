@@ -4,3 +4,6 @@
 [submodule "external/exafmm"]
 	path = external/exafmm
 	url = git@bitbucket.org:ricortiz/exafmm-cmake.git
+[submodule "external/quark"]
+	path = external/quark
+	url = git@bitbucket.org:ricortiz/quark-cmake.git
