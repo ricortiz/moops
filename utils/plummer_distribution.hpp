@@ -22,7 +22,7 @@
 #include<cstdlib>
 
 template<typename value_type>
-void genereateVector(value_type rad,value_type *p)
+void genereatePoint(value_type rad,value_type *p)
 {
     p[0] = 0;
     p[1] = 0;
@@ -32,7 +32,7 @@ void genereateVector(value_type rad,value_type *p)
     while (rsq <= 1)
     {
         rsq = 0;
-        p[0] = 2*rand48()/((value_type)RAND_MAX+1) - 1;
+        p[0] = 2*rand()/((value_type)RAND_MAX+1) - 1;
         rsq = rsq + p[0] * p[0];
         p[1] = 2*rand()/((value_type)RAND_MAX+1) - 1;
         rsq = rsq + p[1] * p[1];
@@ -47,6 +47,24 @@ void genereateVector(value_type rad,value_type *p)
 }
 
 template<typename value_type>
+value_type genereatePoint(value_type rad)
+{
+    value_type p = 0;
+    bool tooBig = true;
+    value_type rsq = 0;
+    while (rsq <= 1)
+    {
+        rsq = 0;
+        p = 2*rand()/((value_type)RAND_MAX+1) - 1;
+        rsq = rsq + p * p;
+    }
+    
+    return p;
+    
+}
+
+
+template<typename value_type>
 void plummerDistribution(value_type position[], size_t num_particles)
 {
     //used in distribution creation
@@ -58,7 +76,7 @@ void plummerDistribution(value_type position[], size_t num_particles)
         value_type temp = 1.0/std::pow(0.999*rand()/((value_type)RAND_MAX+1),1.5) - 1.0;
         value_type ri = 1.0/sqrt(temp);
         
-        genereateVector(rsc*ri,&position[idx]);
+        genereatePoint(rsc*ri,&position[idx]);
     }
     
 }

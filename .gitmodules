@@ -1,9 +1,6 @@
 [submodule "external/tinyxml"]
 	path = external/tinyxml
 	url = git://github.com/leethomason/tinyxml2.git
-[submodule "external/quark"]
-	path = external/quark
-	url = git@bitbucket.org:ricortiz/quark-cmake.git
 [submodule "external/exafmm"]
 	path = external/exafmm
 	url = git@bitbucket.org:ricortiz/exafmm.git

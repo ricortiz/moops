@@ -179,9 +179,9 @@ public:
 
         size_t size = data.data_size();
         m_vtk_data.positions->SetArray(data.positions(), size, 1);
-        m_vtk_data.velocities->SetArray(data.velocities(), size, 1);
         m_vtk_data.positions->SetNumberOfComponents(3);
         m_vtk_data.positions->SetName("positions");
+        m_vtk_data.velocities->SetArray(data.velocities(), size, 1);
         m_vtk_data.velocities->SetNumberOfComponents(3);
         m_vtk_data.velocities->SetName("velocity");
         
@@ -292,6 +292,50 @@ class vtkOctreeStorage
         {
             m_box->SetPoints(m_hex_points);
         }
+};
+
+template < typename value_type, typename array_type = vtkDoubleArray >
+class vtkParticleStorage
+{
+private:
+    vtkArrays<array_type>                   m_vtk_data;
+    vtkSmartPointer<vtkPolyData>            m_poly_data;
+    
+public:
+    vtkParticleStorage(value_type *positions, value_type *velocities, size_t size) : m_poly_data(vtkSmartPointer<vtkPolyData>::New())
+    {
+        m_vtk_data.positions = vtkSmartPointer<array_type>::New();
+        m_vtk_data.velocities = vtkSmartPointer<array_type>::New();
+        m_vtk_data.cells = vtkSmartPointer<vtkCellArray>::New();
+        
+        m_vtk_data.positions->SetArray(positions, size, 1);
+        m_vtk_data.positions->SetNumberOfComponents(3);
+        m_vtk_data.positions->SetName("positions");
+        m_vtk_data.velocities->SetArray(velocities, size, 1);
+        m_vtk_data.velocities->SetNumberOfComponents(3);
+        m_vtk_data.velocities->SetName("velocity");
+
+        vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+        points->SetData(m_vtk_data.positions);
+        m_poly_data->SetPoints(points);
+        if (m_vtk_data.velocities->GetSize() > 0)
+            m_poly_data->GetPointData()->AddArray(m_vtk_data.velocities);
+        
+        for(vtkIdType i = 0; i < size/3; ++i)
+            m_vtk_data.cells->InsertNextCell(VTK_VERTEX,&i);
+        m_poly_data->SetVerts(m_vtk_data.cells);
+    }
+    
+    inline const vtkSmartPointer<array_type> &positions() const    { return m_vtk_data.positions; }
+    inline vtkSmartPointer<array_type> &positions()                { return m_vtk_data.positions; }
+    inline const vtkSmartPointer<array_type> &velocities() const   { return m_vtk_data.velocities; }
+    inline vtkSmartPointer<array_type> &velocities()               { return m_vtk_data.velocities; }
+    inline const vtkSmartPointer<vtkCellArray> &cells() const      { return m_vtk_data.cells; }
+    inline vtkSmartPointer<vtkCellArray> &cells()                  { return m_vtk_data.cells; }
+    inline const vtkSmartPointer<vtkPolyData> &grid() const        { return m_poly_data; }
+    inline vtkSmartPointer<vtkPolyData> &grid()                    { return m_poly_data; }
+    
+    
 };
 
 #endif
