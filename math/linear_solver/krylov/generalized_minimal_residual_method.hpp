@@ -139,7 +139,7 @@ class GeneralizedMinimalResidualMethod : public KrylovBase<GeneralizedMinimalRes
         }
 };
 
-template<typename _value_type, size_t _krylov_space_max_dim>
+template<typename _value_type, int _krylov_space_max_dim>
 struct krylov_traits<GeneralizedMinimalResidualMethod<_value_type, _krylov_space_max_dim> >
 {
     typedef _value_type value_type;

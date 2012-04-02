@@ -34,7 +34,7 @@ struct krylov_arrays
 
 /** \internal
  *
- * \class sdc_storage
+ * \class
  *
  * \brief Stores the data of the sdc method
  *

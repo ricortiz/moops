@@ -22,7 +22,3 @@ if(USE_EXAFMM)
         TARGET_LINK_LIBRARIES(TestFluidSolvers quark)
     ENDIF(USE_QUARK)
 endif()
-
-IF(USE_QT_GUI)
-    TARGET_LINK_LIBRARIES(TestFluidSolvers octreerenderer)
-ENDIF(USE_QT_GUI)

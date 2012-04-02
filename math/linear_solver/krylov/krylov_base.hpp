@@ -1,5 +1,5 @@
-#ifndef KRYLOV_BASE_RAW_HPP
-#define KRYLOV_BASE_RAW_HPP
+#ifndef KRYLOV_BASE_HPP
+#define KRYLOV_BASE_HPP
 /****************************************************************************
 ** MOOPS -- Modular Object Oriented Particle Simulator
 ** Copyright (C) 2011-2012  Ricardo Ortiz <ortiz@unc.edu>
@@ -27,7 +27,7 @@ class KrylovBase
 {
     protected:
         typedef typename krylov_traits<Derived>::value_type     value_type;
-        
+
     public:
 
         KrylovBase() {}
