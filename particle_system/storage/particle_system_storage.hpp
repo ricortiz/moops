@@ -22,7 +22,6 @@
 /// @section Description This particle system provides allocation and handling of 
 /// 			the simulation data.  The purpose of this class is to provide 
 /// 			storage model that is easy to swap when needing.
-/// 			
 
 enum storage_shape { SURFACE, VOLUME };
 

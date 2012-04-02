@@ -29,11 +29,7 @@
  * @return updated velocity vector
  **/
 template<typename vector3_type, typename real_type> __host__ __device__
-void ComputeStokeslets(const vector3_type &target,
-                        vector3_type &velocity,
-                        const vector3_type &source,
-                        const vector3_type &force,
-                        real_type delta)
+void ComputeStokeslets(const vector3_type &target, vector3_type &velocity, const vector3_type &source, const vector3_type &force, real_type delta)
 {
     vector3_type dx = {target.x - source.x,target.y - source.y,target.z - source.z};
 
@@ -41,8 +37,8 @@ void ComputeStokeslets(const vector3_type &target,
     real_type d2 = delta * delta;
     real_type R1 = r2 + d2;
     real_type R2 = R1 + d2;
-    real_type invR = 1.0f/R1;
-    real_type H = sqrtf(invR)*invR * 0.039788735772974f;
+    real_type invR = real_type(1.0)/R1;
+    real_type H = sqrtf(invR)*invR * real_type(0.039788735772974);
 
     real_type fdx = (force.x*dx.x+force.y*dx.y+force.z*dx.z);
 

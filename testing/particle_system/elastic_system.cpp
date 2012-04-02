@@ -21,8 +21,6 @@ struct Traits<int>
 };
 
 
-
-
 int elastic_system(int, char **)
 {
     ElasticBoundary<int> elastic_boundary;

@@ -80,23 +80,23 @@ class Timer
         struct timeval m_end;     ///<
 
     public:
-        inline void start(std::string event)
+        inline void start(const std::string &event)
         {
             gettimeofday(&m_start_times[event], NULL);
         }
-        inline real_type stop(std::string event)
+        inline real_type stop(const std::string &event)
         {
             gettimeofday(&m_end, NULL);
             return operator()(event);
         }
-        inline real_type operator()(std::string event) 
+        inline real_type operator()(const std::string &event) 
         {
             real_type t1 =  static_cast<real_type>(m_start_times[event].tv_sec) + 1e-6 * static_cast<real_type>(m_start_times[event].tv_usec);
             real_type t2 =  static_cast<real_type>(m_end.tv_sec) + 1e-6 * static_cast<real_type>(m_end.tv_usec);
             return t2 - t1;
         }
         void reset() { m_start_times.clear(); }
-        void eraseEvent(std::string event) { m_start_times.erase(event); }
+        void eraseEvent(const std::string &event) { m_start_times.erase(event); }
 #endif
 };
 

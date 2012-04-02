@@ -24,23 +24,19 @@ template <typename Derived>
 class SpringSystem
 {
     public:
-        typedef typename Traits<Derived>::particle_type particle_type;
-        typedef typename Traits<Derived>::value_type    value_type;
-        typedef Spring<particle_type>                           spring_type;
-        typedef typename std::list<spring_type>                 spring_container;
-        typedef typename spring_container::iterator             spring_iterator;
-        typedef typename std::list<spring_type*>              spring_ptr_container;
-        typedef typename std::map <particle_type*, spring_ptr_container>      spring_lut_type;
+        typedef typename Traits<Derived>::particle_type                         particle_type;
+        typedef typename Traits<Derived>::value_type                            value_type;
+        typedef Spring<particle_type>                                           spring_type;
+        typedef typename std::list<spring_type>                                 spring_container;
+        typedef typename spring_container::iterator                             spring_iterator;
+        typedef typename std::list<spring_type*>                                spring_ptr_container;
+        typedef typename std::map<particle_type*, spring_ptr_container>         spring_lut_type;
 
     private:
         spring_container        m_springs;      ///< Internal data structure used to store all spring constraints.
         spring_lut_type         m_spring_lut;   ///< Internal datas tructure to record spring connections.
 
     public:
-        inline Derived &derived()
-        {
-            return *static_cast<Derived*>(this);
-        }
 
         spring_iterator springs_begin()                 { return m_springs.begin(); }
         spring_iterator springs_end()                   { return m_springs.end(); }
@@ -129,6 +125,7 @@ class SpringSystem
         friend out_stream &operator<<(out_stream &out, SpringSystem<Derived> &system)
         {
             system.writeSprings(out);
+            system.writeRestingLengths(out);
             return out;
         }
 

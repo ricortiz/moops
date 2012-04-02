@@ -73,7 +73,6 @@ class Spring
 
             value_type dx[3] = { A->position[0] - B->position[0], A->position[1] - B->position[1], A->position[2] - B->position[2] };
             m_l = std::sqrt(dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2]);
-
         }
 
     public:
@@ -101,6 +100,19 @@ class Spring
             f2[0] += L * dx[0];
             f2[1] += L * dx[1];
             f2[2] += L * dx[2];
+        }
+
+        template<typename out>
+        friend out &operator<<(out &out_stream, Spring<particle_type> &s)
+        {
+            out_stream << "[" << s.m_Aidx << "," << s.m_Bidx << "]" << std::endl;
+            out_stream << "stiffness: " << s.m_k << std::endl;
+            out_stream << "length: " << s.m_l << std::endl;
+            out_stream << "forceA = [" << s.m_A->force[0] << "," << s.m_A->force[1] << "," << s.m_A->force[2]  << "]" << std::endl;
+            out_stream << "forceB = [" << s.m_B->force[0] << "," << s.m_B->force[1] << "," << s.m_B->force[2]  << "]" << std::endl;
+            
+            return out_stream;
+            
         }
 };
 
