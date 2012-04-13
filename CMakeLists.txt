@@ -143,6 +143,18 @@ OPTION(USE_EXAFMM "Enable ExaFMM" OFF)
 IF(USE_EXAFMM)
     ADD_SUBDIRECTORY(external/exafmm)
 ENDIF()
+
+# Set documentation target
+OPTION(BUILD_DOCS "Build doxygen documentation" ON)
+IF(BUILD_DOCS)
+    SET(EXAFMM_VERSION 0.0)
+    configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    )
+    ADD_CUSTOM_TARGET(docs ALL COMMAND doxygen ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+ENDIF()
+
 # Setup host variables
-option(ADD_SUBMISION_SCRIPTS "Add custom target for job submision." OFF)
+option(ADD_SUBMISSION_SCRIPTS "Add custom target for job submision." OFF)
 
