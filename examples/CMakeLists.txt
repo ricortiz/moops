@@ -1,3 +1,23 @@
 
+macro(ADD_APP _APP_NAME)
+    ADD_EXECUTABLE(${_APP_NAME} ${_APP_NAME}.cpp)
+    TARGET_LINK_LIBRARIES(${_APP_NAME} ${APP_LIBS})
+
+    IF(USE_EXAFMM)
+        TARGET_LINK_LIBRARIES(${_APP_NAME} Kernels)
+        IF(USE_QUARK)
+            TARGET_LINK_LIBRARIES(${_APP_NAME} quark)
+        ENDIF(USE_QUARK)
+    ENDIF()
+
+    IF(ADD_SUBMISSION_SCRIPTS)
+        SET(QUEUE gpu)
+        SET(NUM_PROCESSORS 1)
+        SET(NUM_CORES_PER_PROCESSORS 12)
+        SET(PROGRAM_PATH ${MOOPS_BINARY_DIR}/examples/${_APP_NAME})        
+    ENDIF()
+endmacro(ADD_APP)
+
 ADD_SUBDIRECTORY(valveless_heart)
 ADD_SUBDIRECTORY(swarm)
+ADD_SUBDIRECTORY(glycocalyx)
