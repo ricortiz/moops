@@ -20,6 +20,11 @@
 #include<limits>
 #include<algorithm>
 
+/** \class ParticleSystem
+ *  \ingroup ParticleSystem_Module
+ *  \brief Provides basic handling and the high level storage for the particle data.
+ *  \tparam Derived is the derived type, ie the surface being modeled
+ */
 template<typename Derived>
 class ParticleSystem
 {

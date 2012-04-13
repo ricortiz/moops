@@ -18,7 +18,11 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 
-
+/** \class Surface
+ *  \ingroup ParticleSystem_Module
+ *  \brief This is a wrapper to the time stepping method
+ *  \tparam Derived is the derived type, ie the surface being modeled
+ */
 template<typename Derived>
 class TimeIntegrator
 {

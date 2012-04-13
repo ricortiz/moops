@@ -29,17 +29,15 @@ struct newton_arrays
 
 /** \internal
  *
- * \class sdc_storage
+ *  \class newton_storage
  *
- * \brief Stores the data of the sdc method
+ * \brief Stores the data used in the newton method
  *
- * This class stores the data of fixed-size sdc vectors
  *
  */
 template<typename T>
 class newton_storage;
 
-// purely fixed-size arrays
 template<typename T>
 class newton_storage
 {

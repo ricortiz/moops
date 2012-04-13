@@ -5,6 +5,19 @@
 #include <Eigen/Core>
 #include <Eigen/Array>
 
+template<typename stepper_type>
+struct TimeStepper
+{
+
+    ComputeForces()
+    {
+        
+    }
+
+    
+};
+
+
 template<typename sdc_method, typename value_type>
 void time_stepper(sdc_method &sdc,value_type dt,int iterations)
 {

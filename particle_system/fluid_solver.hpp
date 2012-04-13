@@ -18,6 +18,12 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 
+
+/** \class FluidSolver
+ *  \ingroup ParticleSystem_Module
+ *  \brief Wrapper for the fluid solver to use
+ *  \tparam Derived is the derived type, ie the application type or an expresion
+ */
 template<typename Derived>
 class FluidSolver
 {
@@ -29,7 +35,7 @@ class FluidSolver
 
     public:
         FluidSolver(size_t num_particles) : m_fluid_solver(num_particles) {}
-        
+
         inline Derived &derived()
         {
             return *static_cast<Derived*>(this);
@@ -47,7 +53,7 @@ class FluidSolver
         {
             m_fluid_solver(t,x,v,derived().positions(),derived().forces(),num_targets);
         }
-        
+
         template<typename value_type>
         inline void Explicit(value_type t, value_type *x, value_type *v)
         {
@@ -61,6 +67,7 @@ class FluidSolver
             derived().computeForces(t);
             m_fluid_solver.Implicit(t,x,v,derived().forces());
         }
+
         fluid_solver_type &fluid_solver() { return m_fluid_solver; }
 };
 

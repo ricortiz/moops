@@ -21,6 +21,12 @@
 #include "particle_system.hpp"
 #include "storage/particle_system_storage.hpp"
 
+/** \class ParticleMarkers
+ *  \ingroup ParticleSystem_Module
+ *  \brief This is a helper class that keep tracks of markers in the particle system
+ *  \tparam surface_type is the surface particle system associated to this markers,  it defines the fluid solver used here.
+ *  \tparam time_integrator is the time stepper used to move the markers, usually inexpensive and not necesarily the same used by the surface_type
+ */
 template<typename surface_type, typename time_integrator>
 class ParticleMarkers : public ParticleSystem<ParticleMarkers<surface_type, time_integrator> >
 {
@@ -28,20 +34,21 @@ class ParticleMarkers : public ParticleSystem<ParticleMarkers<surface_type, time
         typedef ParticleSystem<ParticleMarkers<surface_type, time_integrator> > base_type;
 
     protected:
-        time_integrator integrator;
+        time_integrator m_integrator;
 
     public:
-        ParticleMarkers(size_t num_particles) : base_type(num_particles), integrator(3*num_particles) {  }
+        ParticleMarkers(size_t num_particles) : base_type(num_particles), m_integrator(3*num_particles) {  }
 
         template<typename value_type>
         void run(value_type timestep, surface_type &surface)
         {
             size_t num_targets = this->particles_size();
             surface(this->time(), this->positions(), this->velocities(), this->particles_size());
-            integrator(this->positions(), this->velocities(), timestep);
+            m_integrator(this->positions(), this->velocities(), timestep);
             this->time() += timestep;
         }
 };
+
 
 template<typename surface_type, typename time_integrator>
 struct Traits<ParticleMarkers<surface_type, time_integrator> >

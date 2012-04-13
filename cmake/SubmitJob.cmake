@@ -11,6 +11,7 @@
 
 # find local commands
 find_program(SSH_COMMAND NAMES ssh)
+find_program(SCP_COMMAND NAMES scp)
 find_program(RSYNC_COMMAND NAMES rsync)
 
 # macro to clone repo into remote directory
@@ -28,7 +29,7 @@ endmacro(PULL_REPOSITORY)
 
 # macro to rsync repo in to remote directory
 macro(COPY_REPOSITORY APP_NAME FROM TO)
-    set(OPTIONS -aCv --rsh=ssh --exclude='bin*' --exclude='build*' --exclude='*docs*' )
+    set(OPTIONS -aCv --rsh=ssh --exclude '*bin*' --exclude '*build*' --exclude '*docs*')
     set(CMD ${RSYNC_COMMAND} ${OPTIONS} ${FROM} ${TO})
     add_custom_target(${APP_NAME}_copy_repository COMMAND ${CMD} VERBATIM)
 endmacro(COPY_REPOSITORY)
@@ -63,17 +64,17 @@ macro(ADD_DATA_PATH APP_NAME DATA_PATH)
 endmacro()
 
 # macro to create a target that submit the job to the cluster
-macro(SUBMIT_JOB APP_NAME)
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/Submit${PROGRAM_NAME}Job.sh "#!/bin/bash \n\n${BSUB_COMMANDS}")
-    execute_process(COMMAND ${SCP_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/Submit${PROGRAM_NAME}Job.sh ${REMOTE_SERVER}:${SCRATCH_REMOTE_DIRECTORY}/ RESULT_VARIABLE out OUTPUT_QUIET)
-    add_custom_target(${APP_NAME} COMMAND ${SSH_COMMAND} ${REMOTE_SERVER} sh ${SCRATCH_REMOTE_DIRECTORY}/Submit${PROGRAM_NAME}Job.sh VERBATIM)
-    add_dependencies(${APP_NAME} ${APP_NAME}_clone_repository ${APP_NAME}_add_data_path ${APP_NAME}_remote_build)
+macro(SUBMIT_JOB APP_NAME _EXT_DEPENDENCIES)
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/Submit_${APP_NAME}.sh "#!/bin/bash \n\n${BSUB_COMMANDS}")
+    execute_process(COMMAND ${SCP_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/Submit_${APP_NAME}.sh ${REMOTE_SERVER}:${SCRATCH_REMOTE_DIRECTORY}/ RESULT_VARIABLE out OUTPUT_QUIET)
+    add_custom_target(submit_${APP_NAME} COMMAND ${SSH_COMMAND} ${REMOTE_SERVER} sh ${SCRATCH_REMOTE_DIRECTORY}/Submit_${APP_NAME}.sh VERBATIM)
+    add_dependencies(submit_${APP_NAME} ${APP_NAME}_clone_repository ${APP_NAME}_add_data_path ${APP_NAME}_remote_build ${_EXT_DEPENDENCIES})
 endmacro()
 
 # macro to create a target that terminates the job with specified job name
-macro(TERMINATE_JOB APP_NAME)
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/Terminate${PROGRAM_NAME}Job.sh "#!/bin/bash \n\nbkill `bjobs -u ricortiz -J ${JOB_NAME} -l | sed -n '/Job </p' | sed -e 's/.*Job <//;s/>.*//'`")
-    execute_process(COMMAND ${SCP_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/Terminate${PROGRAM_NAME}Job.sh ${REMOTE_SERVER}:${SCRATCH_REMOTE_DIRECTORY}/ RESULT_VARIABLE out OUTPUT_QUIET)
-    add_custom_target(${APP_NAME} COMMAND ${SSH_COMMAND} ${REMOTE_SERVER} sh ${SCRATCH_REMOTE_DIRECTORY}/Terminate${PROGRAM_NAME}Job.sh VERBATIM)
+macro(TERMINATE_JOB APP_NAME JOB_NAME)
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/Terminate_${APP_NAME}.sh "#!/bin/bash \n\nbkill `bjobs -u ricortiz -J ${JOB_NAME} -l | sed -n '/Job </p' | sed -e 's/.*Job <//;s/>.*//'`")
+    execute_process(COMMAND ${SCP_COMMAND} ${CMAKE_CURRENT_BINARY_DIR}/Terminate_${APP_NAME}.sh ${REMOTE_SERVER}:${SCRATCH_REMOTE_DIRECTORY}/ RESULT_VARIABLE out OUTPUT_QUIET)
+    add_custom_target(terminate_${APP_NAME} COMMAND ${SSH_COMMAND} ${REMOTE_SERVER} sh ${SCRATCH_REMOTE_DIRECTORY}/Terminate_${APP_NAME}.sh VERBATIM)
 endmacro()
 

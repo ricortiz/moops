@@ -21,6 +21,11 @@
 #include<cmath>
 #include <stdexcept>
 
+/** \class Spring
+ *  \ingroup ParticleSystem_Module
+ *  \brief Spring object.  It does the actual force calculation.
+ *  \tparam particle_type particle type used
+ */
 template<typename particle_type>
 class Spring
 {
@@ -102,17 +107,15 @@ class Spring
             f2[2] += L * dx[2];
         }
 
-        template<typename out>
-        friend out &operator<<(out &out_stream, Spring<particle_type> &s)
+        template<typename out_stream>
+        friend out_stream &operator<<(out_stream &out, Spring<particle_type> &s)
         {
-            out_stream << "[" << s.m_Aidx << "," << s.m_Bidx << "]" << std::endl;
-            out_stream << "stiffness: " << s.m_k << std::endl;
-            out_stream << "length: " << s.m_l << std::endl;
-            out_stream << "forceA = [" << s.m_A->force[0] << "," << s.m_A->force[1] << "," << s.m_A->force[2]  << "]" << std::endl;
-            out_stream << "forceB = [" << s.m_B->force[0] << "," << s.m_B->force[1] << "," << s.m_B->force[2]  << "]" << std::endl;
-            
-            return out_stream;
-            
+            out << "[" << s.m_Aidx << "," << s.m_Bidx << "]" << std::endl;
+            out << "stiffness: " << s.m_k << std::endl;
+            out << "length: " << s.m_l << std::endl;
+            out << "forceA = [" << s.m_A->force[0] << "," << s.m_A->force[1] << "," << s.m_A->force[2]  << "]" << std::endl;
+            out << "forceB = [" << s.m_B->force[0] << "," << s.m_B->force[1] << "," << s.m_B->force[2]  << "]" << std::endl;
+            return out;
         }
 };
 

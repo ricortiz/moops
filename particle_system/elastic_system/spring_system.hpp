@@ -20,6 +20,11 @@
 
 #include "particle_system/forces/spring.hpp"
 
+/** \class SpringSystem
+ *  \ingroup ParticleSystem_Module
+ *  \brief Storage for springs.  Handle spring insertion and deletion and tracks the spring whole sturcture.
+ *  \tparam Derived is the derived type, ie the application type or an expression.
+ */
 template <typename Derived>
 class SpringSystem
 {

@@ -20,6 +20,11 @@
 
 #include "particle_system/elastic_system/spring_system.hpp"
 
+/** \class ElasticBoundary
+ *  \ingroup ParticleSystem_Module
+ *  \brief Handle the spring creation and force computation
+ *  \tparam Derived is the derived type, ie the application type or an expression.
+ */
 template<typename Derived>
 class ElasticBoundary : public SpringSystem<Derived>
 {

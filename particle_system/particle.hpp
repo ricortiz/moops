@@ -18,6 +18,11 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 
+/** \class ParticleWrapper
+ *  \ingroup ParticleSystem_Module
+ *  \brief This is a wrapper to the particle data stored in the particle system.
+ *  \tparam _value_type is the value type used for the data
+ */
 template<typename _value_type>
 struct ParticleWrapper
 {

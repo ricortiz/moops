@@ -17,12 +17,17 @@
  ** You should have received a copy of the GNU General Public License
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-/// @name ParticleSystemStorage - Provides the storage for the particle system.
-///
-/// @section Description This particle system provides allocation and handling of 
-/// 			the simulation data.  The purpose of this class is to provide 
-/// 			storage model that is easy to swap when needing.
 
+/** \class ParticleSystemStorage
+ *  \ingroup ParticleSystem_Module
+ *  \brief This particle system provides allocation and handling of the simulation data.
+ *
+ * The purpose of this class is to provide storage model that is easy to swap when needing.
+ * 
+ * \tparam T is the data type
+ * \tparam particle_type is the particle wrapper type
+ * \tparam immerse_structure_type is the type of immersed particles, free moving or constrained(by spring, for example)
+ */
 enum storage_shape { SURFACE, VOLUME };
 
 template<typename T, typename particle_type>

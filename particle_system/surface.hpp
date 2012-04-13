@@ -22,6 +22,11 @@
 #include "particle_system/time_integrator.hpp"
 #include "particle_system/fluid_solver.hpp"
 
+/** \class Surface
+ *  \ingroup ParticleSystem_Module
+ *  \brief This is a wrapper that orchestrate the simulation of the immersed boundary
+ *  \tparam Derived is the derived type, ie the surface being modeled
+ */
 template<typename Derived>
 class Surface : public ParticleSystem<Derived>,
                 public ElasticBoundary<Derived>,
