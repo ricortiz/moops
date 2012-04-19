@@ -22,7 +22,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
     public:
         HeartPump(size_t M, size_t N) : base_type(M*N)
         {
-            size_t lo = 0, hi = N/4;
+            size_t lo = 10, hi = 50;
             m_geometry.setDimensions(M, N);
             m_geometry.setX0(0, 0, 0);
             m_geometry.setForcingRange(lo, hi);
@@ -43,12 +43,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             sortConnections(col_ptr, col_idx);
             getStrengths(col_ptr, col_idx, strenght);
             setSprings(col_ptr, col_idx, strenght);
-            setIteratorRange(lo, hi, m_spring_range[0]);
-            setIteratorRange(2*hi, 3*hi/4, m_spring_range[1]);
-            for(spring_iterator s = m_spring_range[0].first; s != m_spring_range[0].second; ++s)
-                s->stiffness() = 1.0;
-            for(spring_iterator s = m_spring_range[1].first; s != m_spring_range[1].second; ++s)
-                s->stiffness() = 1.0;
+            setIteratorRange(lo, hi);
 //             this->writePositions(std::cout);
 //             spring_iterator s = m_spring_range.first; for(int i = 0; i < 500; ++i) ++s;
 //             this->writeSprings(std::cout,m_spring_range.first, s);
@@ -57,7 +52,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
         inline void computeForces(value_type time)
         {
             m_geometry.setPeristalticRadiusScaling(time);
-            for (spring_iterator s = m_spring_range[0].first, end = m_spring_range[0].second; s != end; ++s)
+            for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
                 m_geometry.resetRestingLength(s);
             this->clearForces();
             base_type::computeForces();
@@ -84,7 +79,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
                         strengths[i] = 2;
         }
 
-        void setIteratorRange(size_t lo, size_t hi, spring_iterator_pair &range)
+        void setIteratorRange(size_t lo, size_t hi)
         {
             size_t M, N;
             m_geometry.getDimensions(M, N);
@@ -97,7 +92,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
             for (; f != s_end; ++f)
                 if (f->getAidx() / 3 == hi)
                     break;
-            range = std::make_pair(s, f);
+            m_spring_range[0] = std::make_pair(s, f);
         }
 
     public:

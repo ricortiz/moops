@@ -1,7 +1,3 @@
-// #include <iostream>
-// #include <iterator>
-// #include <memory>
-
 #include "examples/type_binder.hpp"
 #include "valveless_heart.hpp"
 
