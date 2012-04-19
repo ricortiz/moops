@@ -5,32 +5,6 @@
 #include <Eigen/Core>
 #include <Eigen/Array>
 
-template<typename stepper_type>
-struct TimeStepper
-{
-
-    ComputeForces()
-    {
-        
-    }
-
-    
-};
-
-
-template<typename sdc_method, typename value_type>
-void time_stepper(sdc_method &sdc,value_type dt,int iterations)
-{
-    value_type time = 0;
-    for (int i = 0; i < iterations; ++i)
-    {
-        sdc.predictor(time,dt);
-        sdc.corrector(time,dt);
-        time += dt;
-    }
-}
-
-
 template<typename sdc_type, typename value_type, typename vector_type>
 void test_convergence_rate(sdc_type &sdc, const vector_type &x0, const vector_type &f0, value_type final_time, const int time_steps[], int num_steps)
 {    
