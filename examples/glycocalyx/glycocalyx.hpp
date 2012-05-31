@@ -1,195 +1,131 @@
 #ifndef GLYCOCALYX_HPP
 #define GLYCOCALYX_HPP
 
-#include "particle_system/particle.hpp"
-#include "particle_system/surface.hpp"
-#include "geometry/sine_geometry.hpp"
-
-template<typename value_type, typename fluid_solver, typename time_integrator>
-class Glycocalyx : public Surface<Glycocalyx<value_type, fluid_solver, time_integrator> >
-  {
-  public:
-    typedef Surface<Glycocalyx<value_type, fluid_solver, time_integrator> >      base_type;
-    typedef typename base_type::spring_iterator                             spring_iterator;
-    typedef std::pair<spring_iterator, spring_iterator>                     spring_iterator_pair;
-    typedef ParticleWrapper<value_type>                                     particle_type;
-    typedef SineGeometry<value_type>                                        sperm_type;
-    typedef std::vector<spring_iterator_pair>                               iterator_pair_array;
-
-  private:
-    sperm_type              m_geometry;             //< Contains geometrical props of sperms
-    iterator_pair_array     m_tail_iterator_pairs;  //< Stores spring iterator range for tail
-    int                     m_num_geometries;
-
-  public:
-
-    Glycocalyx ( size_t Mt, size_t Nt, size_t Mh, size_t Nh, int num_sperms = 1 )
-        : base_type ( num_sperms * ( Mt * Nt + Mh * ( Nh - 1 ) + 1 ) ), m_num_geometries ( num_sperms )
-    {
-      // Set geometry parameters
-      m_geometry.setDimensions ( Mt, Nt, Mh, Nh ); // tail dims: MtxNt; head dims: MhxNh
-      m_geometry.setWaveSpeed ( .001 );            // speed of wave passed to tail
-      m_geometry.setTailRadius ( .05 );            // radius of tail tube
-      m_geometry.setHeadRadius ( .05 * 5 );        // radius of head
-      m_geometry.setLength ( 4.0 );                // length of the tail
-      m_geometry.setTailAmplitude ( .25 );         // initial amplitude of tail
-      m_geometry.setTailPitch ( 4.1 );             // pitch of tail
-      std::vector<value_type> mesh2d;              // coords of each geometry
-      size_t x = std::sqrt ( num_sperms ) , y = x;
-      setGeometryGrid ( mesh2d, x, y );      // create a grid to put the geometries on
-      std::vector<size_t> /*&*/col_ptr/* = this->fluid_solver().col_ptr*/;// sparse matrix (CSR-format) holding
-      std::vector<size_t> /*&*/col_idx/* = this->fluid_solver().col_idx*/;// sparse matrix (CSR-format) holding
-      std::vector<value_type> strenght;            // interactions between particles
-      size_t num_springs = this->particles_size() * 9; // estimate total number of springs
-      col_ptr.reserve ( this->particles_size() + 1 ); // Reserve
-      col_idx.reserve ( num_springs );             // Reserve
-      strenght.reserve ( num_springs );            // Reserve
-      col_ptr.push_back ( 0 );
-      m_geometry.init ( &this->particles() [0] );
-      m_geometry.getConnections ( col_ptr, col_idx );
-      value_type T[3] = {128,240,128};
-      m_geometry.applyTranslation ( &this->particles() [0],T );
-      for ( int i = 1, idx = 3; i < num_sperms; ++i, idx += 3 )
-        {
-          particle_type *p_init = &this->particles() [0];
-          particle_type *p = &this->particles() [i * m_geometry.numParticles() ];
-          for ( size_t j = 0; j < m_geometry.numParticles(); ++j )
-            {
-              p[j].position[0] = p_init[j].position[0] + mesh2d[idx];
-              p[j].position[1] = p_init[j].position[1] + mesh2d[idx + 1];
-              p[j].position[2] = p_init[j].position[2] + mesh2d[idx + 2];
-              p[j].i = p_init[j].i;
-              p[j].j = p_init[j].j;
-            }
-          m_geometry.getConnections ( col_ptr, col_idx, i * m_geometry.numParticles() );
-        }
-      sortConnections ( col_ptr, col_idx );
-      getStrengths ( col_ptr, col_idx, strenght );
-      base_type::setSprings ( col_ptr, col_idx, strenght );
-
-      setIteratorRanges ( Mt * Nt, Mh * ( Nh - 1 ) + 1 );
-    }
-
-    inline void computeForces ( value_type time )
-    {
-      for ( size_t i = 0; i < m_tail_iterator_pairs.size(); ++i )
-        {
-          for ( spring_iterator s = m_tail_iterator_pairs[i].first, end = m_tail_iterator_pairs[i].second; s != end; ++s )
-            m_geometry.resetRestingLength ( s, time );
-        }
-      this->clearForces();
-      base_type::computeForces();
-      //             updateForceGradient();
-    }
-
-  private:
-    void setGeometryGrid ( std::vector<value_type> &mesh2d, int x, int y )
-    {
-      value_type dtheta = 1., dalpha = 1.;
-      for ( int i = 0; i < x; ++i )
-        for ( int j = 0; j < y; ++j )
-          {
-            mesh2d.push_back ( i * dtheta );
-            mesh2d.push_back ( 0.0 );
-            mesh2d.push_back ( j * dalpha );
-          }
-    }
-
-    void setIteratorRanges ( int tail_offset, int head_offset )
-    {
-      spring_iterator s = this->springs_begin(), s_end = this->springs_end(), f;
-      size_t offset = 0;
-      while ( s != s_end )
-        {
-          offset += head_offset;
-          for ( ; s != s_end; ++s )
-            if ( s->getAidx() / 3 == offset )
-              break;
-          offset += tail_offset;
-          f = s;
-          for ( ; f != s_end; ++f )
-            if ( f->getAidx() / 3 == offset )
-              break;
-          m_tail_iterator_pairs.push_back ( std::make_pair ( s, f ) );
-          s = f;
-        }
-
-    }
-
-    void getStrengths ( const std::vector<size_t> &, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths )
-    {
-      strengths.resize ( col_idx.size(), 1.0 );
-    }
-
-    void updateForceGradient()
-    {
-      size_t Mt, Nt, Mh, Nh;
-      m_geometry.getDimensions ( Mt, Nt, Mh, Nh );
-      size_t tail_offset = Mt * Nt;
-      size_t head_offset = Mh * ( Nh - 1 ) + 1;
-      size_t offset = tail_offset + head_offset;
-
-      for ( int i = 0; i < m_num_geometries; ++i )
-        {
-          value_type gradient[3] = {0};
-          particle_type *particles = this->particles() + i * offset;
-          for ( size_t j = 0; j < head_offset; ++j )
-            {
-              gradient[0] += particles[j].force[0];
-              gradient[1] += particles[j].force[1];
-              gradient[2] += particles[j].force[2];
-            }
-          gradient[0] /= head_offset;
-          gradient[1] /= head_offset;
-          gradient[2] /= head_offset;
-          //                 value_type norm = std::sqrt(gradient[0] * gradient[0] + gradient[1] * gradient[1] + gradient[2] * gradient[2]);
-
-          value_type scale = .001;//(1.0 / std::sqrt(particles[0].position[0] * particles[0].position[0] * particles[0].position[1] * particles[0].position[1] * particles[0].position[2] * particles[0].position[2]));
-
-          if ( scale > 1 )
-            return;
-
-          gradient[0] = -particles[0].position[0] * scale;
-          gradient[1] = -particles[0].position[1] * scale;
-          gradient[2] = -particles[0].position[2] * scale;
-          particles[0].force[0] += gradient[0];
-          particles[0].force[1] += gradient[1];
-          particles[0].force[2] += gradient[2];
-        }
-
-    }
-
-    void sortConnections ( std::vector<size_t> &col_ptr, std::vector<size_t> &col_idx )
-    {
-      std::vector<size_t>::iterator begin, end;
-      for ( size_t i = 0; i < col_ptr.size() - 1; ++i )
-        {
-          begin = col_idx.begin() + col_ptr[i];
-          end = col_idx.begin() + col_ptr[i + 1];
-          std::sort ( begin, end );
-        }
-    }
-
-  public:
-    sperm_type &geometry()
-    {
-      return m_geometry;
-    }
-
-
-
-  };
-
 #include "particle_system/storage/particle_system_storage.hpp"
-template<typename _value_type, typename _fluid_solver, typename _time_integrator>
-struct Traits<Glycocalyx<_value_type, _fluid_solver, _time_integrator> >
-  {
-    typedef _value_type value_type;
-    typedef _fluid_solver fluid_solver_type;
-    typedef _time_integrator time_integrator_type;
-    typedef ParticleWrapper<value_type>                                      particle_type;
-    typedef ParticleSystemStorage<value_type, particle_type, SURFACE> storage_type;
-  };
+#include "particle_system/particle.hpp"
+#include "particle_system/particle_system.hpp"
+#include "geometry/tower_geometry.hpp"
+#include "math/fluid_solver/stokes/cpu_stokes_solver.hpp"
+#include "math/linear_solver/krylov/generalized_minimal_residual_method.hpp"
+
+template<typename value_type, typename matrix_type>
+struct MatrixOperator 
+{
+    const value_type *m_x;
+    matrix_type &m_matrix;
+    MatrixOperator (matrix_type &matrix): m_matrix(matrix){}
+    void init(const value_type *x)
+    {
+        m_x = x;
+    }
+    
+    inline void operator()(const value_type *y, value_type *Ay)
+    {
+        m_matrix(0,m_x,Ay,y);
+    }
+};
+
+template<typename value_type, typename fluid_solver_type = CpuStokesSolver<value_type> >
+class Glycocalyx : public ParticleSystem<Glycocalyx<value_type> >
+{
+    public:
+        typedef ParticleSystem<Glycocalyx<value_type> > particle_system_type;
+
+        typedef ParticleWrapper<value_type>             particle_type;
+        typedef TowerGeometry<value_type>               tower_type;
+
+    private:
+        tower_type              m_geometry;             //< Contains geometrical props of sperms
+        int                     m_num_geometries;
+        fluid_solver_type       m_fluid_solver;
+        MatrixOperator<value_type,fluid_solver_type> m_A;
+        GeneralizedMinimalResidualMethod<value_type> m_linear_solver;
+
+    public:
+
+        Glycocalyx(size_t M, size_t N, int num_towers = 1)
+        : particle_system_type(num_towers*M*N), m_fluid_solver(num_towers*M*N), m_num_geometries(num_towers), m_A(m_fluid_solver), m_linear_solver(3*num_towers*M*N)
+        {
+            // Set geometry parameters
+            m_geometry.setDimensions(M, N);    // tail dims: MtxNt; head dims: MhxNh
+            m_geometry.setLength(20.0);                   // length of the tail
+            m_geometry.setRadius(1.0);                   // radius
+            std::vector<value_type> mesh2d;              // coords of each geometry
+            size_t x = std::sqrt(num_towers) , y = x;
+            setGeometryGrid(mesh2d, x, y);         // create a grid to put the geometries on
+            m_geometry.init(&this->particles() [0]);
+            for(int i = 1, idx = 3; i < num_towers; ++i, idx += 3)
+            {
+                particle_type *p_init = &this->particles() [0];
+                particle_type *p = &this->particles() [i * m_geometry.numParticles() ];
+                for(size_t j = 0; j < m_geometry.numParticles(); ++j)
+                {
+                    p[j].position[0] = p_init[j].position[0] + mesh2d[idx];
+                    p[j].position[1] = p_init[j].position[1] + mesh2d[idx + 1];
+                    p[j].position[2] = p_init[j].position[2] + mesh2d[idx + 2];
+                    p[j].i = p_init[j].i;
+                    p[j].j = p_init[j].j;
+                }
+            }
+
+        }
+
+        inline void computeVelocities()
+        {
+            std::fill(this->velocities_begin(),this->velocities_end(),0.0);
+            for(size_t i = 0, k = 2; i < this->data_size(); i+=3, k+=3)
+                this->velocity()[i] = -.1*this->positions()[k];
+            m_A.init(this->positions(),m_fluid_solver);
+        }
+        inline void computeForces()
+        {
+            m_linear_solver(m_A,this->velocities(),this->forces());
+        }
+
+        inline void run(value_type dt)
+        {
+            computeVelocities();
+            computeForces();
+        }
+
+
+    private:
+        void setGeometryGrid(std::vector<value_type> &mesh2d, int x, int y)
+        {
+            value_type dtheta = 1., dalpha = 1.;
+            for(int i = 0; i < x; ++i)
+                for(int j = 0; j < y; ++j)
+                {
+                    mesh2d.push_back(i * dtheta);
+                    mesh2d.push_back(0.0);
+                    mesh2d.push_back(j * dalpha);
+                }
+        }
+
+        void getStrengths(const std::vector<size_t> &, const std::vector<size_t> &col_idx, std::vector<value_type> &strengths)
+        {
+            strengths.resize(col_idx.size(), 1.0);
+        }
+
+    public:
+        tower_type &geometry()
+        {
+            return m_geometry;
+        }
+        
+        fluid_solver_type &fluid_solver() { return m_flu}
+
+
+
+};
+
+template<typename _value_type>
+struct Traits<Glycocalyx<_value_type> >
+{
+    typedef _value_type                                                 value_type;
+    typedef ParticleWrapper<value_type>                                 particle_type;
+    typedef ParticleSystemStorage<value_type, particle_type, SURFACE>   storage_type;
+};
 
 #endif
 

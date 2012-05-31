@@ -71,6 +71,7 @@ namespace IO
                     m_writer(vtkSmartPointer<vtk_writer_type>::New()),
                     m_write_binary(write_binary)
             {
+                vtksys::SystemTools::MakeDirectory(data_path.c_str());
                 if (m_write_binary)
                     m_writer->SetDataModeToBinary();
                 else
@@ -119,6 +120,7 @@ namespace IO
              **/
             void setDataPath(const std::string &data_path)
             {
+                vtksys::SystemTools::MakeDirectory(data_path.c_str());
                 m_data_path = data_path;
             }
 

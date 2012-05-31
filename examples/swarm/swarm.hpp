@@ -5,10 +5,11 @@
 #include "particle_system/surface.hpp"
 #include "geometry/sine_geometry.hpp"
 
-template<typename value_type, typename fluid_solver, typename time_integrator>
-class Swarm : public Surface<Swarm<value_type, fluid_solver, time_integrator> >
+template<typename _value_type, typename fluid_solver, typename time_integrator>
+class Swarm : public Surface<Swarm<_value_type, fluid_solver, time_integrator> >
 {
     public:
+        typedef _value_type value_type;
         typedef Surface<Swarm<value_type, fluid_solver, time_integrator> >      base_type;
         typedef typename base_type::spring_iterator                             spring_iterator;
         typedef std::pair<spring_iterator, spring_iterator>                     spring_iterator_pair;

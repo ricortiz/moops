@@ -22,43 +22,49 @@
  *  \ingroup ParticleSystem_Module
  *  \brief This particle system provides allocation and handling of the simulation data.
  *
- * The purpose of this class is to provide storage model that is easy to swap when needing.
- * 
+ * The purpose of this class is to provide storage model that is easy to swap when needed.
+ *
  * \tparam T is the data type
- * \tparam particle_type is the particle wrapper type
+ * \tparam P is the particle wrapper type
  * \tparam immerse_structure_type is the type of immersed particles, free moving or constrained(by spring, for example)
  */
 enum storage_shape { SURFACE, VOLUME };
 
-template<typename T, typename particle_type>
+template<typename T, typename P>
 struct particle_system_arrays
 {
     T positions;
     T velocities;
     T forces;
-    particle_type particles;
+    P particles;
 };
 
-template<typename T, typename particle_type, storage_shape immerse_structure_type>
+template<typename T, typename P, storage_shape immerse_structure_type>
 class ParticleSystemStorage;
 
 
-template<typename T, typename particle_type>
-class ParticleSystemStorage<T,particle_type,SURFACE>
+template<typename T, typename P>
+class ParticleSystemStorage<T,P,SURFACE>
 {
+    public:
+        typedef std::vector<T> data_vector_type;
+        typedef typename data_vector_type::iterator data_iterator;
+        typedef std::vector<P> particle_vector_type;
+        typedef typename particle_vector_type::iterator particle_iterator;
+
     private:
-        particle_system_arrays<T*,particle_type*> m_data;
+        particle_system_arrays<data_vector_type,particle_vector_type> m_data;
         size_t m_data_size;
-        
+
     public:
         inline explicit ParticleSystemStorage(size_t num_particles)
         {
             m_data_size = num_particles*3;
-            m_data.positions = new T[m_data_size];
-            m_data.velocities = new T[m_data_size];
-            m_data.forces = new T[m_data_size];
-            m_data.particles = new particle_type[num_particles];
-            for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
+            m_data.positions.resize(m_data_size);
+            m_data.velocities.resize(m_data_size);
+            m_data.forces.resize(m_data_size);
+            m_data.particles.resize(num_particles);
+            for(size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
             {
                 m_data.particles[i].position = &m_data.positions[idx];
                 m_data.particles[i].velocity = &m_data.velocities[idx];
@@ -68,56 +74,63 @@ class ParticleSystemStorage<T,particle_type,SURFACE>
 
         ~ParticleSystemStorage()
         {
-            delete [] m_data.positions;
-            delete [] m_data.velocities;
-            delete [] m_data.forces;
-            delete [] m_data.particles;
         }
         inline void swap(ParticleSystemStorage& other) { std::swap(m_data,other.m_data); }
 
-        inline const T *position(size_t i) const { return m_data.particle[i].position; }
-        inline T *position(size_t i)             { return m_data.particle[i].position; }
+        inline data_iterator positions_begin() { return m_data.positions.begin(); }
+        inline data_iterator positions_end()   { return m_data.positions.end(); }
 
-        inline const T *velocity(size_t i) const { return m_data.particle[i].velocity; }
-        inline T *velocity(size_t i)             { return m_data.particle[i].velocity; }
+        inline data_iterator velocities_begin() { return m_data.velocities.begin(); }
+        inline data_iterator velocities_end()   { return m_data.velocities.end(); }
 
-        inline const T *force(size_t i) const { return m_data.particle[i].force; }
-        inline T *force(size_t i)             { return m_data.particle[i].force; }
+        inline data_iterator forces_begin() { return m_data.forces.begin(); }
+        inline data_iterator forces_end()   { return m_data.forces.end(); }
 
-        inline const particle_type *particles(size_t i) const { return m_data.particles[i]; }
-        inline particle_type *particles(size_t i)             { return m_data.particles[i]; }
+        inline particle_iterator particles_begin() { return m_data.particles.begin(); }
+        inline particle_iterator particles_end()   { return m_data.particles.end(); }
 
-        inline const T *positions() const { return m_data.positions; }
-        inline T *positions()             { return m_data.positions; }
+        inline const T *positions() const { return &m_data.positions[0]; }
+        inline T *positions()             { return &m_data.positions[0]; }
 
-        inline const T *velocities() const { return m_data.velocities; }
-        inline T *velocities()             { return m_data.velocities; }
+        inline const T *velocities() const { return &m_data.velocities[0]; }
+        inline T *velocities()             { return &m_data.velocities[0]; }
 
-        inline const T *forces() const { return m_data.forces; }
-        inline T *forces()             { return m_data.forces; }
+        inline const T *forces() const { return &m_data.forces[0]; }
+        inline T *forces()             { return &m_data.forces[0]; }
 
-        inline const particle_type *particles() const { return m_data.particles; }
-        inline particle_type *particles()             { return m_data.particles; }
+        inline const P *particles() const { return &m_data.particles[0]; }
+        inline P *particles()             { return &m_data.particles[0]; }
 
         size_t data_size() { return m_data_size; }
+
+        void clearData()
+        {
+            std::fill(m_data.positions.begin(),m_data.positions.end(),T(0));
+            std::fill(m_data.velocities.begin(),m_data.velocities.end(),T(0));
+            std::fill(m_data.forces.begin(),m_data.forces.end(),T(0));
+        }
 };
 
-template<typename T, typename particle_type>
-class ParticleSystemStorage<T,particle_type,VOLUME>
+template<typename T, typename P>
+class ParticleSystemStorage<T,P,VOLUME>
 {
+    protected:
+        typedef std::vector<T> data_vector_type;
+        typedef typename data_vector_type::iterator data_iterator;
+        typedef std::vector<P> particle_vector_type;
+        typedef typename particle_vector_type::iterator particle_iterator;
     private:
-        particle_system_arrays<T*,particle_type*> m_data;
+        particle_system_arrays<std::vector<T>,std::vector<P> > m_data;
         size_t m_data_size;
-        
+
     public:
         inline explicit ParticleSystemStorage(size_t num_particles)
         {
             m_data_size = num_particles*3;
-            m_data.positions = new T[m_data_size];
-            m_data.velocities = new T[m_data_size];
-            m_data.forces = NULL;
-            m_data.particles = new particle_type[num_particles];
-            for (size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
+            m_data.positions.resize(m_data_size);
+            m_data.velocities.resize(m_data_size);
+            m_data.particles.resize(num_particles);
+            for(size_t i = 0, idx = 0; i < num_particles; ++i, idx+=3)
             {
                 m_data.particles[i].position = &m_data.positions[idx];
                 m_data.particles[i].velocity = &m_data.velocities[idx];
@@ -126,37 +139,38 @@ class ParticleSystemStorage<T,particle_type,VOLUME>
 
         ~ParticleSystemStorage()
         {
-            delete [] m_data.positions;
-            delete [] m_data.velocities;
-            delete [] m_data.particles;
         }
+
         inline void swap(ParticleSystemStorage& other) { std::swap(m_data,other.m_data); }
 
-        inline const T *position(size_t i) const { return m_data.particle[i].position; }
-        inline T *position(size_t i)             { return m_data.particle[i].position; }
+        inline data_iterator positions_begin() { return m_data.positions.begin(); }
+        inline data_iterator positions_end()   { return m_data.positions.end(); }
 
-        inline const T *velocity(size_t i) const { return m_data.particle[i].velocity; }
-        inline T *velocity(size_t i)             { return m_data.particle[i].velocity; }
+        inline data_iterator velocities_begin() { return m_data.velocities.begin(); }
+        inline data_iterator velocities_end()   { return m_data.velocities.end(); }
 
-        inline const particle_type *particles(size_t i) const { return m_data.particles[i]; }
-        inline particle_type *particles(size_t i)             { return m_data.particles[i]; }
-        
-        inline const T *force(size_t i) const { return m_data.particle[i].force; }
-        inline T *force(size_t i)             { return m_data.particle[i].force; }
+        inline particle_iterator particles_begin() { return m_data.particles.begin(); }
+        inline particle_iterator particles_end()   { return m_data.particles.end(); }
 
         inline const T *positions() const { return m_data.positions; }
         inline T *positions()             { return m_data.positions; }
-        
+
         inline const T *forces() const { return m_data.forces; }
         inline T *forces()             { return m_data.forces; }
 
         inline const T *velocities() const { return m_data.velocities; }
         inline T *velocities()             { return m_data.velocities; }
 
-        inline const particle_type *particles() const { return m_data.particles; }
-        inline particle_type *particles()             { return m_data.particles; }
-        
+        inline const P *particles() const { return m_data.particles; }
+        inline P *particles()             { return m_data.particles; }
+
         size_t data_size() { return m_data_size; }
+
+        void clearData()
+        {
+            std::fill(m_data.positions.begin(),m_data.positions.end(),T(0));
+            std::fill(m_data.velocities.begin(),m_data.velocities.end(),T(0));
+        }
 };
 
 #endif

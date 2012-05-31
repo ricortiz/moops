@@ -168,11 +168,6 @@ class BaseGeometry
                     derived()->surfacePoint(i, j, time, particles[idx], dtheta, dalpha);
         }
 
-        void setCells()
-        {
-            derived()->setCells();
-        }
-
         template < typename particle_type>
         void applyTranslation(particle_type *particles, value_type T[3])
         {
@@ -184,6 +179,11 @@ class BaseGeometry
                 particles[i].position[1] += T[1];
                 particles[i].position[2] += T[2];
             }
+        }
+
+        void setCells()
+        {
+            derived()->setCells();
         }
 
 };

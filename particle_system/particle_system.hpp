@@ -32,13 +32,16 @@ class ParticleSystem
         typedef typename Traits<Derived>::value_type value_type;
         typedef typename Traits<Derived>::particle_type particle_type;
         typedef typename Traits<Derived>::storage_type storage_type;
+        typedef typename storage_type::particle_iterator particle_iterator;
+        typedef typename storage_type::data_iterator data_iterator;
+        
 
     private:
         value_type            m_time;         ///< Current time.
         storage_type          m_storage;
         size_t         m_num_particles;
-        value_type            m_domain[2][3]
-        ;
+        value_type            m_domain[2][3];
+        
     public:
 
         ParticleSystem(size_t num_particles) : m_time(0.0), m_storage(num_particles), m_num_particles(num_particles)
@@ -59,6 +62,14 @@ class ParticleSystem
         inline particle_type const *particles() const { return m_storage.particles(); }
         inline particle_type *particles()             { return m_storage.particles(); }
 
+        inline particle_iterator particles_begin() { return m_storage.particles_begin(); }
+        inline particle_iterator particles_end() { return m_storage.particles_end(); }
+        inline data_iterator positions_begin() { return m_storage.positions_begin(); }
+        inline data_iterator positions_end() { return m_storage.positions_end(); }
+        inline data_iterator velocities_begin() { return m_storage.velocities_begin(); }
+        inline data_iterator velocities_end() { return m_storage.velocities_end(); }
+        inline data_iterator forces_begin() { return m_storage.forces_begin(); }
+        inline data_iterator forces_end() { return m_storage.forces_end(); }
 
         inline void setDomain()
         {
@@ -95,7 +106,7 @@ class ParticleSystem
             m_domain[1][0] = m_domain[1][1] = m_domain[1][2] = R0 * 1.000001;
         }
 
-        void clear() { m_time = 0.; }
+        void clearTime() { m_time = 0.; }
         inline void clearForces() { std::fill(forces(), forces() + data_size(), 0.0); }
         inline void clearVelocities() { std::fill(velocities(), velocities() + data_size(), 0.0); }
         inline std::size_t particles_size() { return m_num_particles; }

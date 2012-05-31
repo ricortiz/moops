@@ -5,10 +5,11 @@
 #include "geometry/oval_geometry.hpp"
 #include "particle_system/surface.hpp"
 
-template<typename value_type, typename fluid_solver, typename time_integrator>
-class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integrator> >
+template<typename _value_type, typename fluid_solver, typename time_integrator>
+class HeartPump : public Surface<HeartPump<_value_type, fluid_solver, time_integrator> >
 {
-    protected:
+    public:
+        typedef _value_type value_type;
         typedef Surface<HeartPump<value_type, fluid_solver, time_integrator> > base_type;
         typedef typename base_type::spring_iterator             spring_iterator;
         typedef std::pair<spring_iterator, spring_iterator>     spring_iterator_pair;
@@ -52,7 +53,7 @@ class HeartPump : public Surface<HeartPump<value_type, fluid_solver, time_integr
         inline void computeForces(value_type time)
         {
             m_geometry.setPeristalticRadiusScaling(time);
-            for (spring_iterator s = m_spring_range.first, end = m_spring_range.second; s != end; ++s)
+            for (spring_iterator s = m_spring_range[0].first, end = m_spring_range[0].second; s != end; ++s)
                 m_geometry.resetRestingLength(s);
             this->clearForces();
             base_type::computeForces();

@@ -22,3 +22,8 @@ if(USE_EXAFMM)
         TARGET_LINK_LIBRARIES(TestFluidSolvers quark)
     ENDIF(USE_QUARK)
 endif()
+
+add_executable(conovergence_rate conovergence_rate.cpp)
+target_link_libraries(conovergence_rate mgl ${APP_LIBS})
+
+

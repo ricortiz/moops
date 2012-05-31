@@ -42,10 +42,10 @@ class InexactNewtonMethod: public NewtonBase<InexactNewtonMethod<value_type,k_ma
         size_t m_system_size;
         size_t m_maxitc;
         newton_storage<value_type> 	m_storage;
-        GeneralizedMinimalResidualMethod<value_type,k_max> m_gmres;
+        linear_solver_type m_gmres;
         value_type 			m_gamma;
         value_type 			m_forcing_term;
-	
+        
     public:
 
         InexactNewtonMethod(size_t system_size) :

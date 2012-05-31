@@ -58,8 +58,8 @@ class SDCBase
     public:
         typedef Derived sdc_method_type;
         typedef typename sdc_traits<Derived>::value_type value_type;
+        
     private:
-
         enum
         {
             sdc_nodes = sdc_traits<Derived>::sdc_nodes,
@@ -76,7 +76,7 @@ class SDCBase
     public:
 
         /**
-         * @brief This function returns an instance of the sdc_method type.
+         * @brief This function returns an instance of the sdc_method (child) type.
          *
          * @return Derived&
          **/
